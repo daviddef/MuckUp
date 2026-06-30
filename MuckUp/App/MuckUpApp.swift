@@ -17,6 +17,7 @@ struct MuckUpApp: App {
                 .environmentObject(locationService)
                 .onAppear {
                     locationService.requestLocation()
+                    NotificationService.shared.requestPermission()
                 }
         }
         .modelContainer(for: [Muck.self, MuckEvent.self])

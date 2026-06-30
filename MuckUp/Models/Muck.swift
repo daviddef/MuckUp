@@ -31,7 +31,6 @@ enum MuckType: String, Codable, CaseIterable {
         }
     }
 
-    // Whether community events can be scheduled against this type
     var allowsEvents: Bool { self != .hazard }
 }
 
@@ -50,6 +49,9 @@ final class Muck {
     var votes: Int
     var eventCount: Int
     var isClosed: Bool
+    var closedDate: Date?
+    @Attribute(.externalStorage) var photoData: Data?
+    @Attribute(.externalStorage) var afterPhotoData: Data?
 
     var type: MuckType {
         get { MuckType(rawValue: typeRaw) ?? .cleanup }

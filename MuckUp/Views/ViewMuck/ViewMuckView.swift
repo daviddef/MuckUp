@@ -8,13 +8,15 @@ struct ViewMuckView: View {
     @EnvironmentObject var muckVM: MuckViewModel
 
     @State private var showAddToEvent = false
+    @State private var showCloseMuck = false
     @State private var isFavourite = false
+    @State private var afterPhotoData: Data?
 
     var body: some View {
         ZStack(alignment: .bottom) {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.lg) {
-                    // Type header strip
+                    // Type header
                     HStack {
                         TypeBadgeView(type: muck.type)
                         if muck.isHazardous {
@@ -47,9 +49,47 @@ struct ViewMuckView: View {
                         .font(.muckBody)
                         .foregroundStyle(Color.muckNearBlack.opacity(0.8))
 
+                    // Before photo
+                    if let data = muck.photoData, let ui = UIImage(data: data) {
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Before")
+                                .font(.muckCaption)
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                            Image(uiImage: ui)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 200)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                        }
+                    }
+
+                    // After photo (only if closed or has one)
+                    if muck.isClosed || muck.afterPhotoData != nil {
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("After")
+                                .font(.muckCaption)
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                            if let data = muck.afterPhotoData, let ui = UIImage(data: data) {
+                                Image(uiImage: ui)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 200)
+                                    .clipped()
+                                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                            } else {
+                                Text("No after photo recorded")
+                                    .font(.muckBody)
+                                    .foregroundStyle(Color.muckNearBlack.opacity(0.3))
+                            }
+                        }
+                    }
+
                     Divider()
 
-                    // Vote + Favourite row
+                    // Vote + Favourite
                     HStack(spacing: Spacing.lg) {
                         VoteColumnView(
                             votes: muck.votes,
@@ -72,6 +112,12 @@ struct ViewMuckView: View {
                         .buttonStyle(.plain)
 
                         Spacer()
+
+                        if muck.isClosed {
+                            Label("Cleared", systemImage: "checkmark.seal.fill")
+                                .font(.muckCaption)
+                                .foregroundStyle(Color.muckGreen)
+                        }
                     }
 
                     // Hazard notice
@@ -84,7 +130,7 @@ struct ViewMuckView: View {
                                 Text("Managed by Authorities")
                                     .font(.muckHeadline)
                                     .foregroundStyle(Color.muckRed)
-                                Text("Community events cannot be scheduled for hazardous mucks. Please contact your local council or EPA.")
+                                Text("Community events cannot be scheduled for hazardous mucks. Contact your local council or EPA.")
                                     .font(.muckBody)
                                     .foregroundStyle(Color.muckNearBlack.opacity(0.7))
                             }
@@ -94,16 +140,14 @@ struct ViewMuckView: View {
                         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
                     }
 
-                    // Linked events
+                    // Linked events count
                     if muck.eventCount > 0 {
-                        VStack(alignment: .leading, spacing: Spacing.xs) {
-                            Text("Scheduled Events")
-                                .font(.muckTitle)
-                                .foregroundStyle(Color.muckNearBlack)
-                            Text("\(muck.eventCount) event\(muck.eventCount == 1 ? "" : "s") scheduled for this muck")
-                                .font(.muckBody)
-                                .foregroundStyle(Color.muckNearBlack.opacity(0.5))
-                        }
+                        Label(
+                            "\(muck.eventCount) community event\(muck.eventCount == 1 ? "" : "s") scheduled",
+                            systemImage: "calendar"
+                        )
+                        .font(.muckBody)
+                        .foregroundStyle(Color.muckGreen)
                     }
 
                     Spacer(minLength: 120)
@@ -112,7 +156,7 @@ struct ViewMuckView: View {
             }
 
             // Sticky bottom CTA
-            if !muck.isHazardous {
+            if !muck.isHazardous && !muck.isClosed {
                 VStack(spacing: Spacing.xs) {
                     PrimaryButton(
                         title: "Add to a Community Event",
@@ -121,11 +165,11 @@ struct ViewMuckView: View {
                         showAddToEvent = true
                     }
                     Button {
-                        // Close Muck flow
+                        showCloseMuck = true
                     } label: {
-                        Text("✕  Close this Muck")
+                        Text("✓  Mark as Cleaned Up")
                             .font(.muckCaption)
-                            .foregroundStyle(Color.muckRed.opacity(0.7))
+                            .foregroundStyle(Color.muckGreen.opacity(0.8))
                     }
                     .buttonStyle(.plain)
                 }
@@ -140,6 +184,9 @@ struct ViewMuckView: View {
         }
         .sheet(isPresented: $showAddToEvent) {
             AddToEventSheet(muck: muck)
+        }
+        .sheet(isPresented: $showCloseMuck) {
+            CloseMuckSheet(muck: muck)
         }
     }
 }

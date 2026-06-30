@@ -14,6 +14,7 @@ struct RaiseMuckView: View {
     @State private var isHazardous = false
     @State private var reportedDate = Date.now
     @State private var isSaved = false
+    @State private var photoData: Data? = nil
 
     // Location picker state
     @State private var pickedCoordinate: CLLocationCoordinate2D? = nil
@@ -133,32 +134,16 @@ struct RaiseMuckView: View {
                             .tint(Color.muckGreen)
                     }
 
-                    // Photo placeholder
+                    // Photo evidence
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("Add a photo")
                             .font(.muckTitle)
                             .foregroundStyle(Color.muckNearBlack)
-                        Button {
-                            // Camera/photo sheet will go here
-                        } label: {
-                            HStack {
-                                Image(systemName: "camera.fill")
-                                    .font(.system(size: 20))
-                                Text("Take or choose a photo")
-                                    .font(.muckHeadline)
-                            }
-                            .foregroundStyle(Color.muckNearBlack.opacity(0.5))
-                            .frame(maxWidth: .infinity)
-                            .padding(Spacing.lg)
-                            .background(Color.muckSurface)
-                            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: Radius.md)
-                                    .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6]))
-                                    .foregroundStyle(Color.muckNearBlack.opacity(0.15))
-                            )
-                        }
-                        .buttonStyle(.plain)
+                        PhotoPickerButton(
+                            label: "Take or choose a photo",
+                            systemImage: "camera.fill",
+                            imageData: $photoData
+                        )
                     }
 
                     PrimaryButton(
@@ -220,6 +205,7 @@ struct RaiseMuckView: View {
             latitude: coord.latitude,
             longitude: coord.longitude
         )
+        newMuck.photoData = photoData
         modelContext.insert(newMuck)
         muckVM.award(.raiseMuck)
         isSaved = true
