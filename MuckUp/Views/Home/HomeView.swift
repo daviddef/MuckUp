@@ -145,7 +145,7 @@ struct HomeView: View {
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .navigationBarLeading) {
-            Text("MUCK UP")
+            Text("GRUB")
                 .font(.muckDisplay)
                 .foregroundStyle(Color.muckNearBlack)
         }

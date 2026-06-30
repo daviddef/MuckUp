@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Muck Up</string>
+	<string>Grub</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -21,13 +21,13 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Muck Up needs your camera to photograph mucks you report.</string>
+	<string>Grub needs your camera to photograph mucks you report.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Muck Up uses your location to show nearby mucks and events.</string>
+	<string>Grub uses your location to show nearby mucks and events.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Muck Up uses your location to show nearby mucks and events.</string>
+	<string>Grub uses your location to show nearby mucks and events.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Muck Up needs photo library access to attach images to mucks.</string>
+	<string>Grub needs photo library access to attach images to mucks.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

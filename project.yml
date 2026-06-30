@@ -28,14 +28,14 @@ targets:
       path: MuckUp/Info.plist
       properties:
         UILaunchStoryboardName: LaunchScreen
-        NSLocationWhenInUseUsageDescription: "Muck Up uses your location to show nearby mucks and events."
-        NSLocationAlwaysAndWhenInUseUsageDescription: "Muck Up uses your location to show nearby mucks and events."
-        NSCameraUsageDescription: "Muck Up needs your camera to photograph mucks you report."
-        NSPhotoLibraryUsageDescription: "Muck Up needs photo library access to attach images to mucks."
+        NSLocationWhenInUseUsageDescription: "Grub uses your location to show nearby mucks and events."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Grub uses your location to show nearby mucks and events."
+        NSCameraUsageDescription: "Grub needs your camera to photograph mucks you report."
+        NSPhotoLibraryUsageDescription: "Grub needs photo library access to attach images to mucks."
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
           UISceneConfigurations: {}
-        CFBundleDisplayName: Muck Up
+        CFBundleDisplayName: Grub
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
     settings:
