@@ -40,7 +40,7 @@
 
 /* Begin PBXFileReference section */
 		00E5C0CC699276BF021AE9CD /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		0231A542FD787EA709BCB79D /* MuckUp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MuckUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0231A542FD787EA709BCB79D /* MuckUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MuckUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		02BF1D0A5B9BFE2F786E50F1 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		0E58BC07F2CC555A6E27848D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1F8408E4F2ABE83F4AD25A8D /* ScheduleEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventView.swift; sourceTree = "<group>"; };
@@ -283,13 +283,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1500;
-				TargetAttributes = {
-					A2EAED8B3138F72536AFCD22 = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
-			buildConfigurationList = 45498EF24FF7A4BECFFBB608 /* Build configuration list for PBXProject "MuckUp" */;
+			buildConfigurationList = 45498EF24FF7A4BECFFBB608 /* Build configuration list for PBXProject "Grub" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -363,12 +358,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = L9SAXP2E2W;
 				INFOPLIST_FILE = MuckUp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.grub.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -425,7 +422,7 @@
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.daviddef.grub;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muckup.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -492,7 +489,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.daviddef.grub;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muckup.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -506,12 +503,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = L9SAXP2E2W;
 				INFOPLIST_FILE = MuckUp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.grub.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -520,7 +519,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		45498EF24FF7A4BECFFBB608 /* Build configuration list for PBXProject "MuckUp" */ = {
+		45498EF24FF7A4BECFFBB608 /* Build configuration list for PBXProject "Grub" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				531B4D1B1DB4FC462879FD8C /* Debug */,
