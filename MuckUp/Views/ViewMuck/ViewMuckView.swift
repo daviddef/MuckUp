@@ -7,7 +7,7 @@ struct ViewMuckView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var muckVM: MuckViewModel
 
-    @State private var showScheduleEvent = false
+    @State private var showAddToEvent = false
     @State private var isFavourite = false
 
     var body: some View {
@@ -115,10 +115,10 @@ struct ViewMuckView: View {
             if !muck.isHazardous {
                 VStack(spacing: Spacing.xs) {
                     PrimaryButton(
-                        title: "Schedule a Community Event",
+                        title: "Add to a Community Event",
                         icon: "calendar.badge.plus"
                     ) {
-                        showScheduleEvent = true
+                        showAddToEvent = true
                     }
                     Button {
                         // Close Muck flow
@@ -138,8 +138,8 @@ struct ViewMuckView: View {
         .onAppear {
             isFavourite = muckVM.isFavourite(muckId: muck.id)
         }
-        .sheet(isPresented: $showScheduleEvent) {
-            ScheduleEventView(preselectedMuck: muck)
+        .sheet(isPresented: $showAddToEvent) {
+            AddToEventSheet(muck: muck)
         }
     }
 }
