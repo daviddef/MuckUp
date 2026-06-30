@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftData
+import MapKit
+import CoreLocation
 
 struct RaiseMuckView: View {
     @Environment(\.dismiss) private var dismiss
@@ -12,6 +14,11 @@ struct RaiseMuckView: View {
     @State private var isHazardous = false
     @State private var reportedDate = Date.now
     @State private var isSaved = false
+
+    // Location picker state
+    @State private var pickedCoordinate: CLLocationCoordinate2D? = nil
+    @State private var pickedAddress: String = "Locating…"
+    @State private var isDragging = false
 
     private var isValid: Bool { description.trimmingCharacters(in: .whitespaces).count >= 10 }
 
@@ -36,27 +43,62 @@ struct RaiseMuckView: View {
                         }
                     }
 
-                    // Hazardous toggle
+                    // WHERE — location picker map
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Toggle(isOn: $isHazardous) {
-                            HStack(spacing: Spacing.xs) {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(isHazardous ? Color.muckRed : Color.muckNearBlack.opacity(0.4))
-                                VStack(alignment: .leading, spacing: 1) {
-                                    Text("Mark as Hazardous")
-                                        .font(.muckHeadline)
-                                        .foregroundStyle(Color.muckNearBlack)
-                                    Text("Chemical, biological, or dangerous to approach")
-                                        .font(.muckCaption)
-                                        .foregroundStyle(Color.muckNearBlack.opacity(0.5))
-                                }
+                        Text("Where is it?")
+                            .font(.muckTitle)
+                            .foregroundStyle(Color.muckNearBlack)
+
+                        MuckLocationPicker(
+                            userLocation: locationService.location,
+                            isDragging: $isDragging,
+                            onCoordinateChanged: { coord in
+                                pickedCoordinate = coord
+                                reverseGeocode(coord)
+                            }
+                        )
+                        .frame(height: 220)
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Radius.md)
+                                .strokeBorder(Color.muckNearBlack.opacity(0.1))
+                        )
+
+                        // Address readout
+                        HStack(spacing: Spacing.xs) {
+                            Image(systemName: "mappin.circle.fill")
+                                .foregroundStyle(Color.muckGreen)
+                                .font(.system(size: 14))
+                            Text(isDragging ? "Drop to set location…" : pickedAddress)
+                                .font(.muckBody)
+                                .foregroundStyle(isDragging
+                                    ? Color.muckNearBlack.opacity(0.4)
+                                    : Color.muckNearBlack)
+                                .animation(.easeInOut(duration: 0.15), value: isDragging)
+                            Spacer()
+                        }
+                        .padding(.horizontal, Spacing.xs)
+                    }
+
+                    // Hazardous toggle
+                    Toggle(isOn: $isHazardous) {
+                        HStack(spacing: Spacing.xs) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(isHazardous ? Color.muckRed : Color.muckNearBlack.opacity(0.4))
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("Mark as Hazardous")
+                                    .font(.muckHeadline)
+                                    .foregroundStyle(Color.muckNearBlack)
+                                Text("Chemical, biological, or dangerous to approach")
+                                    .font(.muckCaption)
+                                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
                             }
                         }
-                        .tint(Color.muckRed)
-                        .padding(Spacing.sm)
-                        .background(isHazardous ? Color.muckRed.opacity(0.06) : Color.muckSurface)
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
                     }
+                    .tint(Color.muckRed)
+                    .padding(Spacing.sm)
+                    .background(isHazardous ? Color.muckRed.opacity(0.06) : Color.muckSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
 
                     // Description
                     VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -142,22 +184,218 @@ struct RaiseMuckView: View {
             .navigationDestination(isPresented: $isSaved) {
                 MuckSavedView()
             }
+            .onAppear {
+                if let loc = locationService.location {
+                    pickedCoordinate = loc.coordinate
+                    reverseGeocode(loc.coordinate)
+                } else {
+                    pickedAddress = "Move the map to set location"
+                }
+            }
+        }
+    }
+
+    private func reverseGeocode(_ coord: CLLocationCoordinate2D) {
+        let geocoder = CLGeocoder()
+        let loc = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+        geocoder.reverseGeocodeLocation(loc) { placemarks, _ in
+            guard let place = placemarks?.first else { return }
+            let parts = [place.name, place.locality, place.administrativeArea]
+                .compactMap { $0 }
+            pickedAddress = parts.prefix(2).joined(separator: ", ")
         }
     }
 
     private func submitMuck() {
+        let coord = pickedCoordinate
+            ?? locationService.location?.coordinate
+            ?? CLLocationCoordinate2D(latitude: -37.8136, longitude: 144.9631)
+
         let newMuck = Muck(
-            location: locationService.locationName,
+            location: pickedAddress,
             description: description,
             type: selectedType,
             isHazardous: isHazardous,
             reportedDate: reportedDate,
-            latitude: locationService.location?.coordinate.latitude ?? -37.8136,
-            longitude: locationService.location?.coordinate.longitude ?? 144.9631
+            latitude: coord.latitude,
+            longitude: coord.longitude
         )
         modelContext.insert(newMuck)
         muckVM.award(.raiseMuck)
         isSaved = true
+    }
+}
+
+// MARK: - Location Picker Map
+
+struct MuckLocationPicker: UIViewRepresentable {
+    let userLocation: CLLocation?
+    @Binding var isDragging: Bool
+    let onCoordinateChanged: (CLLocationCoordinate2D) -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(isDragging: $isDragging, onCoordinateChanged: onCoordinateChanged)
+    }
+
+    func makeUIView(context: Context) -> MKMapView {
+        let map = MKMapView()
+        map.delegate = context.coordinator
+        map.showsUserLocation = true          // blue glowing dot
+        map.userTrackingMode = .none
+        map.showsCompass = false
+        map.pointOfInterestFilter = .excludingAll
+
+        // Overlay crosshair — stays fixed at centre
+        let crosshair = CrosshairView()
+        crosshair.translatesAutoresizingMaskIntoConstraints = false
+        map.addSubview(crosshair)
+        NSLayoutConstraint.activate([
+            crosshair.centerXAnchor.constraint(equalTo: map.centerXAnchor),
+            crosshair.centerYAnchor.constraint(equalTo: map.centerYAnchor),
+            crosshair.widthAnchor.constraint(equalToConstant: 44),
+            crosshair.heightAnchor.constraint(equalToConstant: 44),
+        ])
+        context.coordinator.crosshair = crosshair
+
+        // Default region — user location or Melbourne CBD
+        let centre = userLocation?.coordinate
+            ?? CLLocationCoordinate2D(latitude: -37.8136, longitude: 144.9631)
+        let region = MKCoordinateRegion(center: centre, latitudinalMeters: 500, longitudinalMeters: 500)
+        map.setRegion(region, animated: false)
+
+        return map
+    }
+
+    func updateUIView(_ mapView: MKMapView, context: Context) {
+        // If we just got a user location and haven't been dragged yet, re-centre
+        if !context.coordinator.hasDragged, let loc = userLocation {
+            let region = MKCoordinateRegion(center: loc.coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
+            mapView.setRegion(region, animated: true)
+        }
+    }
+
+    // MARK: Coordinator
+
+    final class Coordinator: NSObject, MKMapViewDelegate {
+        @Binding var isDragging: Bool
+        let onCoordinateChanged: (CLLocationCoordinate2D) -> Void
+        var hasDragged = false
+        weak var crosshair: CrosshairView?
+
+        init(isDragging: Binding<Bool>, onCoordinateChanged: @escaping (CLLocationCoordinate2D) -> Void) {
+            self._isDragging = isDragging
+            self.onCoordinateChanged = onCoordinateChanged
+        }
+
+        func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
+            // Only treat gesture-driven changes as drags (not programmatic)
+            if let gesture = mapView.subviews.first?.gestureRecognizers?.first(where: { $0.state == .began || $0.state == .changed }) {
+                _ = gesture // gesture exists = user-driven
+                hasDragged = true
+                isDragging = true
+                crosshair?.setLifted(true)
+            } else if hasDragged {
+                // Subsequent programmatic check
+                isDragging = true
+                crosshair?.setLifted(true)
+            }
+        }
+
+        func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            isDragging = false
+            crosshair?.setLifted(false)
+            onCoordinateChanged(mapView.centerCoordinate)
+        }
+    }
+}
+
+// MARK: - Crosshair View
+
+final class CrosshairView: UIView {
+    private let pinBody = UIView()
+    private let pinShadow = UIView()
+    private let pulseRing = UIView()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setup()
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func setup() {
+        backgroundColor = .clear
+
+        // Pulse ring — visible when dropped
+        pulseRing.frame = CGRect(x: 10, y: 10, width: 24, height: 24)
+        pulseRing.layer.cornerRadius = 12
+        pulseRing.layer.borderWidth = 2
+        pulseRing.layer.borderColor = UIColor(Color.muckGreen).withAlphaComponent(0.4).cgColor
+        pulseRing.backgroundColor = UIColor(Color.muckGreen).withAlphaComponent(0.1)
+        addSubview(pulseRing)
+
+        // Pin shadow — small ellipse below pin tip
+        pinShadow.frame = CGRect(x: 16, y: 36, width: 12, height: 4)
+        pinShadow.layer.cornerRadius = 2
+        pinShadow.backgroundColor = UIColor.black.withAlphaComponent(0.2)
+        addSubview(pinShadow)
+
+        // Pin body — teardrop shape via CAShapeLayer
+        let pinSize: CGFloat = 28
+        let pinLayer = CAShapeLayer()
+        pinLayer.path = teardropPath(size: pinSize).cgPath
+        pinLayer.fillColor = UIColor(Color.muckGreen).cgColor
+        pinLayer.shadowColor = UIColor.black.cgColor
+        pinLayer.shadowOpacity = 0.25
+        pinLayer.shadowOffset = CGSize(width: 0, height: 3)
+        pinLayer.shadowRadius = 4
+
+        pinBody.frame = CGRect(x: (44 - pinSize) / 2, y: 2, width: pinSize, height: pinSize + 6)
+        pinBody.backgroundColor = .clear
+        pinBody.layer.addSublayer(pinLayer)
+        addSubview(pinBody)
+
+        // White dot in centre of pin
+        let dot = UIView(frame: CGRect(x: (pinSize - 8) / 2, y: (pinSize - 8) / 2 - 3, width: 8, height: 8))
+        dot.layer.cornerRadius = 4
+        dot.backgroundColor = .white
+        pinBody.addSubview(dot)
+    }
+
+    private func teardropPath(size: CGFloat) -> UIBezierPath {
+        let path = UIBezierPath()
+        let r = size / 2
+        let cx = r
+        let cy = r - 2
+        // Circle top
+        path.addArc(withCenter: CGPoint(x: cx, y: cy), radius: r, startAngle: .pi, endAngle: 0, clockwise: true)
+        // Taper to point at bottom
+        path.addLine(to: CGPoint(x: cx + r, y: cy))
+        path.addQuadCurve(to: CGPoint(x: cx, y: size + 4), controlPoint: CGPoint(x: cx + r, y: size))
+        path.addQuadCurve(to: CGPoint(x: cx - r, y: cy), controlPoint: CGPoint(x: cx - r, y: size))
+        path.close()
+        return path
+    }
+
+    func setLifted(_ lifted: Bool) {
+        UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseOut) {
+            // Lift pin up, shrink shadow
+            self.pinBody.transform = lifted
+                ? CGAffineTransform(translationX: 0, y: -10)
+                : .identity
+            self.pinShadow.transform = lifted
+                ? CGAffineTransform(scaleX: 0.5, y: 0.5)
+                : .identity
+            self.pinShadow.alpha = lifted ? 0.15 : 0.7
+            // Hide pulse ring while dragging
+            self.pulseRing.alpha = lifted ? 0 : 1
+        }
+        // Pulse animation when dropped
+        if !lifted {
+            pulseRing.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+            UIView.animate(withDuration: 0.4, delay: 0.1, usingSpringWithDamping: 0.5, initialSpringVelocity: 1) {
+                self.pulseRing.transform = .identity
+            }
+        }
     }
 }
 
@@ -176,7 +414,7 @@ private struct TypeSelectorCard: View {
                     .foregroundStyle(isSelected ? .white : Color.muckTypeColor(type))
                 Text(type.displayName)
                     .font(.muckCaption)
-                    .foregroundStyle(isSelected ? .white : .muckNearBlack)
+                    .foregroundStyle(isSelected ? .white : Color.muckNearBlack)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.md)
@@ -216,7 +454,6 @@ struct MuckSavedView: View {
                     showScheduleEvent = true
                 }
                 SecondaryButton(title: "Back to Home") {
-                    // Pop to root
                     dismiss()
                 }
             }
