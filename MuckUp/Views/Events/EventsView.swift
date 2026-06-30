@@ -4,6 +4,7 @@ import SwiftData
 struct EventsView: View {
     @Query private var allEvents: [MuckEvent]
     @EnvironmentObject var eventVM: EventViewModel
+    @State private var showSchedule = false
 
     var body: some View {
         NavigationStack {
@@ -35,6 +36,20 @@ struct EventsView: View {
             }
             .background(Color.muckBg)
             .navigationTitle("Events")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showSchedule = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.muckGreen)
+                    }
+                }
+            }
+            .sheet(isPresented: $showSchedule) {
+                ScheduleEventView()
+            }
         }
     }
 }
