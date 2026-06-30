@@ -1,4 +1,4 @@
-name: MuckUp
+name: Grub
 options:
   bundleIdPrefix: com.daviddef
   deploymentTarget:
@@ -16,7 +16,7 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
 
 targets:
-  MuckUp:
+  Grub:
     type: application
     platform: iOS
     deploymentTarget: "17.0"
