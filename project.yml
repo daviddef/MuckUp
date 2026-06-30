@@ -27,8 +27,7 @@ targets:
     info:
       path: MuckUp/Info.plist
       properties:
-        UILaunchScreen:
-          UIColorName: MuckBg
+        UILaunchStoryboardName: LaunchScreen
         NSLocationWhenInUseUsageDescription: "Muck Up uses your location to show nearby mucks and events."
         NSLocationAlwaysAndWhenInUseUsageDescription: "Muck Up uses your location to show nearby mucks and events."
         NSCameraUsageDescription: "Muck Up needs your camera to photograph mucks you report."
