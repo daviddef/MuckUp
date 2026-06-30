@@ -38,6 +38,10 @@ targets:
         CFBundleDisplayName: Grub
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        UIRequiresFullScreen: true
+        UIDeviceFamily:
+          - 1
     settings:
       base:
         INFOPLIST_FILE: MuckUp/Info.plist
+        TARGETED_DEVICE_FAMILY: "1"
