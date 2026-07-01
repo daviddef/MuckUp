@@ -27,6 +27,8 @@ struct HelpView: View {
     @State private var showAskForHelp = false
     @State private var showRaiseMuck = false
     @State private var selectedRequest: HelpRequest?
+    @State private var showNearbyMucks = false
+    @State private var showUpcomingEvents = false
 
     var body: some View {
         NavigationStack {
@@ -53,6 +55,12 @@ struct HelpView: View {
             .sheet(isPresented: $showRaiseMuck) {
                 RaiseMuckView()
             }
+            .sheet(isPresented: $showNearbyMucks) {
+                NearbyMucksSheet(mucks: muckVM.filtered(allMucks))
+            }
+            .sheet(isPresented: $showUpcomingEvents) {
+                UpcomingEventsSheet(events: allEvents.filter { !$0.isPast })
+            }
             .navigationDestination(item: $selectedRequest) { request in
                 HelpRequestDetailView(request: request)
             }
@@ -76,8 +84,12 @@ struct HelpView: View {
                     HelpWorldMiniMapView(mucks: muckVM.filtered(allMucks), userLocation: locationService.location)
 
                     HStack(spacing: Spacing.sm) {
-                        HelpStatCard(icon: "mappin.circle.fill", value: "\(openMuckCount)", label: "open mucks nearby")
-                        HelpStatCard(icon: "calendar", value: "\(upcomingEventCount)", label: "upcoming events")
+                        HelpStatCard(icon: "mappin.circle.fill", value: "\(openMuckCount)", label: "open mucks nearby") {
+                            showNearbyMucks = true
+                        }
+                        HelpStatCard(icon: "calendar", value: "\(upcomingEventCount)", label: "upcoming events") {
+                            showUpcomingEvents = true
+                        }
                     }
 
                     VStack(spacing: Spacing.sm) {
@@ -329,23 +341,141 @@ private struct HelpStatCard: View {
     let icon: String
     let value: String
     let label: String
+    var action: (() -> Void)? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xxs) {
-            Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundStyle(Color.muckGreen)
-            Text(value)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.muckNearBlack)
-            Text(label)
-                .font(.muckMicro)
-                .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+        Button {
+            action?()
+        } label: {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                HStack {
+                    Image(systemName: icon)
+                        .font(.system(size: 16))
+                        .foregroundStyle(Color.muckGreen)
+                    Spacer()
+                    if action != nil {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.25))
+                    }
+                }
+                Text(value)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.muckNearBlack)
+                Text(label)
+                    .font(.muckMicro)
+                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(Spacing.sm)
+            .background(Color.muckSurface)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Spacing.sm)
-        .background(Color.muckSurface)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+        .buttonStyle(.plain)
+        .disabled(action == nil)
+    }
+}
+
+// MARK: - Nearby mucks / upcoming events sheets
+
+private struct NearbyMucksSheet: View {
+    let mucks: [Muck]
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var muckVM: MuckViewModel
+    @EnvironmentObject var locationService: LocationService
+    @State private var selectedMuck: Muck?
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if mucks.isEmpty {
+                    VStack(spacing: Spacing.sm) {
+                        Image(systemName: "mappin.slash")
+                            .font(.system(size: 40))
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.2))
+                        Text("No open mucks nearby")
+                            .font(.muckBody)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List(mucks) { muck in
+                        MuckCardView(
+                            muck: muck,
+                            hasVoted: !muckVM.canVote(muck),
+                            onVote: { muckVM.upvote(muck) },
+                            userLocation: locationService.location
+                        )
+                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .onTapGesture { selectedMuck = muck }
+                    }
+                    .listStyle(.plain)
+                }
+            }
+            .background(Color.muckBg)
+            .navigationTitle("Open Mucks Nearby")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(Color.muckNearBlack)
+                }
+            }
+            .navigationDestination(item: $selectedMuck) { muck in
+                ViewMuckView(muck: muck)
+            }
+        }
+    }
+}
+
+private struct UpcomingEventsSheet: View {
+    let events: [MuckEvent]
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedEvent: MuckEvent?
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if events.isEmpty {
+                    VStack(spacing: Spacing.sm) {
+                        Image(systemName: "calendar.badge.exclamationmark")
+                            .font(.system(size: 40))
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.2))
+                        Text("No upcoming events")
+                            .font(.muckBody)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List(events) { event in
+                        EventRowView(event: event)
+                            .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .onTapGesture { selectedEvent = event }
+                    }
+                    .listStyle(.plain)
+                }
+            }
+            .background(Color.muckBg)
+            .navigationTitle("Upcoming Events")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(Color.muckNearBlack)
+                }
+            }
+            .navigationDestination(item: $selectedEvent) { event in
+                if event.isToday || event.isLive {
+                    EventLiveView(event: event)
+                } else {
+                    EventDetailView(event: event)
+                }
+            }
+        }
     }
 }
 
