@@ -175,7 +175,7 @@ struct AskForHelpView: View {
                 }
             }
             .navigationDestination(isPresented: $isSaved) {
-                HelpRequestSavedView()
+                HelpRequestSavedView(onDone: { dismiss() })
             }
             .onAppear {
                 if let loc = locationService.location {
@@ -221,7 +221,7 @@ struct AskForHelpView: View {
 }
 
 struct HelpRequestSavedView: View {
-    @Environment(\.dismiss) private var dismiss
+    let onDone: () -> Void
 
     var body: some View {
         VStack(spacing: Spacing.xl) {
@@ -239,7 +239,7 @@ struct HelpRequestSavedView: View {
                 .padding(.horizontal, Spacing.xl)
             Spacer()
             PrimaryButton(title: "Done") {
-                dismiss()
+                onDone()
             }
             .padding(.horizontal, Spacing.md)
             .padding(.bottom, Spacing.xl)
