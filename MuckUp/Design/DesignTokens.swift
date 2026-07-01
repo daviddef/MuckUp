@@ -31,6 +31,7 @@ extension Color {
         case .moving:        return Color(hex: "6366F1") // indigo
         case .repairs:       return .muckAmber
         case .companionship: return Color(hex: "EC4899") // pink
+        case .respite:       return Color(hex: "0EA5E9") // sky blue
         case .other:         return Color(hex: "64748B") // slate
         }
     }

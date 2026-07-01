@@ -5,7 +5,7 @@ import CoreLocation
 // MARK: - HelpCategory
 
 enum HelpCategory: String, Codable, CaseIterable {
-    case yardWork, moving, repairs, companionship, other
+    case yardWork, moving, repairs, companionship, respite, other
 
     var displayName: String {
         switch self {
@@ -13,6 +13,7 @@ enum HelpCategory: String, Codable, CaseIterable {
         case .moving:         return "Moving / Lifting"
         case .repairs:        return "Repairs"
         case .companionship:  return "Companionship"
+        case .respite:        return "Respite"
         case .other:          return "Other"
         }
     }
@@ -23,6 +24,7 @@ enum HelpCategory: String, Codable, CaseIterable {
         case .moving:         return "shippingbox.fill"
         case .repairs:        return "hammer.fill"
         case .companionship:  return "person.2.fill"
+        case .respite:        return "cup.and.saucer.fill"
         case .other:          return "hand.raised.fill"
         }
     }
