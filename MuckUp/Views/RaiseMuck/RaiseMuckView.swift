@@ -3,11 +3,19 @@ import SwiftData
 import MapKit
 import CoreLocation
 
+struct RaiseMuckPrefill {
+    var description: String = ""
+    var coordinate: CLLocationCoordinate2D?
+    var address: String?
+}
+
 struct RaiseMuckView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var locationService: LocationService
+
+    var prefill: RaiseMuckPrefill = RaiseMuckPrefill()
 
     @State private var selectedType: MuckType = .cleanup
     @State private var description = ""
@@ -52,6 +60,7 @@ struct RaiseMuckView: View {
 
                         MuckLocationPicker(
                             userLocation: locationService.location,
+                            initialCoordinate: prefill.coordinate,
                             isDragging: $isDragging,
                             onCoordinateChanged: { coord in
                                 pickedCoordinate = coord
@@ -166,6 +175,13 @@ struct RaiseMuckView: View {
                         .foregroundStyle(Color.muckNearBlack)
                 }
             }
+            .onAppear {
+                if !prefill.description.isEmpty { description = prefill.description }
+                if let coord = prefill.coordinate {
+                    pickedCoordinate = coord
+                    pickedAddress = prefill.address ?? pickedAddress
+                }
+            }
             .navigationDestination(isPresented: $isSaved) {
                 MuckSavedView()
             }
@@ -216,11 +232,14 @@ struct RaiseMuckView: View {
 
 struct MuckLocationPicker: UIViewRepresentable {
     let userLocation: CLLocation?
+    var initialCoordinate: CLLocationCoordinate2D? = nil
     @Binding var isDragging: Bool
     let onCoordinateChanged: (CLLocationCoordinate2D) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(isDragging: $isDragging, onCoordinateChanged: onCoordinateChanged)
+        let coordinator = Coordinator(isDragging: $isDragging, onCoordinateChanged: onCoordinateChanged)
+        coordinator.hasDragged = initialCoordinate != nil
+        return coordinator
     }
 
     func makeUIView(context: Context) -> MKMapView {
@@ -243,8 +262,9 @@ struct MuckLocationPicker: UIViewRepresentable {
         ])
         context.coordinator.crosshair = crosshair
 
-        // Default region — user location or Melbourne CBD
-        let centre = userLocation?.coordinate
+        // Default region — prefilled coordinate, user location, or Melbourne CBD
+        let centre = initialCoordinate
+            ?? userLocation?.coordinate
             ?? CLLocationCoordinate2D(latitude: -37.8136, longitude: 144.9631)
         let region = MKCoordinateRegion(center: centre, latitudinalMeters: 500, longitudinalMeters: 500)
         map.setRegion(region, animated: false)

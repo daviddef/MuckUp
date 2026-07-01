@@ -37,6 +37,7 @@
 		BD187811AF5BF7E23CD8DCF4 /* EventLiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B986405B5BABD48CAD63D7E /* EventLiveView.swift */; };
 		D5ACD10D9019DBD60DC01307 /* VoteColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1E83310AF223CD36FB390D /* VoteColumnView.swift */; };
 		DFBF21BE9BFA3A3E9FC1B730 /* MapViewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A75924861FE271F11D81B905 /* MapViewScreen.swift */; };
+		EAAFF076663A850C5D6808BC /* MuckMiniMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D6B190F2F6105F50AB0C87 /* MuckMiniMapView.swift */; };
 		EB0D0A13E1C675C022C09EA3 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D30E409F88B8591FA4F094 /* User.swift */; };
 		F58484A156015E6669190F7A /* MuckEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0FAEAE3DEFD169BDA719CA /* MuckEvent.swift */; };
 		F7014BC8E402EBEF438A43C9 /* Muck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90AB05B21CBFCB7E71B4E85D /* Muck.swift */; };
@@ -61,6 +62,7 @@
 		7B986405B5BABD48CAD63D7E /* EventLiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventLiveView.swift; sourceTree = "<group>"; };
 		7DC66CBC2FD20B89C0F193A1 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
 		8204790B4A659E31ABDC9920 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
+		87D6B190F2F6105F50AB0C87 /* MuckMiniMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckMiniMapView.swift; sourceTree = "<group>"; };
 		8AAC5F994776F115B6E7AE07 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		90AB05B21CBFCB7E71B4E85D /* Muck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Muck.swift; sourceTree = "<group>"; };
 		9BB21888E0DD634338526D36 /* ScheduleEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventView.swift; sourceTree = "<group>"; };
@@ -256,6 +258,7 @@
 			isa = PBXGroup;
 			children = (
 				ADC8024B54B25D5878D6A4A0 /* CloseMuckSheet.swift */,
+				87D6B190F2F6105F50AB0C87 /* MuckMiniMapView.swift */,
 				C9AE63513E766A7DEBDD253A /* ViewMuckView.swift */,
 			);
 			path = ViewMuck;
@@ -356,6 +359,7 @@
 				F7014BC8E402EBEF438A43C9 /* Muck.swift in Sources */,
 				34BFD69DD9FB92C5559C68BF /* MuckCardView.swift in Sources */,
 				F58484A156015E6669190F7A /* MuckEvent.swift in Sources */,
+				EAAFF076663A850C5D6808BC /* MuckMiniMapView.swift in Sources */,
 				222074DF393D3FDE09468072 /* MuckUpApp.swift in Sources */,
 				12853CF997870A1D3EC801F9 /* MuckViewModel.swift in Sources */,
 				0C32683227A9F89484467B59 /* NotificationService.swift in Sources */,

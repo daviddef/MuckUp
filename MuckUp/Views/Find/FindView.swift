@@ -1,9 +1,24 @@
 import SwiftUI
+import CoreLocation
+import MapKit
+
+enum FindDisplayMode: String, CaseIterable {
+    case list, map, timeline
+
+    var icon: String {
+        switch self {
+        case .list:     return "list.bullet"
+        case .map:      return "map"
+        case .timeline: return "calendar.day.timeline.left"
+        }
+    }
+}
 
 struct FindView: View {
     @EnvironmentObject var partnerVM: PartnerViewModel
     @EnvironmentObject var locationService: LocationService
     @State private var searchText = ""
+    @State private var displayMode: FindDisplayMode = .list
 
     private var filteredItems: [PartnerItem] {
         let base = partnerVM.filteredItems
@@ -38,29 +53,30 @@ struct FindView: View {
                 }
                 .padding(.vertical, Spacing.xs)
 
+                // Display mode switch
+                Picker("View", selection: $displayMode) {
+                    ForEach(FindDisplayMode.allCases, id: \.self) { mode in
+                        Image(systemName: mode.icon).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, Spacing.md)
+                .padding(.bottom, Spacing.xs)
+
                 if partnerVM.isLoading {
                     Spacer()
                     ProgressView("Finding nearby activity…")
                         .tint(Color.muckGreen)
                     Spacer()
                 } else {
-                    List {
-                        ForEach(filteredItems) { item in
-                            PartnerItemRow(item: item)
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
-                        }
-
-                        // More Organisations footer
-                        Section {
-                            MoreOrganisationsView()
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                        }
+                    switch displayMode {
+                    case .list:
+                        listView
+                    case .map:
+                        FindMapView(items: filteredItems)
+                    case .timeline:
+                        FindTimelineView(items: filteredItems)
                     }
-                    .listStyle(.plain)
-                    .searchable(text: $searchText, prompt: "Search nearby activity")
                 }
             }
             .background(Color.muckBg)
@@ -76,11 +92,125 @@ struct FindView: View {
             }
         }
     }
+
+    private var listView: some View {
+        List {
+            ForEach(filteredItems) { item in
+                PartnerItemRow(item: item)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+            }
+
+            // More Organisations footer
+            Section {
+                MoreOrganisationsView()
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
+        }
+        .listStyle(.plain)
+        .searchable(text: $searchText, prompt: "Search nearby activity")
+    }
+}
+
+// MARK: - Find: Map view
+
+struct FindMapView: View {
+    let items: [PartnerItem]
+    @EnvironmentObject var locationService: LocationService
+    @State private var cameraPosition: MapCameraPosition = .automatic
+    @State private var selectedItem: PartnerItem?
+
+    var body: some View {
+        Map(position: $cameraPosition) {
+            UserAnnotation()
+            ForEach(items) { item in
+                Annotation(item.name, coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)) {
+                    PartnerMapMarker(source: item.source)
+                        .onTapGesture { selectedItem = item }
+                }
+            }
+        }
+        .mapStyle(.standard(elevation: .flat))
+        .onAppear {
+            if let loc = locationService.location {
+                cameraPosition = .camera(MapCamera(centerCoordinate: loc.coordinate, distance: 6000))
+            }
+        }
+        .sheet(item: $selectedItem) { item in
+            NavigationStack {
+                ScrollView {
+                    PartnerItemRow(item: item)
+                        .padding(Spacing.md)
+                }
+                .background(Color.muckBg)
+                .navigationTitle(item.source.displayName)
+                .navigationBarTitleDisplayMode(.inline)
+            }
+            .presentationDetents([.height(280)])
+            .presentationDragIndicator(.visible)
+        }
+    }
+}
+
+// MARK: - Find: Timeline view
+
+struct FindTimelineView: View {
+    let items: [PartnerItem]
+
+    private var groupedByDate: [(label: String, items: [PartnerItem])] {
+        let dated = items.filter { $0.date != nil }
+        let undated = items.filter { $0.date == nil }
+
+        let grouped = Dictionary(grouping: dated) { item -> Date in
+            Calendar.current.startOfDay(for: item.date!)
+        }
+        var sections = grouped.keys.sorted().map { day -> (String, [PartnerItem]) in
+            let label: String
+            if Calendar.current.isDateInToday(day) {
+                label = "Today"
+            } else if Calendar.current.isDateInTomorrow(day) {
+                label = "Tomorrow"
+            } else {
+                label = day.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())
+            }
+            return (label, grouped[day]!.sorted { ($0.date ?? .distantFuture) < ($1.date ?? .distantFuture) })
+        }
+        if !undated.isEmpty {
+            sections.append(("Ongoing", undated))
+        }
+        return sections
+    }
+
+    var body: some View {
+        if items.isEmpty {
+            Spacer()
+            Text("Nothing to show yet.")
+                .font(.muckBody)
+                .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+            Spacer()
+        } else {
+            List {
+                ForEach(groupedByDate, id: \.label) { section in
+                    Section(section.label) {
+                        ForEach(section.items) { item in
+                            PartnerItemRow(item: item)
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+                        }
+                    }
+                }
+            }
+            .listStyle(.plain)
+        }
+    }
 }
 
 struct PartnerItemRow: View {
     let item: PartnerItem
-    @State private var showSafari = false
+    @State private var showRaiseMuck = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -122,14 +252,16 @@ struct PartnerItemRow: View {
             // CTA
             if item.source.promptsCreateMuck {
                 HStack {
-                    SecondaryButton(title: "🌿  Create a Muck", action: {})
+                    SecondaryButton(title: "🌿  Create a Muck") {
+                        showRaiseMuck = true
+                    }
                     Spacer()
                     Link("View on \(item.source.displayName) →", destination: item.externalURL)
                         .font(.muckCaption)
                         .foregroundStyle(Color.muckNearBlack.opacity(0.5))
                 }
             } else {
-                Link("Join on TrashMob →", destination: item.externalURL)
+                Link("View on \(item.source.displayName) →", destination: item.externalURL)
                     .font(.muckCaption)
                     .foregroundStyle(Color.partnerColor(item.source))
             }
@@ -137,6 +269,13 @@ struct PartnerItemRow: View {
         .padding(Spacing.md)
         .background(Color.muckSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+        .sheet(isPresented: $showRaiseMuck) {
+            RaiseMuckView(prefill: RaiseMuckPrefill(
+                description: item.itemDescription ?? item.name,
+                coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude),
+                address: item.name
+            ))
+        }
         .muckCardShadow()
     }
 }

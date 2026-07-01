@@ -49,6 +49,9 @@ struct ViewMuckView: View {
                         .font(.muckBody)
                         .foregroundStyle(Color.muckNearBlack.opacity(0.8))
 
+                    // Mini map with nearby mucks
+                    MuckMiniMapView(muck: muck)
+
                     // Before photo
                     if let data = muck.photoData, let ui = UIImage(data: data) {
                         VStack(alignment: .leading, spacing: Spacing.xs) {

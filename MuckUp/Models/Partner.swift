@@ -30,12 +30,12 @@ enum PartnerSource: String, CaseIterable, Identifiable {
         }
     }
 
-    // Whether items from this source get a "Create Muck" CTA (vs a Join link)
+    // Whether items from this source get a "Create Muck" CTA (vs a link-out only).
+    // Litter Map reports are raw litter sightings — a natural 1:1 match for a Muck.
+    // Everything else (organised events, official hazard reports) sends users
+    // straight to the partner rather than letting them spin up a duplicate Muck.
     var promptsCreateMuck: Bool {
-        switch self {
-        case .openlittermap, .epa, .wcd, .justserve, .volunteerconnector: return true
-        case .trashmob: return false
-        }
+        self == .openlittermap
     }
 }
 
