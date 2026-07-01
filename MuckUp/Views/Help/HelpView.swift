@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import CoreLocation
+import MapKit
 
 enum HelpLane: String, CaseIterable {
     case helpWorld, helpMe
@@ -67,13 +68,15 @@ struct HelpView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    Text("Do something for your neighbourhood")
+                    Text("Neighbourhood Cleanup")
                         .font(.muckDisplay)
                         .foregroundStyle(Color.muckNearBlack)
                     Text("Spot litter, report a hazard, or join a community cleanup near you.")
                         .font(.muckBody)
                         .foregroundStyle(Color.muckNearBlack.opacity(0.5))
                 }
+
+                HelpWorldMiniMapView(mucks: muckVM.filtered(allMucks), userLocation: locationService.location)
 
                 HStack(spacing: Spacing.sm) {
                     HelpStatCard(icon: "mappin.circle.fill", value: "\(openMuckCount)", label: "open mucks nearby")
@@ -130,6 +133,14 @@ struct HelpView: View {
 
     private var helpMeTab: some View {
         VStack(spacing: 0) {
+            HelpMeMiniMapView(
+                requests: helpVM.filtered(allHelpRequests),
+                userLocation: locationService.location
+            )
+            .padding(.horizontal, Spacing.md)
+            .padding(.top, Spacing.xs)
+            .padding(.bottom, Spacing.sm)
+
             // Category filter
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Spacing.xs) {
@@ -187,6 +198,116 @@ struct HelpView: View {
             }
             .padding(Spacing.md)
         }
+    }
+}
+
+// MARK: - Help World mini map
+
+private struct HelpWorldMiniMapView: View {
+    let mucks: [Muck]
+    let userLocation: CLLocation?
+
+    @State private var cameraPosition: MapCameraPosition = .automatic
+    @State private var showFullMap = false
+
+    var body: some View {
+        Button {
+            showFullMap = true
+        } label: {
+            ZStack(alignment: .bottomTrailing) {
+                Map(position: $cameraPosition, interactionModes: []) {
+                    ForEach(mucks.prefix(30)) { muck in
+                        Annotation(muck.location, coordinate: muck.coordinate) {
+                            MuckMapMarker(muck: muck)
+                                .scaleEffect(0.8)
+                        }
+                    }
+                }
+                .mapStyle(.standard(elevation: .flat))
+                .disabled(true)
+                .frame(height: 150)
+                .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+
+                if !mucks.isEmpty {
+                    Label("\(mucks.count) nearby", systemImage: "mappin.and.ellipse")
+                        .font(.muckMicro)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, Spacing.xs)
+                        .padding(.vertical, 4)
+                        .background(Color.muckNearBlack.opacity(0.6))
+                        .clipShape(Capsule())
+                        .padding(Spacing.xs)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.md)
+                .strokeBorder(Color.muckNearBlack.opacity(0.08))
+        )
+        .onAppear { centre() }
+        .onChange(of: mucks.map(\.id)) { _, _ in centre() }
+        .sheet(isPresented: $showFullMap) {
+            NavigationStack {
+                MapViewScreen()
+            }
+        }
+    }
+
+    private func centre() {
+        let target = userLocation?.coordinate
+            ?? mucks.first?.coordinate
+            ?? CLLocationCoordinate2D(latitude: -37.8136, longitude: 144.9631)
+        cameraPosition = .camera(MapCamera(centerCoordinate: target, distance: 4000))
+    }
+}
+
+// MARK: - Help Me mini map
+
+private struct HelpMeMiniMapView: View {
+    let requests: [HelpRequest]
+    let userLocation: CLLocation?
+
+    @State private var cameraPosition: MapCameraPosition = .automatic
+
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            Map(position: $cameraPosition, interactionModes: []) {
+                ForEach(requests) { request in
+                    MapCircle(center: request.blurredCoordinate, radius: request.blurRadiusMetres)
+                        .foregroundStyle(Color.helpCategoryColor(request.category).opacity(0.18))
+                        .stroke(Color.helpCategoryColor(request.category), lineWidth: 1.5)
+                }
+            }
+            .mapStyle(.standard(elevation: .flat))
+            .disabled(true)
+            .frame(height: 150)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+
+            if !requests.isEmpty {
+                Label("\(requests.count) nearby", systemImage: "hand.raised.fill")
+                    .font(.muckMicro)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, Spacing.xs)
+                    .padding(.vertical, 4)
+                    .background(Color.muckNearBlack.opacity(0.6))
+                    .clipShape(Capsule())
+                    .padding(Spacing.xs)
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.md)
+                .strokeBorder(Color.muckNearBlack.opacity(0.08))
+        )
+        .onAppear { centre() }
+        .onChange(of: requests.map(\.id)) { _, _ in centre() }
+    }
+
+    private func centre() {
+        let target = userLocation?.coordinate
+            ?? requests.first?.blurredCoordinate
+            ?? CLLocationCoordinate2D(latitude: -37.8136, longitude: 144.9631)
+        cameraPosition = .camera(MapCamera(centerCoordinate: target, distance: 4000))
     }
 }
 
