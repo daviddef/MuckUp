@@ -20,6 +20,11 @@ struct ScheduleEventView: View {
     @State private var expandedRadius = false
     @State private var quickLookMuck: Muck?
 
+    // Meetup location picker state
+    @State private var pickedMeetupCoordinate: CLLocationCoordinate2D? = nil
+    @State private var pickedMeetupAddress: String = "Locating…"
+    @State private var isDraggingMeetup = false
+
     // Radius thresholds in metres
     private let nearbyRadius: Double = 10_000   // 10 km
     private let expandedRadiusKm: Double = 50_000  // 50 km
@@ -255,6 +260,46 @@ struct ScheduleEventView: View {
                         .font(.muckCaption)
                 }
 
+                // ── Meetup location ───────────────────────────────────
+                Section {
+                    MuckLocationPicker(
+                        userLocation: locationService.location,
+                        initialCoordinate: pickedMeetupCoordinate ?? centroidOfSelectedMucks,
+                        isDragging: $isDraggingMeetup,
+                        onCoordinateChanged: { coord in
+                            pickedMeetupCoordinate = coord
+                            reverseGeocodeMeetup(coord)
+                        }
+                    )
+                    .frame(height: 180)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .strokeBorder(Color.muckNearBlack.opacity(0.1))
+                    )
+                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+
+                    HStack(spacing: Spacing.xs) {
+                        Image(systemName: "mappin.circle.fill")
+                            .foregroundStyle(Color.muckGreen)
+                            .font(.system(size: 14))
+                        Text(isDraggingMeetup ? "Drop to set the meeting point…" : pickedMeetupAddress)
+                            .font(.muckBody)
+                            .foregroundStyle(isDraggingMeetup
+                                ? Color.muckNearBlack.opacity(0.4)
+                                : Color.muckNearBlack)
+                            .animation(.easeInOut(duration: 0.15), value: isDraggingMeetup)
+                        Spacer()
+                    }
+                } header: {
+                    Text("Where — Meeting Point")
+                        .font(.muckCaption)
+                } footer: {
+                    Text("Where people should physically gather — pan the map to drop the pin.")
+                        .font(.muckMicro)
+                        .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                }
+
                 // ── Description ──────────────────────────────────────
                 Section {
                     TextEditor(text: $description)
@@ -310,6 +355,13 @@ struct ScheduleEventView: View {
             if let muck = preselectedMuck {
                 selectedMuckIds.insert(muck.id)
             }
+            let start = centroidOfSelectedMucks ?? locationService.location?.coordinate
+            if let start {
+                pickedMeetupCoordinate = start
+                reverseGeocodeMeetup(start)
+            } else {
+                pickedMeetupAddress = "Move the map to set the meeting point"
+            }
         }
     }
 
@@ -330,15 +382,46 @@ struct ScheduleEventView: View {
             .distance(from: location)
     }
 
+    // Centre point of whatever mucks are already selected (e.g. arriving via
+    // "Add to Event" or Litter Map's Schedule Cleanup) — a sensible starting
+    // pin for the meetup point before the organiser adjusts it themselves.
+    private var centroidOfSelectedMucks: CLLocationCoordinate2D? {
+        guard !selectedMucks.isEmpty else { return nil }
+        let lats = selectedMucks.map(\.latitude)
+        let lons = selectedMucks.map(\.longitude)
+        return CLLocationCoordinate2D(
+            latitude: lats.reduce(0, +) / Double(lats.count),
+            longitude: lons.reduce(0, +) / Double(lons.count)
+        )
+    }
+
+    private func reverseGeocodeMeetup(_ coord: CLLocationCoordinate2D) {
+        let geocoder = CLGeocoder()
+        let loc = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+        geocoder.reverseGeocodeLocation(loc) { placemarks, _ in
+            guard let place = placemarks?.first else { return }
+            let parts = [place.name, place.locality, place.administrativeArea]
+                .compactMap { $0 }
+            pickedMeetupAddress = parts.prefix(2).joined(separator: ", ")
+        }
+    }
+
     private func createEvent() {
+        let meetupCoord = pickedMeetupCoordinate
+            ?? centroidOfSelectedMucks
+            ?? locationService.location?.coordinate
+            ?? CLLocationCoordinate2D(latitude: -37.8136, longitude: 144.9631)
+
         let event = MuckEvent(
             title: title,
-            location: allMucks.first(where: { selectedMuckIds.contains($0.id) })?.location ?? "",
+            location: pickedMeetupAddress,
             date: eventDate,
             description: description,
             muckIds: Array(selectedMuckIds),
             participants: 1,
-            isAttending: true
+            isAttending: true,
+            meetupLatitude: meetupCoord.latitude,
+            meetupLongitude: meetupCoord.longitude
         )
         modelContext.insert(event)
         for id in selectedMuckIds {
