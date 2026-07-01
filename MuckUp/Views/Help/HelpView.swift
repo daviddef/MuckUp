@@ -59,71 +59,60 @@ struct HelpView: View {
         }
     }
 
-    // MARK: - Help the World (environmental impact launcher)
+    // MARK: - Help Us Cleanup (environmental impact launcher)
 
     private var openMuckCount: Int { muckVM.filtered(allMucks).count }
     private var upcomingEventCount: Int { allEvents.filter { !$0.isPast }.count }
 
     private var helpWorldTab: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.lg) {
-                VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    Text("Neighbourhood Cleanup")
-                        .font(.muckDisplay)
-                        .foregroundStyle(Color.muckNearBlack)
-                    Text("Spot litter, report a hazard, or join a community cleanup near you.")
-                        .font(.muckBody)
-                        .foregroundStyle(Color.muckNearBlack.opacity(0.5))
-                }
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: Spacing.lg) {
+                    laneHeader(
+                        title: "Neighbourhood Cleanup",
+                        subtitle: "Spot litter, report a hazard, or join a community cleanup near you."
+                    )
 
-                HelpWorldMiniMapView(mucks: muckVM.filtered(allMucks), userLocation: locationService.location)
+                    HelpWorldMiniMapView(mucks: muckVM.filtered(allMucks), userLocation: locationService.location)
 
-                HStack(spacing: Spacing.sm) {
-                    HelpStatCard(icon: "mappin.circle.fill", value: "\(openMuckCount)", label: "open mucks nearby")
-                    HelpStatCard(icon: "calendar", value: "\(upcomingEventCount)", label: "upcoming events")
-                }
-
-                VStack(spacing: Spacing.sm) {
-                    HelpLaneActionRow(
-                        icon: "leaf.fill",
-                        title: "Raise a Muck",
-                        subtitle: "Report litter, a hazard, or something that needs fixing.",
-                        color: Color.muckGreen
-                    ) {
-                        showRaiseMuck = true
+                    HStack(spacing: Spacing.sm) {
+                        HelpStatCard(icon: "mappin.circle.fill", value: "\(openMuckCount)", label: "open mucks nearby")
+                        HelpStatCard(icon: "calendar", value: "\(upcomingEventCount)", label: "upcoming events")
                     }
 
-                    NavigationLink {
-                        MapViewScreen()
-                    } label: {
-                        HelpLaneActionRow(
-                            icon: "map.fill",
-                            title: "Browse the Map",
-                            subtitle: "See every open muck and event around you.",
-                            color: Color.muckAmber,
-                            isLink: true
-                        ) {}
+                    VStack(spacing: Spacing.sm) {
+                        NavigationLink {
+                            MapViewScreen()
+                        } label: {
+                            HelpLaneActionRow(
+                                icon: "map.fill",
+                                title: "Browse the Map",
+                                subtitle: "See every open muck and event around you.",
+                                color: Color.muckAmber,
+                                isLink: true
+                            ) {}
+                        }
+                        .buttonStyle(.plain)
+
+                        Button {
+                            withAnimation { lane = .helpMe }
+                        } label: {
+                            HelpLaneActionRow(
+                                icon: "hand.raised.fill",
+                                title: "Switch to Help Me",
+                                subtitle: "Browse requests from neighbours who need a hand.",
+                                color: Color.helpCategoryColor(.other),
+                                isLink: true
+                            ) {}
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
+                .padding(Spacing.md)
+            }
 
-                Text("🤝 Prefer to help a person instead?")
-                    .font(.muckHeadline)
-                    .foregroundStyle(Color.muckNearBlack.opacity(0.6))
-                    .padding(.top, Spacing.sm)
-
-                Button {
-                    withAnimation { lane = .helpMe }
-                } label: {
-                    HelpLaneActionRow(
-                        icon: "hand.raised.fill",
-                        title: "Switch to Help Me",
-                        subtitle: "Browse requests from neighbours who need a hand.",
-                        color: Color.helpCategoryColor(.other),
-                        isLink: true
-                    ) {}
-                }
-                .buttonStyle(.plain)
+            PrimaryButton(title: "Raise a Muck", icon: "leaf.fill") {
+                showRaiseMuck = true
             }
             .padding(Spacing.md)
         }
@@ -131,72 +120,95 @@ struct HelpView: View {
 
     // MARK: - Help Me (personal request feed)
 
+    private var openRequestCount: Int { allHelpRequests.filter { $0.status != .completed }.count }
+    private var offeredByMeCount: Int { muckVM.offeredHelpIds.count }
+
     private var helpMeTab: some View {
         VStack(spacing: 0) {
-            HelpMeMiniMapView(
-                requests: helpVM.filtered(allHelpRequests),
-                userLocation: locationService.location
-            )
-            .padding(.horizontal, Spacing.md)
-            .padding(.top, Spacing.xs)
-            .padding(.bottom, Spacing.sm)
+            ScrollView {
+                VStack(alignment: .leading, spacing: Spacing.lg) {
+                    laneHeader(
+                        title: "Ask a Neighbour",
+                        subtitle: "Get a hand with yard work, moving, repairs, or just some company."
+                    )
 
-            // Category filter
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: Spacing.xs) {
-                    FilterPill(title: "All", isActive: helpVM.categoryFilter == nil) {
-                        helpVM.categoryFilter = nil
+                    HelpMeMiniMapView(
+                        requests: helpVM.filtered(allHelpRequests),
+                        userLocation: locationService.location
+                    )
+
+                    HStack(spacing: Spacing.sm) {
+                        HelpStatCard(icon: "hand.raised.fill", value: "\(openRequestCount)", label: "open requests nearby")
+                        HelpStatCard(icon: "hands.sparkles.fill", value: "\(offeredByMeCount)", label: "you've offered")
                     }
-                    ForEach(HelpCategory.allCases, id: \.self) { cat in
-                        FilterPill(
-                            title: cat.displayName,
-                            isActive: helpVM.categoryFilter == cat,
-                            activeColor: Color.helpCategoryColor(cat)
-                        ) {
-                            helpVM.categoryFilter = (helpVM.categoryFilter == cat) ? nil : cat
+
+                    // Category filter
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: Spacing.xs) {
+                            FilterPill(title: "All", isActive: helpVM.categoryFilter == nil) {
+                                helpVM.categoryFilter = nil
+                            }
+                            ForEach(HelpCategory.allCases, id: \.self) { cat in
+                                FilterPill(
+                                    title: cat.displayName,
+                                    isActive: helpVM.categoryFilter == cat,
+                                    activeColor: Color.helpCategoryColor(cat)
+                                ) {
+                                    helpVM.categoryFilter = (helpVM.categoryFilter == cat) ? nil : cat
+                                }
+                            }
+                        }
+                    }
+
+                    let requests = helpVM.filtered(allHelpRequests)
+
+                    if requests.isEmpty {
+                        VStack(spacing: Spacing.sm) {
+                            Image(systemName: "hand.raised.fill")
+                                .font(.system(size: 44))
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.2))
+                            Text("No open requests nearby")
+                                .font(.muckTitle)
+                                .foregroundStyle(Color.muckNearBlack)
+                            Text("Be the first to ask your neighbours for a hand.")
+                                .font(.muckBody)
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, Spacing.xl)
+                    } else {
+                        VStack(spacing: Spacing.sm) {
+                            ForEach(requests) { request in
+                                HelpRequestCard(
+                                    request: request,
+                                    distance: request.distanceLabel(from: locationService.location),
+                                    hasOffered: helpVM.hasOffered(request)
+                                )
+                                .onTapGesture { selectedRequest = request }
+                            }
                         }
                     }
                 }
-                .padding(.horizontal, Spacing.md)
-            }
-            .padding(.bottom, Spacing.xs)
-
-            let requests = helpVM.filtered(allHelpRequests)
-
-            if requests.isEmpty {
-                Spacer()
-                VStack(spacing: Spacing.sm) {
-                    Image(systemName: "hand.raised.fill")
-                        .font(.system(size: 44))
-                        .foregroundStyle(Color.muckNearBlack.opacity(0.2))
-                    Text("No open requests nearby")
-                        .font(.muckTitle)
-                        .foregroundStyle(Color.muckNearBlack)
-                    Text("Be the first to ask your neighbours for a hand.")
-                        .font(.muckBody)
-                        .foregroundStyle(Color.muckNearBlack.opacity(0.5))
-                }
-                .padding(Spacing.xl)
-                Spacer()
-            } else {
-                List(requests) { request in
-                    HelpRequestCard(
-                        request: request,
-                        distance: request.distanceLabel(from: locationService.location),
-                        hasOffered: helpVM.hasOffered(request)
-                    )
-                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .onTapGesture { selectedRequest = request }
-                }
-                .listStyle(.plain)
+                .padding(Spacing.md)
             }
 
             PrimaryButton(title: "Ask for Help", icon: "hand.raised.fill") {
                 showAskForHelp = true
             }
             .padding(Spacing.md)
+        }
+    }
+
+    // MARK: - Shared header
+
+    private func laneHeader(title: String, subtitle: String) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.xxs) {
+            Text(title)
+                .font(.muckDisplay)
+                .foregroundStyle(Color.muckNearBlack)
+            Text(subtitle)
+                .font(.muckBody)
+                .foregroundStyle(Color.muckNearBlack.opacity(0.5))
         }
     }
 }
@@ -351,7 +363,7 @@ private struct HelpLaneActionRow: View {
         Button(action: action) {
             HStack(spacing: Spacing.sm) {
                 ZStack {
-                    Circle().fill(color.opacity(0.12)).frame(width: 40, height: 40)
+                    Circle().fill(color.opacity(0.12)).frame(width: 44, height: 44)
                     Image(systemName: icon)
                         .font(.system(size: 16))
                         .foregroundStyle(color)

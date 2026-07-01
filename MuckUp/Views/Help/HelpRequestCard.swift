@@ -15,7 +15,7 @@ struct HelpRequestCard: View {
             ZStack {
                 Circle()
                     .fill(Color.helpCategoryColor(request.category).opacity(0.12))
-                    .frame(width: 48, height: 48)
+                    .frame(width: 44, height: 44)
                 Image(systemName: request.category.icon)
                     .font(.system(size: 18))
                     .foregroundStyle(Color.helpCategoryColor(request.category))
