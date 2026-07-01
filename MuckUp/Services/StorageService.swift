@@ -89,6 +89,32 @@ final class StorageService {
         }
     }
 
+    // MARK: - Personal history (help requests)
+
+    func recordPostedHelpRequest(_ id: String, for userId: String) {
+        appendUnique(id, key: "helpPosted_\(userId)")
+    }
+
+    func loadPostedHelpRequestIds(for userId: String) -> [String] {
+        defaults.array(forKey: "helpPosted_\(userId)") as? [String] ?? []
+    }
+
+    func recordOfferedHelp(_ id: String, for userId: String) {
+        appendUnique(id, key: "helpOffered_\(userId)")
+    }
+
+    func loadOfferedHelpIds(for userId: String) -> [String] {
+        defaults.array(forKey: "helpOffered_\(userId)") as? [String] ?? []
+    }
+
+    func recordCompletedHelp(_ id: String, for userId: String) {
+        appendUnique(id, key: "helpCompleted_\(userId)")
+    }
+
+    func loadCompletedHelpIds(for userId: String) -> [String] {
+        defaults.array(forKey: "helpCompleted_\(userId)") as? [String] ?? []
+    }
+
     // MARK: - Activity streak
 
     /// Call whenever the user does something meaningful (raise, close, attend).

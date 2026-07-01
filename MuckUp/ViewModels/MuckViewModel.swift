@@ -94,4 +94,22 @@ final class MuckViewModel: ObservableObject {
     var raisedMuckIds: [String] { storage.loadRaisedMuckIds(for: userId) }
     var closedMuckIds: [String] { storage.loadClosedMuckIds(for: userId) }
     var streak: Int { storage.currentStreak(for: userId) }
+
+    // MARK: - Personal history (Help Me)
+
+    func recordHelpPosted(_ id: String) {
+        storage.recordPostedHelpRequest(id, for: userId)
+    }
+
+    func recordHelpOffered(_ id: String) {
+        storage.recordOfferedHelp(id, for: userId)
+    }
+
+    func recordHelpCompleted(_ id: String) {
+        storage.recordCompletedHelp(id, for: userId)
+    }
+
+    var postedHelpRequestIds: [String] { storage.loadPostedHelpRequestIds(for: userId) }
+    var offeredHelpIds: [String] { storage.loadOfferedHelpIds(for: userId) }
+    var completedHelpIds: [String] { storage.loadCompletedHelpIds(for: userId) }
 }

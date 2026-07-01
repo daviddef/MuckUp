@@ -24,6 +24,17 @@ extension Color {
         }
     }
 
+    // Help category colours — warmer, "neighbourly" palette distinct from muck types
+    static func helpCategoryColor(_ category: HelpCategory) -> Color {
+        switch category {
+        case .yardWork:      return .muckGreen
+        case .moving:        return Color(hex: "6366F1") // indigo
+        case .repairs:       return .muckAmber
+        case .companionship: return Color(hex: "EC4899") // pink
+        case .other:         return Color(hex: "64748B") // slate
+        }
+    }
+
     // Partner source colours
     static func partnerColor(_ source: PartnerSource) -> Color {
         switch source {

@@ -18,17 +18,23 @@ struct ContentView: View {
                 }
                 .tag(1)
 
-            EventsView()
+            HelpView()
                 .tabItem {
-                    Label("Events", systemImage: selectedTab == 2 ? "calendar.circle.fill" : "calendar.circle")
+                    Label("Help", systemImage: selectedTab == 2 ? "hand.raised.fill" : "hand.raised")
                 }
                 .tag(2)
 
-            ProfileView()
+            EventsView()
                 .tabItem {
-                    Label("Profile", systemImage: selectedTab == 3 ? "person.circle.fill" : "person.circle")
+                    Label("Events", systemImage: selectedTab == 3 ? "calendar.circle.fill" : "calendar.circle")
                 }
                 .tag(3)
+
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: selectedTab == 4 ? "person.circle.fill" : "person.circle")
+                }
+                .tag(4)
         }
         .tint(Color.muckGreen)
     }
@@ -40,5 +46,6 @@ struct ContentView: View {
         .environmentObject(MuckViewModel())
         .environmentObject(EventViewModel())
         .environmentObject(PartnerViewModel())
+        .environmentObject(HelpViewModel())
         .environmentObject(LocationService())
 }

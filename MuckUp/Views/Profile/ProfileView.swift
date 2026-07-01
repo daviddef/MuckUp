@@ -4,6 +4,7 @@ import SwiftData
 struct ProfileView: View {
     @Query private var allMucks: [Muck]
     @Query private var allEvents: [MuckEvent]
+    @Query private var allHelpRequests: [HelpRequest]
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var eventVM: EventViewModel
 
@@ -25,6 +26,20 @@ struct ProfileView: View {
         return allEvents.filter { ids.contains($0.id) }
     }
 
+    private var myPostedRequests: [HelpRequest] {
+        let ids = Set(muckVM.postedHelpRequestIds)
+        return allHelpRequests.filter { ids.contains($0.id) }
+    }
+
+    private var myOfferedRequests: [HelpRequest] {
+        let ids = Set(muckVM.offeredHelpIds)
+        return allHelpRequests.filter { ids.contains($0.id) }
+    }
+
+    private var myCompletedHelpCount: Int {
+        muckVM.completedHelpIds.count
+    }
+
     private var favMucks: [Muck] {
         let ids = StorageService.shared.loadFavouriteMucks(for: muckVM.userId)
         return allMucks.filter { ids.contains($0.id) }
@@ -42,6 +57,16 @@ struct ProfileView: View {
         totalBagsCollected * 3
     }
 
+    // Lightweight badges derived from cumulative activity — a nudge toward
+    // both lanes of community contribution, not a full achievements system.
+    private var badges: [String] {
+        var result: [String] = []
+        if myClosedMucks.count >= 5 { result.append("🌍 Eco Warrior") }
+        if myOfferedRequests.count >= 3 { result.append("🤝 Good Neighbour") }
+        if muckVM.streak >= 7 { result.append("🔥 On Fire") }
+        return result
+    }
+
     private var historyItems: [HistoryItem] {
         var items: [HistoryItem] = []
         items += myMucks.map { .init(date: $0.reportedDate, kind: .raised($0)) }
@@ -50,6 +75,8 @@ struct ProfileView: View {
             return HistoryItem(date: date, kind: .closed(muck))
         }
         items += myAttendedEvents.map { .init(date: $0.eventDate, kind: .attended($0)) }
+        items += myPostedRequests.map { .init(date: $0.createdDate, kind: .askedForHelp($0)) }
+        items += myOfferedRequests.map { .init(date: $0.createdDate, kind: .offeredHelp($0)) }
         return items.sorted { $0.date > $1.date }
     }
 
@@ -58,6 +85,7 @@ struct ProfileView: View {
             VStack(spacing: 0) {
                 heroSection
                 impactGrid
+                helpImpactGrid
 
                 // Tab picker
                 Picker("", selection: $selectedTab) {
@@ -96,18 +124,35 @@ struct ProfileView: View {
                         .foregroundStyle(Color.muckNearBlack)
                 }
 
-                if muckVM.streak > 0 {
-                    HStack(spacing: Spacing.xxs) {
-                        Image(systemName: "flame.fill")
-                            .font(.system(size: 12))
-                        Text("\(muckVM.streak) day streak")
-                            .font(.muckCaption)
+                HStack(spacing: Spacing.xxs) {
+                    if muckVM.streak > 0 {
+                        HStack(spacing: Spacing.xxs) {
+                            Image(systemName: "flame.fill")
+                                .font(.system(size: 12))
+                            Text("\(muckVM.streak) day streak")
+                                .font(.muckCaption)
+                        }
+                        .foregroundStyle(Color.muckRed)
+                        .padding(.horizontal, Spacing.xs)
+                        .padding(.vertical, 3)
+                        .background(Color.muckRed.opacity(0.1))
+                        .clipShape(Capsule())
                     }
-                    .foregroundStyle(Color.muckRed)
-                    .padding(.horizontal, Spacing.xs)
-                    .padding(.vertical, 3)
-                    .background(Color.muckRed.opacity(0.1))
-                    .clipShape(Capsule())
+                }
+
+                if !badges.isEmpty {
+                    HStack(spacing: Spacing.xxs) {
+                        ForEach(badges, id: \.self) { badge in
+                            Text(badge)
+                                .font(.muckMicro)
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.6))
+                                .padding(.horizontal, Spacing.xs)
+                                .padding(.vertical, 3)
+                                .background(Color.muckNearBlack.opacity(0.06))
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .padding(.top, Spacing.xxxs)
                 }
             }
             Spacer()
@@ -119,14 +164,45 @@ struct ProfileView: View {
         .background(Color.muckSurface)
     }
 
-    // MARK: - Impact grid
+    // MARK: - Impact grids
 
     private var impactGrid: some View {
-        HStack(spacing: 1) {
-            ImpactStatTile(icon: "mappin.circle.fill", value: "\(myMucks.count)", label: "Raised")
-            ImpactStatTile(icon: "checkmark.seal.fill", value: "\(myClosedMucks.count)", label: "Cleared")
-            ImpactStatTile(icon: "bag.fill", value: "\(totalBagsCollected)", label: "Bags")
-            ImpactStatTile(icon: "scalemass.fill", value: "\(totalKgDiverted)kg", label: "Diverted")
+        VStack(spacing: 1) {
+            Text("🌍 Help the World")
+                .font(.muckMicro)
+                .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, Spacing.md)
+                .padding(.top, Spacing.xs)
+                .padding(.bottom, Spacing.xxxs)
+                .background(Color.muckBg)
+
+            HStack(spacing: 1) {
+                ImpactStatTile(icon: "mappin.circle.fill", value: "\(myMucks.count)", label: "Raised")
+                ImpactStatTile(icon: "checkmark.seal.fill", value: "\(myClosedMucks.count)", label: "Cleared")
+                ImpactStatTile(icon: "bag.fill", value: "\(totalBagsCollected)", label: "Bags")
+                ImpactStatTile(icon: "scalemass.fill", value: "\(totalKgDiverted)kg", label: "Diverted")
+            }
+        }
+        .background(Color.muckNearBlack.opacity(0.06))
+    }
+
+    private var helpImpactGrid: some View {
+        VStack(spacing: 1) {
+            Text("🙋 Help Me")
+                .font(.muckMicro)
+                .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, Spacing.md)
+                .padding(.top, Spacing.xs)
+                .padding(.bottom, Spacing.xxxs)
+                .background(Color.muckBg)
+
+            HStack(spacing: 1) {
+                ImpactStatTile(icon: "hand.raised.fill", value: "\(myPostedRequests.count)", label: "Asked")
+                ImpactStatTile(icon: "hands.sparkles.fill", value: "\(myOfferedRequests.count)", label: "Offered")
+                ImpactStatTile(icon: "person.fill.checkmark", value: "\(myCompletedHelpCount)", label: "Helped")
+            }
         }
         .background(Color.muckNearBlack.opacity(0.06))
     }
@@ -258,13 +334,17 @@ private struct HistoryItem: Identifiable {
         case raised(Muck)
         case closed(Muck)
         case attended(MuckEvent)
+        case askedForHelp(HelpRequest)
+        case offeredHelp(HelpRequest)
     }
 
     var id: String {
         switch kind {
-        case .raised(let m):   return "raised-\(m.id)"
-        case .closed(let m):   return "closed-\(m.id)"
-        case .attended(let e): return "attended-\(e.id)"
+        case .raised(let m):        return "raised-\(m.id)"
+        case .closed(let m):        return "closed-\(m.id)"
+        case .attended(let e):      return "attended-\(e.id)"
+        case .askedForHelp(let h):  return "asked-\(h.id)"
+        case .offeredHelp(let h):   return "offered-\(h.id)"
         }
     }
 }
@@ -302,33 +382,41 @@ private struct HistoryRow: View {
 
     private var icon: String {
         switch item.kind {
-        case .raised:   return "flag.fill"
-        case .closed:   return "checkmark.seal.fill"
-        case .attended: return "calendar"
+        case .raised:        return "flag.fill"
+        case .closed:        return "checkmark.seal.fill"
+        case .attended:      return "calendar"
+        case .askedForHelp:  return "hand.raised.fill"
+        case .offeredHelp:   return "hands.sparkles.fill"
         }
     }
 
     private var iconColor: Color {
         switch item.kind {
-        case .raised:   return Color.muckAmber
-        case .closed:   return Color.muckGreen
-        case .attended: return Color.muckGreen
+        case .raised:        return Color.muckAmber
+        case .closed:        return Color.muckGreen
+        case .attended:      return Color.muckGreen
+        case .askedForHelp:  return Color.helpCategoryColor(.other)
+        case .offeredHelp:   return Color.muckGreen
         }
     }
 
     private var title: String {
         switch item.kind {
-        case .raised:   return "Raised a muck"
-        case .closed:   return "Cleared a muck"
-        case .attended: return "Attended an event"
+        case .raised:        return "Raised a muck"
+        case .closed:        return "Cleared a muck"
+        case .attended:      return "Attended an event"
+        case .askedForHelp:  return "Asked for help"
+        case .offeredHelp:   return "Offered to help"
         }
     }
 
     private var subtitle: String {
         switch item.kind {
-        case .raised(let m):   return m.location
-        case .closed(let m):   return m.location
-        case .attended(let e): return e.title
+        case .raised(let m):        return m.location
+        case .closed(let m):        return m.location
+        case .attended(let e):      return e.title
+        case .askedForHelp(let h):  return h.title
+        case .offeredHelp(let h):   return h.title
         }
     }
 }

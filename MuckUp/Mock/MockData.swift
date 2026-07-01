@@ -135,6 +135,46 @@ extension MuckEvent {
     ]}
 }
 
+// MARK: - Mock Help Requests
+
+extension HelpRequest {
+    static var mockData: [HelpRequest] {
+        let items = [
+            HelpRequest(
+                id: "HLP-1001",
+                title: "Overgrown yard needs a working bee",
+                description: "Yard hasn't been touched in months — grass is knee-high and there's a fallen branch blocking the side path. Could use 2-3 people for a few hours.",
+                category: .yardWork,
+                preferredDate: Calendar.current.date(byAdding: .day, value: 2, to: .now)!,
+                exactLatitude: -37.7860,
+                exactLongitude: 144.9700,
+                requesterId: "demo-neighbour-1"
+            ),
+            HelpRequest(
+                id: "HLP-1002",
+                title: "Help moving a couch downstairs",
+                description: "Moving out this weekend and need a hand getting a heavy couch and a few boxes down two flights of stairs.",
+                category: .moving,
+                preferredDate: Calendar.current.date(byAdding: .day, value: 5, to: .now)!,
+                exactLatitude: -37.8010,
+                exactLongitude: 144.9820,
+                requesterId: "demo-neighbour-2"
+            ),
+            HelpRequest(
+                id: "HLP-1003",
+                title: "Fence panel blew down in the storm",
+                description: "One fence panel came loose in last night's wind. Just needs re-screwing to the post — have the tools, just need an extra pair of hands to hold it steady.",
+                category: .repairs,
+                preferredDate: Calendar.current.date(byAdding: .day, value: 1, to: .now)!,
+                exactLatitude: -37.7920,
+                exactLongitude: 144.9550,
+                requesterId: "demo-neighbour-3"
+            ),
+        ]
+        return items
+    }
+}
+
 // MARK: - Mock Partner Items
 
 extension PartnerItem {
@@ -218,13 +258,16 @@ extension PartnerItem {
 @MainActor
 let previewContainer: ModelContainer = {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Muck.self, MuckEvent.self, configurations: config)
+    let container = try! ModelContainer(for: Muck.self, MuckEvent.self, HelpRequest.self, configurations: config)
 
     for muck in Muck.mockData {
         container.mainContext.insert(muck)
     }
     for event in MuckEvent.mockData {
         container.mainContext.insert(event)
+    }
+    for request in HelpRequest.mockData {
+        container.mainContext.insert(request)
     }
 
     return container
