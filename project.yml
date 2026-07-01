@@ -41,6 +41,7 @@ targets:
         UIRequiresFullScreen: true
         UIDeviceFamily:
           - 1
+        ITSAppUsesNonExemptEncryption: false
     settings:
       base:
         INFOPLIST_FILE: MuckUp/Info.plist
