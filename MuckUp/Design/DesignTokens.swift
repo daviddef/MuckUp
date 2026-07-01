@@ -45,6 +45,7 @@ extension Color {
         case .volunteerconnector: return Color(hex: "4F46E5") // indigo
         case .openlittermap:      return Color(hex: "EA580C") // orange
         case .epa:                return Color(hex: "DC2626") // red
+        case .brisbaneEvents:     return Color(hex: "059669") // emerald
         }
     }
 

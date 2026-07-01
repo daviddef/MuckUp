@@ -54,6 +54,7 @@
 		EB0D0A13E1C675C022C09EA3 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D30E409F88B8591FA4F094 /* User.swift */; };
 		F58484A156015E6669190F7A /* MuckEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0FAEAE3DEFD169BDA719CA /* MuckEvent.swift */; };
 		F7014BC8E402EBEF438A43C9 /* Muck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90AB05B21CBFCB7E71B4E85D /* Muck.swift */; };
+		FD914D99BFDBEAC45BC75A55 /* BrisbaneEventsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D95467E9EB25443B7AAB0E5 /* BrisbaneEventsService.swift */; };
 		FDAC794A2F0E144659CEFE1A /* PartnerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52CFF95C2FBC5851A20F18F /* PartnerViewModel.swift */; };
 /* End PBXBuildFile section */
 
@@ -91,6 +92,7 @@
 		9BB21888E0DD634338526D36 /* ScheduleEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventView.swift; sourceTree = "<group>"; };
 		9C9A262C367E9690FB5D8BF2 /* EventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsView.swift; sourceTree = "<group>"; };
 		9D0D6B3AB481B826B56DCD95 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		9D95467E9EB25443B7AAB0E5 /* BrisbaneEventsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrisbaneEventsService.swift; sourceTree = "<group>"; };
 		A231AF8AFCD3609BAA6D179D /* MuckUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckUpApp.swift; sourceTree = "<group>"; };
 		A68CB2FF8089A24369F7A521 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		A75924861FE271F11D81B905 /* MapViewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewScreen.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				144120405C729ED3B97F8EC8 /* AuthService.swift */,
+				9D95467E9EB25443B7AAB0E5 /* BrisbaneEventsService.swift */,
 				A68CB2FF8089A24369F7A521 /* LocationService.swift */,
 				352AFF936DA4E9C62F7376B5 /* NotificationService.swift */,
 				7DC66CBC2FD20B89C0F193A1 /* StorageService.swift */,
@@ -413,6 +416,7 @@
 				B5A5102A881834F11F410018 /* AskForHelpView.swift in Sources */,
 				02AAD08FE0D16506A4F66C02 /* AuthGateView.swift in Sources */,
 				752A0271EEF4B8849BB82637 /* AuthService.swift in Sources */,
+				FD914D99BFDBEAC45BC75A55 /* BrisbaneEventsService.swift in Sources */,
 				9DF45C8629F11BCC6C38485F /* CloseMuckSheet.swift in Sources */,
 				31B1CA5286B739BB30900EF9 /* ContentView.swift in Sources */,
 				2575BB2B761ABE31631419CC /* DesignTokens.swift in Sources */,

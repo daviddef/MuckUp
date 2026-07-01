@@ -4,7 +4,7 @@ import Foundation
 // MARK: - PartnerSource
 
 enum PartnerSource: String, CaseIterable, Identifiable {
-    case trashmob, wcd, justserve, volunteerconnector, openlittermap, epa
+    case trashmob, wcd, justserve, volunteerconnector, openlittermap, epa, brisbaneEvents
 
     var id: String { rawValue }
 
@@ -16,6 +16,7 @@ enum PartnerSource: String, CaseIterable, Identifiable {
         case .volunteerconnector: return "VolConnector"
         case .openlittermap:      return "Litter Map"
         case .epa:                return "EPA"
+        case .brisbaneEvents:     return "Council Events"
         }
     }
 
@@ -27,6 +28,7 @@ enum PartnerSource: String, CaseIterable, Identifiable {
         case .volunteerconnector: return "🙌"
         case .openlittermap:      return "🗑️"
         case .epa:                return "☢️"
+        case .brisbaneEvents:     return "🏛️"
         }
     }
 
