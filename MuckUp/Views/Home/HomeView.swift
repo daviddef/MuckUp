@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import CoreLocation
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
@@ -11,7 +12,25 @@ struct HomeView: View {
     @State private var showRaiseMuck = false
     @State private var selectedMuck: Muck? = nil
 
-    private var mucks: [Muck] { muckVM.filtered(allMucks) }
+    // Map-driven area filter — updated as the mini map is panned
+    @State private var mapCentre: CLLocationCoordinate2D? = nil
+    @State private var mapRadiusMetres: Double = 3000
+
+    private var mucks: [Muck] {
+        let base = muckVM.filtered(allMucks)
+        guard let mapCentre else { return base }
+        let centreLoc = CLLocation(latitude: mapCentre.latitude, longitude: mapCentre.longitude)
+        return base
+            .filter { muck in
+                let loc = CLLocation(latitude: muck.latitude, longitude: muck.longitude)
+                return loc.distance(from: centreLoc) <= mapRadiusMetres
+            }
+            .sorted { a, b in
+                let da = CLLocation(latitude: a.latitude, longitude: a.longitude).distance(from: centreLoc)
+                let db = CLLocation(latitude: b.latitude, longitude: b.longitude).distance(from: centreLoc)
+                return da < db
+            }
+    }
 
     var body: some View {
         NavigationStack {
@@ -19,6 +38,19 @@ struct HomeView: View {
                 Color.muckBg.ignoresSafeArea()
 
                 VStack(spacing: 0) {
+                    // Mini map — pan to browse a different area
+                    HomeMiniMapView(
+                        mucks: muckVM.filtered(allMucks),
+                        userLocation: locationService.location,
+                        onSelectMuck: { selectedMuck = $0 },
+                        onRegionChange: { centre, radius in
+                            mapCentre = centre
+                            mapRadiusMetres = radius
+                        }
+                    )
+                    .padding(.top, Spacing.xs)
+                    .padding(.bottom, Spacing.sm)
+
                     // Filter + sort bar
                     filterBar
 
@@ -116,13 +148,23 @@ struct HomeView: View {
             Text("No mucks here")
                 .font(.muckTitle)
                 .foregroundStyle(Color.muckNearBlack)
-            Text(muckVM.typeFilter != nil ? "Try removing the filter." : "Be the first to report an issue in your area.")
+            Text(emptyStateSubtitle)
                 .font(.muckBody)
                 .foregroundStyle(Color.muckNearBlack.opacity(0.5))
                 .multilineTextAlignment(.center)
             Spacer()
         }
         .padding(Spacing.xl)
+    }
+
+    private var emptyStateSubtitle: String {
+        if muckVM.typeFilter != nil {
+            return "Try removing the filter."
+        } else if mapCentre != nil {
+            return "No mucks in this part of the map. Try panning around."
+        } else {
+            return "Be the first to report an issue in your area."
+        }
     }
 
     private var fab: some View {
