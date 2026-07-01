@@ -16,6 +16,15 @@ final class MuckViewModel: ObservableObject {
         points = storage.loadPoints(for: userId)
     }
 
+    /// Called once the real signed-in (or guest) user is known — swaps the
+    /// working userId and reloads whatever was already stored under it.
+    func updateUser(_ newUserId: String) {
+        guard newUserId != userId else { return }
+        userId = newUserId
+        points = storage.loadPoints(for: userId)
+        objectWillChange.send()
+    }
+
     // MARK: - Filtering & Sorting
 
     func filtered(_ mucks: [Muck]) -> [Muck] {

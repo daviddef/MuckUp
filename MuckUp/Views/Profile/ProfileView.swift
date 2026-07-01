@@ -7,6 +7,7 @@ struct ProfileView: View {
     @Query private var allHelpRequests: [HelpRequest]
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var eventVM: EventViewModel
+    @EnvironmentObject var authService: AuthService
 
     @State private var selectedTab = 0
 
@@ -105,6 +106,23 @@ struct ProfileView: View {
             }
             .background(Color.muckBg)
             .navigationTitle("My Profile")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        if authService.isGuest {
+                            Text("Guest mode — data stays on this device")
+                        } else if let email = authService.currentUser?.email, !email.isEmpty {
+                            Text(email)
+                        }
+                        Button("Sign Out", role: .destructive) {
+                            authService.signOut()
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .foregroundStyle(Color.muckNearBlack)
+                    }
+                }
+            }
         }
     }
 

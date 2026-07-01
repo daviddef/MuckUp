@@ -36,22 +36,28 @@ enum MuckType: String, Codable, CaseIterable {
 
 // MARK: - Muck
 
+// Note: no @Attribute(.unique) on `id` — CloudKit-backed SwiftData does not
+// support unique constraints. Every stored property has an inline default
+// so the CloudKit schema can be created without requiring all fields.
 @Model
 final class Muck {
-    @Attribute(.unique) var id: String
-    var location: String
-    var muckDescription: String
-    var typeRaw: String
-    var isHazardous: Bool
-    var reportedDate: Date
-    var latitude: Double
-    var longitude: Double
-    var votes: Int
-    var eventCount: Int
-    var isClosed: Bool
+    var id: String = "MK-\(Int.random(in: 1000...9999))"
+    var location: String = ""
+    var muckDescription: String = ""
+    var typeRaw: String = MuckType.cleanup.rawValue
+    var isHazardous: Bool = false
+    var reportedDate: Date = Date.now
+    var latitude: Double = 0
+    var longitude: Double = 0
+    var votes: Int = 0
+    var eventCount: Int = 0
+    var isClosed: Bool = false
     var closedDate: Date?
     @Attribute(.externalStorage) var photoData: Data?
     @Attribute(.externalStorage) var afterPhotoData: Data?
+    // Owning user's stable ID (Sign in with Apple identifier). Used to
+    // scope "my mucks" once accounts exist; not enforced server-side yet.
+    var ownerId: String = ""
 
     var type: MuckType {
         get { MuckType(rawValue: typeRaw) ?? .cleanup }
@@ -73,7 +79,8 @@ final class Muck {
         longitude: Double,
         votes: Int = 0,
         eventCount: Int = 0,
-        isClosed: Bool = false
+        isClosed: Bool = false,
+        ownerId: String = ""
     ) {
         self.id = id
         self.location = location
@@ -86,6 +93,7 @@ final class Muck {
         self.votes = votes
         self.eventCount = eventCount
         self.isClosed = isClosed
+        self.ownerId = ownerId
     }
 
     func distance(from userLocation: CLLocation?) -> String? {

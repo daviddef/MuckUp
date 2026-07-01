@@ -36,29 +36,32 @@ enum HelpRequestStatus: String, Codable {
 
 // MARK: - HelpRequest
 
+// Note: no @Attribute(.unique) on `id` — CloudKit-backed SwiftData does not
+// support unique constraints. Every stored property has an inline default
+// so the CloudKit schema can be created without requiring all fields.
 @Model
 final class HelpRequest {
-    @Attribute(.unique) var id: String
-    var title: String
-    var requestDescription: String
-    var categoryRaw: String
-    var preferredDate: Date
-    var createdDate: Date
-    var statusRaw: String
+    var id: String = "HLP-\(Int.random(in: 1000...9999))"
+    var title: String = ""
+    var requestDescription: String = ""
+    var categoryRaw: String = HelpCategory.other.rawValue
+    var preferredDate: Date = Date.now
+    var createdDate: Date = Date.now
+    var statusRaw: String = HelpRequestStatus.open.rawValue
 
     // Exact location — private, never shown to other users directly.
     // Only used for real-world coordination once a helper is matched.
-    var exactLatitude: Double
-    var exactLongitude: Double
+    var exactLatitude: Double = 0
+    var exactLongitude: Double = 0
 
     // Stable jittered offset (metres, bearing) applied to the exact
     // coordinate to produce the public-facing blurred location.
-    var blurOffsetMetres: Double
-    var blurBearingDegrees: Double
-    var blurRadiusMetres: Double
+    var blurOffsetMetres: Double = 250
+    var blurBearingDegrees: Double = 0
+    var blurRadiusMetres: Double = 400
 
-    var requesterId: String
-    var helperIds: [String]
+    var requesterId: String = ""
+    var helperIds: [String] = []
 
     @Attribute(.externalStorage) var photoData: Data?
 

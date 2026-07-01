@@ -47,3 +47,9 @@ targets:
       base:
         INFOPLIST_FILE: MuckUp/Info.plist
         TARGETED_DEVICE_FAMILY: "1"
+    entitlements:
+      path: MuckUp/Grub.entitlements
+      properties:
+        com.apple.developer.applesignin: [Default]
+        com.apple.developer.icloud-container-identifiers: [iCloud.com.daviddef.grub]
+        com.apple.developer.icloud-services: [CloudKit]
