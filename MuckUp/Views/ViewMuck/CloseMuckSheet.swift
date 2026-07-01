@@ -87,6 +87,7 @@ struct CloseMuckSheet: View {
         muck.isClosed = true
         muck.closedDate = .now
         muckVM.award(.closeMuck)
+        muckVM.recordClosed(muck.id)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         withAnimation { done = true }
     }

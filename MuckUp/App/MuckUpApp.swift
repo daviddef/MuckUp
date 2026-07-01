@@ -10,7 +10,7 @@ struct MuckUpApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
                 .environmentObject(muckVM)
                 .environmentObject(eventVM)
                 .environmentObject(partnerVM)

@@ -77,6 +77,21 @@ final class MuckViewModel: ObservableObject {
     func award(_ action: PointAction) {
         storage.addPoints(action.value, for: userId)
         points = storage.loadPoints(for: userId)
+        storage.recordActivityToday(for: userId)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
+
+    // MARK: - Personal history
+
+    func recordRaised(_ muckId: String) {
+        storage.recordRaisedMuck(muckId, for: userId)
+    }
+
+    func recordClosed(_ muckId: String) {
+        storage.recordClosedMuck(muckId, for: userId)
+    }
+
+    var raisedMuckIds: [String] { storage.loadRaisedMuckIds(for: userId) }
+    var closedMuckIds: [String] { storage.loadClosedMuckIds(for: userId) }
+    var streak: Int { storage.currentStreak(for: userId) }
 }

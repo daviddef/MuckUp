@@ -29,7 +29,9 @@ struct RaiseMuckView: View {
     @State private var pickedAddress: String = "Locating…"
     @State private var isDragging = false
 
-    private var isValid: Bool { description.trimmingCharacters(in: .whitespaces).count >= 10 }
+    private var isValid: Bool {
+        description.trimmingCharacters(in: .whitespaces).count >= 10 && photoData != nil
+    }
 
     var body: some View {
         NavigationStack {
@@ -143,11 +145,19 @@ struct RaiseMuckView: View {
                             .tint(Color.muckGreen)
                     }
 
-                    // Photo evidence
+                    // Photo evidence — required
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Add a photo")
-                            .font(.muckTitle)
-                            .foregroundStyle(Color.muckNearBlack)
+                        HStack(spacing: Spacing.xxs) {
+                            Text("Add a photo")
+                                .font(.muckTitle)
+                                .foregroundStyle(Color.muckNearBlack)
+                            Text("*")
+                                .font(.muckTitle)
+                                .foregroundStyle(Color.muckRed)
+                        }
+                        Text("A photo is what turns this into real evidence — for the community, and for councils.")
+                            .font(.muckCaption)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.5))
                         PhotoPickerButton(
                             label: "Take or choose a photo",
                             systemImage: "camera.fill",
@@ -224,6 +234,7 @@ struct RaiseMuckView: View {
         newMuck.photoData = photoData
         modelContext.insert(newMuck)
         muckVM.award(.raiseMuck)
+        muckVM.recordRaised(newMuck.id)
         isSaved = true
     }
 }

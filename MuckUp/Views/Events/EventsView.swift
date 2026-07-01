@@ -94,6 +94,7 @@ struct EventDetailView: View {
     @Bindable var event: MuckEvent
     @State private var attending: Bool
     @Query private var allMucks: [Muck]
+    @EnvironmentObject var eventVM: EventViewModel
 
     init(event: MuckEvent) {
         self.event = event
@@ -143,6 +144,7 @@ struct EventDetailView: View {
                     if attending {
                         event.participants += 1
                         NotificationService.shared.scheduleEventReminders(for: event)
+                        eventVM.recordAttended(event.id)
                         UINotificationFeedbackGenerator().notificationOccurred(.success)
                     } else {
                         event.participants = max(0, event.participants - 1)

@@ -50,4 +50,83 @@ final class StorageService {
         let current = loadPoints(for: userId)
         defaults.set(current + amount, forKey: "points_\(userId)")
     }
+
+    // MARK: - Personal history (mucks raised / closed, events attended)
+
+    func recordRaisedMuck(_ id: String, for userId: String) {
+        appendUnique(id, key: "raised_\(userId)")
+    }
+
+    func loadRaisedMuckIds(for userId: String) -> [String] {
+        defaults.array(forKey: "raised_\(userId)") as? [String] ?? []
+    }
+
+    func recordClosedMuck(_ id: String, for userId: String) {
+        appendUnique(id, key: "closed_\(userId)")
+    }
+
+    func loadClosedMuckIds(for userId: String) -> [String] {
+        defaults.array(forKey: "closed_\(userId)") as? [String] ?? []
+    }
+
+    func recordAttendedEvent(_ id: Int, for userId: String) {
+        var ids = defaults.array(forKey: "attended_\(userId)") as? [Int] ?? []
+        if !ids.contains(id) {
+            ids.append(id)
+            defaults.set(ids, forKey: "attended_\(userId)")
+        }
+    }
+
+    func loadAttendedEventIds(for userId: String) -> [Int] {
+        defaults.array(forKey: "attended_\(userId)") as? [Int] ?? []
+    }
+
+    private func appendUnique(_ id: String, key: String) {
+        var ids = defaults.array(forKey: key) as? [String] ?? []
+        if !ids.contains(id) {
+            ids.append(id)
+            defaults.set(ids, forKey: key)
+        }
+    }
+
+    // MARK: - Activity streak
+
+    /// Call whenever the user does something meaningful (raise, close, attend).
+    /// Tracks which calendar days had activity so we can compute a streak.
+    func recordActivityToday(for userId: String) {
+        let key = "activityDays_\(userId)"
+        var days = Set(defaults.array(forKey: key) as? [String] ?? [])
+        days.insert(Self.dayKey(for: .now))
+        defaults.set(Array(days), forKey: key)
+    }
+
+    /// Consecutive days of activity ending today (0 if nothing today).
+    func currentStreak(for userId: String) -> Int {
+        let key = "activityDays_\(userId)"
+        let days = Set(defaults.array(forKey: key) as? [String] ?? [])
+        guard days.contains(Self.dayKey(for: .now)) else { return 0 }
+        var streak = 0
+        var cursor = Date.now
+        while days.contains(Self.dayKey(for: cursor)) {
+            streak += 1
+            cursor = Calendar.current.date(byAdding: .day, value: -1, to: cursor) ?? cursor
+        }
+        return streak
+    }
+
+    private static func dayKey(for date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: date)
+    }
+
+    // MARK: - Onboarding
+
+    func hasSeenOnboarding() -> Bool {
+        defaults.bool(forKey: "hasSeenOnboarding")
+    }
+
+    func setHasSeenOnboarding() {
+        defaults.set(true, forKey: "hasSeenOnboarding")
+    }
 }

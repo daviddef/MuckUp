@@ -26,4 +26,13 @@ final class EventViewModel: ObservableObject {
     func filtered(_ events: [MuckEvent]) -> [MuckEvent] {
         showAttendingOnly ? events.filter { $0.isAttending } : events
     }
+
+    // MARK: - Personal history
+
+    func recordAttended(_ eventId: Int) {
+        storage.recordAttendedEvent(eventId, for: userId)
+        storage.recordActivityToday(for: userId)
+    }
+
+    var attendedEventIds: [Int] { storage.loadAttendedEventIds(for: userId) }
 }

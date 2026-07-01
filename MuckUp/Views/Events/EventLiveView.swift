@@ -191,6 +191,7 @@ private struct StatChip: View {
 
 private struct LiveMuckRow: View {
     @Bindable var muck: Muck
+    @EnvironmentObject var muckVM: MuckViewModel
     @State private var afterData: Data?
     @State private var isExpanded = false
 
@@ -239,6 +240,8 @@ private struct LiveMuckRow: View {
                         muck.afterPhotoData = afterData
                         muck.isClosed = true
                         muck.closedDate = .now
+                        muckVM.award(.closeMuck)
+                        muckVM.recordClosed(muck.id)
                         UINotificationFeedbackGenerator().notificationOccurred(.success)
                         withAnimation { isExpanded = false }
                     } label: {
