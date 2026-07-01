@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import CoreLocation
+import MapKit
 
 struct ScheduleEventView: View {
     var preselectedMuck: Muck?
@@ -23,6 +24,7 @@ struct ScheduleEventView: View {
     private let nearbyRadius: Double = 10_000   // 10 km
     private let expandedRadiusKm: Double = 50_000  // 50 km
     private let suggestionCount = 5
+    private let visibleListCap = 40
 
     private var eligibleMucks: [Muck] {
         allMucks.filter { !$0.isClosed && $0.type.allowsEvents }
@@ -36,7 +38,7 @@ struct ScheduleEventView: View {
         }
     }
 
-    private var visibleMucks: [Muck] {
+    private var matchingMucks: [Muck] {
         let userLoc = locationService.location
         let radius = expandedRadius ? expandedRadiusKm : nearbyRadius
         var result = mucksByDistance.filter { muck in
@@ -57,20 +59,44 @@ struct ScheduleEventView: View {
         return result
     }
 
-    // Top-voted, nearby, not-yet-selected mucks — a nudge, not a requirement
+    // Hard cap on rendered rows — a dense city could easily have 1,000s of
+    // eligible mucks; the radius/search filters above do the real narrowing,
+    // this is just a backstop so the list never renders something unbounded.
+    private var visibleMucks: [Muck] {
+        Array(matchingMucks.prefix(visibleListCap))
+    }
+
+    private var overflowCount: Int {
+        max(0, matchingMucks.count - visibleListCap)
+    }
+
+    // Nearby, not-yet-selected mucks — top-voted first, falling back to
+    // closest-by-distance so the section is never empty just because
+    // nothing nearby has votes yet. A nudge, not a requirement.
     private var suggestedMucks: [Muck] {
         guard muckSearch.isEmpty else { return [] }
         let radius = expandedRadius ? expandedRadiusKm : nearbyRadius
         let userLoc = locationService.location
-        return eligibleMucks
-            .filter { muck in
-                !selectedMuckIds.contains(muck.id) &&
-                (userLoc == nil || distanceMetres(muck, from: userLoc) <= radius) &&
-                muck.votes > 0
-            }
-            .sorted { $0.votes > $1.votes }
-            .prefix(suggestionCount)
-            .map { $0 }
+        let candidates = eligibleMucks.filter { muck in
+            !selectedMuckIds.contains(muck.id) &&
+            (userLoc == nil || distanceMetres(muck, from: userLoc) <= radius)
+        }
+        let voted = candidates.filter { $0.votes > 0 }.sorted { $0.votes > $1.votes }
+        if voted.count >= suggestionCount {
+            return Array(voted.prefix(suggestionCount))
+        }
+        // Top up with nearest-by-distance candidates not already included
+        let votedIds = Set(voted.map(\.id))
+        let byDistance = candidates
+            .filter { !votedIds.contains($0.id) }
+            .sorted { distanceMetres($0, from: userLoc) < distanceMetres($1, from: userLoc) }
+        return Array((voted + byDistance).prefix(suggestionCount))
+    }
+
+    private var suggestionFooter: String {
+        suggestedMucks.contains { $0.votes > 0 }
+            ? "Based on votes and proximity. Optional — add any that fit."
+            : "Nearest mucks in this area. Optional — add any that fit."
     }
 
     // Mucks that exist but are outside the current radius (and not selected)
@@ -80,6 +106,10 @@ struct ScheduleEventView: View {
             !selectedMuckIds.contains(muck.id) &&
             distanceMetres(muck, from: locationService.location) > nearbyRadius
         }.count
+    }
+
+    private var selectedMucks: [Muck] {
+        allMucks.filter { selectedMuckIds.contains($0.id) }
     }
 
     private var isValid: Bool {
@@ -111,7 +141,22 @@ struct ScheduleEventView: View {
                         Text("🔥 Suggested for this area")
                             .font(.muckCaption)
                     } footer: {
-                        Text("Based on votes and proximity. Optional — add any that fit.")
+                        Text(suggestionFooter)
+                            .font(.muckMicro)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                    }
+                }
+
+                // ── Selected mucks proximity map ─────────────────────
+                if selectedMucks.count > 1 {
+                    Section {
+                        SelectedMucksMapView(mucks: selectedMucks, onSelect: { quickLookMuck = $0 })
+                            .listRowInsets(EdgeInsets(top: 0, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+                    } header: {
+                        Text("Proximity of selected mucks")
+                            .font(.muckCaption)
+                    } footer: {
+                        Text("Spread out mucks mean more walking between stops on the day.")
                             .font(.muckMicro)
                             .foregroundStyle(Color.muckNearBlack.opacity(0.4))
                     }
@@ -148,6 +193,13 @@ struct ScheduleEventView: View {
                             )
                             .listRowInsets(EdgeInsets(top: Spacing.xxs, leading: Spacing.md, bottom: Spacing.xxs, trailing: Spacing.md))
                             .listRowSeparator(.hidden)
+                        }
+
+                        if overflowCount > 0 {
+                            Text("+\(overflowCount) more match — narrow your search to see them.")
+                                .font(.muckMicro)
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                                .padding(.vertical, Spacing.xxs)
                         }
                     }
 
@@ -294,6 +346,54 @@ struct ScheduleEventView: View {
         }
         muckVM.award(.participate)
         isSaved = true
+    }
+}
+
+// MARK: - Selected Mucks Proximity Map
+
+private struct SelectedMucksMapView: View {
+    let mucks: [Muck]
+    let onSelect: (Muck) -> Void
+
+    @State private var cameraPosition: MapCameraPosition = .automatic
+
+    var body: some View {
+        Map(position: $cameraPosition) {
+            ForEach(mucks) { muck in
+                Annotation(muck.location, coordinate: muck.coordinate) {
+                    MuckMapMarker(muck: muck)
+                        .scaleEffect(0.85)
+                        .onTapGesture { onSelect(muck) }
+                }
+            }
+        }
+        .mapStyle(.standard(elevation: .flat))
+        .disabled(false)
+        .frame(height: 150)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.md)
+                .strokeBorder(Color.muckNearBlack.opacity(0.08))
+        )
+        .onAppear { fitCamera() }
+        .onChange(of: mucks.map(\.id)) { _, _ in fitCamera() }
+    }
+
+    private func fitCamera() {
+        guard !mucks.isEmpty else { return }
+        let lats = mucks.map(\.latitude)
+        let lons = mucks.map(\.longitude)
+        let centre = CLLocationCoordinate2D(
+            latitude: (lats.min()! + lats.max()!) / 2,
+            longitude: (lons.min()! + lons.max()!) / 2
+        )
+        let span = MKCoordinateSpan(
+            latitudeDelta: max((lats.max()! - lats.min()!) * 1.8, 0.01),
+            longitudeDelta: max((lons.max()! - lons.min()!) * 1.8, 0.01)
+        )
+        withAnimation {
+            cameraPosition = .region(MKCoordinateRegion(center: centre, span: span))
+        }
     }
 }
 

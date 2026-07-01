@@ -210,7 +210,9 @@ struct FindTimelineView: View {
 
 struct PartnerItemRow: View {
     let item: PartnerItem
-    @State private var showRaiseMuck = false
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var muckVM: MuckViewModel
+    @State private var scheduleMuck: Muck?
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -252,8 +254,8 @@ struct PartnerItemRow: View {
             // CTA
             if item.source.promptsCreateMuck {
                 HStack {
-                    SecondaryButton(title: "🌿  Create a Muck") {
-                        showRaiseMuck = true
+                    SecondaryButton(title: "📅  Schedule Cleanup") {
+                        scheduleCleanup()
                     }
                     Spacer()
                     Link("View on \(item.source.displayName) →", destination: item.externalURL)
@@ -269,14 +271,26 @@ struct PartnerItemRow: View {
         .padding(Spacing.md)
         .background(Color.muckSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-        .sheet(isPresented: $showRaiseMuck) {
-            RaiseMuckView(prefill: RaiseMuckPrefill(
-                description: item.itemDescription ?? item.name,
-                coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude),
-                address: item.name
-            ))
+        .sheet(item: $scheduleMuck) { muck in
+            ScheduleEventView(preselectedMuck: muck)
         }
         .muckCardShadow()
+    }
+
+    /// Litter Map items aren't Mucks yet — silently create the linking Muck
+    /// record from the report, then jump straight into scheduling a cleanup
+    /// for it, instead of making the user go through Raise a Muck manually.
+    private func scheduleCleanup() {
+        let muck = Muck(
+            location: item.name,
+            description: item.itemDescription ?? "Reported via \(item.source.displayName).",
+            type: .cleanup,
+            latitude: item.latitude,
+            longitude: item.longitude
+        )
+        modelContext.insert(muck)
+        muckVM.recordRaised(muck.id)
+        scheduleMuck = muck
     }
 }
 
