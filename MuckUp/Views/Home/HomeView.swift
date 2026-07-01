@@ -5,12 +5,14 @@ import CoreLocation
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allMucks: [Muck]
+    @Query(sort: \MuckEvent.eventDate) private var allEvents: [MuckEvent]
 
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var locationService: LocationService
 
     @State private var showRaiseMuck = false
     @State private var selectedMuck: Muck? = nil
+    @State private var selectedEvent: MuckEvent? = nil
 
     // Map-driven area filter — updated as the mini map is panned
     @State private var mapCentre: CLLocationCoordinate2D? = nil
@@ -51,6 +53,13 @@ struct HomeView: View {
                     .padding(.top, Spacing.xs)
                     .padding(.bottom, Spacing.sm)
 
+                    // Upcoming events near you
+                    NearbyEventsSection(
+                        events: allEvents,
+                        userLocation: locationService.location,
+                        onSelect: { selectedEvent = $0 }
+                    )
+
                     // Filter + sort bar
                     filterBar
 
@@ -72,6 +81,13 @@ struct HomeView: View {
             }
             .navigationDestination(item: $selectedMuck) { muck in
                 ViewMuckView(muck: muck)
+            }
+            .navigationDestination(item: $selectedEvent) { event in
+                if event.isToday || event.isLive {
+                    EventLiveView(event: event)
+                } else {
+                    EventDetailView(event: event)
+                }
             }
         }
     }

@@ -32,6 +32,7 @@
 		675E1F01EB87983148E61629 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 09CF7D5D90EACBF809B6AF1D /* LaunchScreen.storyboard */; };
 		7B9BBEC53DEE1D9539E40245 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E42870C0041768B846A66DF1 /* HomeView.swift */; };
 		7ED01CCF8A64FC4BA3089882 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC775A383F0883ED5F75A29 /* EventViewModel.swift */; };
+		818EB0F5B39E564636091863 /* NearbyEventsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C080C1524515E734DB21B4D /* NearbyEventsSection.swift */; };
 		8CCB42C3576493D1D13D0AE1 /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632C2F91DD7B35B2A04BEB89 /* MockData.swift */; };
 		8CD0E54F18E4E2C617B9AD91 /* PhotoPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E56EBD830F6BAD8615BAC04D /* PhotoPickerButton.swift */; };
 		9DF45C8629F11BCC6C38485F /* CloseMuckSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC8024B54B25D5878D6A4A0 /* CloseMuckSheet.swift */; };
@@ -50,6 +51,7 @@
 
 /* Begin PBXFileReference section */
 		09CF7D5D90EACBF809B6AF1D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		0C080C1524515E734DB21B4D /* NearbyEventsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyEventsSection.swift; sourceTree = "<group>"; };
 		1C12B9181C016426450F8CFF /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		23C3B99BF27711D8EBC4E3D3 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		23E52903B99A781403A7CD32 /* Partner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Partner.swift; sourceTree = "<group>"; };
@@ -190,6 +192,7 @@
 				5C9BA6E45986AFCA7FCDD6E2 /* HomeMiniMapView.swift */,
 				E42870C0041768B846A66DF1 /* HomeView.swift */,
 				B59E2C9895CEFD0B17F90B4B /* MuckCardView.swift */,
+				0C080C1524515E734DB21B4D /* NearbyEventsSection.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -384,6 +387,7 @@
 				EAAFF076663A850C5D6808BC /* MuckMiniMapView.swift in Sources */,
 				222074DF393D3FDE09468072 /* MuckUpApp.swift in Sources */,
 				12853CF997870A1D3EC801F9 /* MuckViewModel.swift in Sources */,
+				818EB0F5B39E564636091863 /* NearbyEventsSection.swift in Sources */,
 				0C32683227A9F89484467B59 /* NotificationService.swift in Sources */,
 				117FB8019BE5CC4FD510524F /* OnboardingView.swift in Sources */,
 				1ADD6A012E28944AEA17517E /* Partner.swift in Sources */,
