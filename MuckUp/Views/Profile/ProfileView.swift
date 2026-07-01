@@ -186,7 +186,7 @@ struct ProfileView: View {
 
     private var impactGrid: some View {
         VStack(spacing: 1) {
-            Text("🌍 Help the World")
+            Text("🌍 Help Us Cleanup")
                 .font(.muckMicro)
                 .foregroundStyle(Color.muckNearBlack.opacity(0.4))
                 .frame(maxWidth: .infinity, alignment: .leading)

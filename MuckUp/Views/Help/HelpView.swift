@@ -7,7 +7,7 @@ enum HelpLane: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .helpWorld: return "🌍 Help the World"
+        case .helpWorld: return "🌍 Help Us Cleanup"
         case .helpMe:    return "🙋 Help Me"
         }
     }
