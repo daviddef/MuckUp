@@ -17,10 +17,12 @@ struct ScheduleEventView: View {
     @State private var isSaved = false
     @State private var muckSearch = ""
     @State private var expandedRadius = false
+    @State private var quickLookMuck: Muck?
 
     // Radius thresholds in metres
     private let nearbyRadius: Double = 10_000   // 10 km
     private let expandedRadiusKm: Double = 50_000  // 50 km
+    private let suggestionCount = 5
 
     private var eligibleMucks: [Muck] {
         allMucks.filter { !$0.isClosed && $0.type.allowsEvents }
@@ -55,6 +57,22 @@ struct ScheduleEventView: View {
         return result
     }
 
+    // Top-voted, nearby, not-yet-selected mucks — a nudge, not a requirement
+    private var suggestedMucks: [Muck] {
+        guard muckSearch.isEmpty else { return [] }
+        let radius = expandedRadius ? expandedRadiusKm : nearbyRadius
+        let userLoc = locationService.location
+        return eligibleMucks
+            .filter { muck in
+                !selectedMuckIds.contains(muck.id) &&
+                (userLoc == nil || distanceMetres(muck, from: userLoc) <= radius) &&
+                muck.votes > 0
+            }
+            .sorted { $0.votes > $1.votes }
+            .prefix(suggestionCount)
+            .map { $0 }
+    }
+
     // Mucks that exist but are outside the current radius (and not selected)
     private var hiddenCount: Int {
         guard !expandedRadius, locationService.location != nil else { return 0 }
@@ -71,6 +89,34 @@ struct ScheduleEventView: View {
     var body: some View {
         NavigationStack {
             List {
+                // ── Suggested mucks ──────────────────────────────────
+                if !suggestedMucks.isEmpty {
+                    Section {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: Spacing.sm) {
+                                ForEach(suggestedMucks) { muck in
+                                    MuckSuggestionCard(
+                                        muck: muck,
+                                        distance: muck.distance(from: locationService.location),
+                                        isSelected: selectedMuckIds.contains(muck.id),
+                                        onTapCard: { quickLookMuck = muck },
+                                        onToggle: { toggleMuck(muck) }
+                                    )
+                                }
+                            }
+                            .padding(.vertical, Spacing.xxs)
+                        }
+                        .listRowInsets(EdgeInsets(top: 0, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+                    } header: {
+                        Text("🔥 Suggested for this area")
+                            .font(.muckCaption)
+                    } footer: {
+                        Text("Based on votes and proximity. Optional — add any that fit.")
+                            .font(.muckMicro)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                    }
+                }
+
                 // ── Muck picker ──────────────────────────────────────
                 Section {
                     // Inline search when list is non-trivial
@@ -93,13 +139,15 @@ struct ScheduleEventView: View {
                             .padding(.vertical, Spacing.xs)
                     } else {
                         ForEach(visibleMucks) { muck in
-                            MuckPickerRow(
+                            MuckPickerCard(
                                 muck: muck,
                                 isSelected: selectedMuckIds.contains(muck.id),
-                                distance: muck.distance(from: locationService.location)
-                            ) {
-                                toggleMuck(muck)
-                            }
+                                distance: muck.distance(from: locationService.location),
+                                onTapCard: { quickLookMuck = muck },
+                                onToggle: { toggleMuck(muck) }
+                            )
+                            .listRowInsets(EdgeInsets(top: Spacing.xxs, leading: Spacing.md, bottom: Spacing.xxs, trailing: Spacing.md))
+                            .listRowSeparator(.hidden)
                         }
                     }
 
@@ -195,6 +243,16 @@ struct ScheduleEventView: View {
             .navigationDestination(isPresented: $isSaved) {
                 EventSavedView()
             }
+            .sheet(item: $quickLookMuck) { muck in
+                MuckQuickLookSheet(
+                    muck: muck,
+                    isSelected: selectedMuckIds.contains(muck.id),
+                    distance: muck.distance(from: locationService.location),
+                    onToggle: { toggleMuck(muck) }
+                )
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+            }
         }
         .onAppear {
             if let muck = preselectedMuck {
@@ -239,21 +297,108 @@ struct ScheduleEventView: View {
     }
 }
 
-// MARK: - Muck Picker Row
+// MARK: - Suggested Muck Card (horizontal carousel)
 
-private struct MuckPickerRow: View {
+private struct MuckSuggestionCard: View {
+    let muck: Muck
+    let distance: String?
+    let isSelected: Bool
+    let onTapCard: () -> Void
+    let onToggle: () -> Void
+
+    var body: some View {
+        Button(action: onTapCard) {
+            VStack(alignment: .leading, spacing: 0) {
+                ZStack(alignment: .topTrailing) {
+                    thumbnail
+                        .frame(width: 168, height: 90)
+                        .clipped()
+
+                    Button(action: onToggle) {
+                        Image(systemName: isSelected ? "checkmark.circle.fill" : "plus.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(isSelected ? Color.muckGreen : .white)
+                            .background(Circle().fill(isSelected ? .white : Color.muckNearBlack.opacity(0.4)))
+                            .clipShape(Circle())
+                    }
+                    .padding(6)
+
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Label("\(muck.votes)", systemImage: "arrow.up")
+                                .font(.muckMicro)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.muckNearBlack.opacity(0.55))
+                                .clipShape(Capsule())
+                            Spacer()
+                        }
+                        .padding(6)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(muck.location)
+                        .font(.muckCaption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.muckNearBlack)
+                        .lineLimit(1)
+                    HStack {
+                        TypeBadgeView(type: muck.type, compact: true)
+                        if let distance {
+                            Text(distance)
+                                .font(.muckMicro)
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                        }
+                    }
+                }
+                .padding(Spacing.xs)
+            }
+            .frame(width: 168)
+            .background(Color.muckSurface)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+            .overlay(
+                RoundedRectangle(cornerRadius: Radius.md)
+                    .strokeBorder(isSelected ? Color.muckGreen : Color.muckNearBlack.opacity(0.08), lineWidth: isSelected ? 1.5 : 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var thumbnail: some View {
+        if let data = muck.photoData, let ui = UIImage(data: data) {
+            Image(uiImage: ui)
+                .resizable()
+                .scaledToFill()
+        } else {
+            ZStack {
+                Color.muckTypeColor(muck.type).opacity(0.15)
+                Image(systemName: muck.type.icon)
+                    .font(.system(size: 24))
+                    .foregroundStyle(Color.muckTypeColor(muck.type))
+            }
+        }
+    }
+}
+
+// MARK: - Muck Picker Card (full list, vertical)
+
+private struct MuckPickerCard: View {
     let muck: Muck
     let isSelected: Bool
     let distance: String?
-    let action: () -> Void
+    let onTapCard: () -> Void
+    let onToggle: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: onTapCard) {
             HStack(spacing: Spacing.sm) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 22))
-                    .foregroundStyle(isSelected ? Color.muckGreen : Color.muckNearBlack.opacity(0.25))
-                    .animation(.easeInOut(duration: 0.15), value: isSelected)
+                thumbnail
+                    .frame(width: 56, height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(muck.location)
@@ -263,22 +408,144 @@ private struct MuckPickerRow: View {
                         .font(.muckBody)
                         .foregroundStyle(Color.muckNearBlack.opacity(0.5))
                         .lineLimit(1)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 3) {
-                    TypeBadgeView(type: muck.type, compact: true)
-                    if let d = distance {
-                        Text(d)
+                    HStack(spacing: Spacing.xs) {
+                        TypeBadgeView(type: muck.type, compact: true)
+                        if let distance {
+                            Text(distance)
+                                .font(.muckMicro)
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.35))
+                        }
+                        Label("\(muck.votes)", systemImage: "arrow.up")
                             .font(.muckMicro)
                             .foregroundStyle(Color.muckNearBlack.opacity(0.35))
                     }
                 }
+
+                Spacer()
+
+                Button(action: onToggle) {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "plus.circle")
+                        .font(.system(size: 24))
+                        .foregroundStyle(isSelected ? Color.muckGreen : Color.muckNearBlack.opacity(0.3))
+                }
+                .buttonStyle(.plain)
             }
-            .contentShape(Rectangle())
+            .padding(Spacing.xs)
+            .background(Color.muckSurface)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+            .overlay(
+                RoundedRectangle(cornerRadius: Radius.md)
+                    .strokeBorder(isSelected ? Color.muckGreen.opacity(0.5) : Color.clear, lineWidth: 1.5)
+            )
         }
         .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var thumbnail: some View {
+        if let data = muck.photoData, let ui = UIImage(data: data) {
+            Image(uiImage: ui)
+                .resizable()
+                .scaledToFill()
+        } else {
+            ZStack {
+                Color.muckTypeColor(muck.type).opacity(0.15)
+                Image(systemName: muck.type.icon)
+                    .font(.system(size: 18))
+                    .foregroundStyle(Color.muckTypeColor(muck.type))
+            }
+        }
+    }
+}
+
+// MARK: - Quick Look Sheet
+
+private struct MuckQuickLookSheet: View {
+    let muck: Muck
+    let isSelected: Bool
+    let distance: String?
+    let onToggle: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var localSelected: Bool
+
+    init(muck: Muck, isSelected: Bool, distance: String?, onToggle: @escaping () -> Void) {
+        self.muck = muck
+        self.isSelected = isSelected
+        self.distance = distance
+        self.onToggle = onToggle
+        _localSelected = State(initialValue: isSelected)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: Spacing.md) {
+                    if let data = muck.photoData, let ui = UIImage(data: data) {
+                        Image(uiImage: ui)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 200)
+                            .frame(maxWidth: .infinity)
+                            .clipped()
+                            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                    }
+
+                    HStack {
+                        TypeBadgeView(type: muck.type)
+                        Spacer()
+                        Label("\(muck.votes) votes", systemImage: "arrow.up")
+                            .font(.muckCaption)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                    }
+
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
+                        Label(muck.location, systemImage: "mappin.circle.fill")
+                            .font(.muckTitle)
+                            .foregroundStyle(Color.muckNearBlack)
+                        HStack(spacing: Spacing.xs) {
+                            if let distance {
+                                Text("\(distance) away")
+                                    .font(.muckCaption)
+                                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                            }
+                            Text(muck.reportedDate, style: .date)
+                                .font(.muckCaption)
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                        }
+                    }
+
+                    Text(muck.muckDescription)
+                        .font(.muckBody)
+                        .foregroundStyle(Color.muckNearBlack.opacity(0.8))
+
+                    if muck.eventCount > 0 {
+                        Label("\(muck.eventCount) other event\(muck.eventCount == 1 ? "" : "s") already linked", systemImage: "calendar")
+                            .font(.muckCaption)
+                            .foregroundStyle(Color.muckGreen)
+                    }
+
+                    PrimaryButton(
+                        title: localSelected ? "Added to this Event" : "Add to this Event",
+                        icon: localSelected ? "checkmark" : "plus"
+                    ) {
+                        onToggle()
+                        localSelected.toggle()
+                    }
+                    .padding(.top, Spacing.xs)
+                }
+                .padding(Spacing.md)
+            }
+            .background(Color.muckBg)
+            .navigationTitle("Muck Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(Color.muckNearBlack)
+                }
+            }
+        }
     }
 }
 
