@@ -124,6 +124,82 @@ struct ScheduleEventView: View {
     var body: some View {
         NavigationStack {
             List {
+                // ── Event title ──────────────────────────────────────
+                Section {
+                    TextField("e.g. Princes Park Saturday Blitz", text: $title)
+                        .font(.muckBody)
+                } header: {
+                    Text("Event Title *")
+                        .font(.muckCaption)
+                }
+
+                // ── Description ──────────────────────────────────────
+                Section {
+                    TextEditor(text: $description)
+                        .font(.muckBody)
+                        .frame(minHeight: 80)
+                } header: {
+                    Text("Description")
+                        .font(.muckCaption)
+                }
+
+                // ── Date ─────────────────────────────────────────────
+                Section {
+                    DatePicker("Date & Time", selection: $eventDate, in: Date.now..., displayedComponents: [.date, .hourAndMinute])
+                        .tint(Color.muckGreen)
+                } header: {
+                    Text("When")
+                        .font(.muckCaption)
+                }
+
+                // ── Submit ───────────────────────────────────────────
+                Section {
+                    PrimaryButton(title: "Create Event", icon: "calendar.badge.plus", isDisabled: !isValid) {
+                        createEvent()
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                }
+                // ── Meetup location ───────────────────────────────────
+                Section {
+                    MuckLocationPicker(
+                        userLocation: locationService.location,
+                        initialCoordinate: pickedMeetupCoordinate ?? centroidOfSelectedMucks,
+                        isDragging: $isDraggingMeetup,
+                        onCoordinateChanged: { coord in
+                            pickedMeetupCoordinate = coord
+                            reverseGeocodeMeetup(coord)
+                        }
+                    )
+                    .frame(height: 180)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .strokeBorder(Color.muckNearBlack.opacity(0.1))
+                    )
+                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+
+                    HStack(spacing: Spacing.xs) {
+                        Image(systemName: "mappin.circle.fill")
+                            .foregroundStyle(Color.muckGreen)
+                            .font(.system(size: 14))
+                        Text(isDraggingMeetup ? "Drop to set the meeting point…" : pickedMeetupAddress)
+                            .font(.muckBody)
+                            .foregroundStyle(isDraggingMeetup
+                                ? Color.muckNearBlack.opacity(0.4)
+                                : Color.muckNearBlack)
+                            .animation(.easeInOut(duration: 0.15), value: isDraggingMeetup)
+                        Spacer()
+                    }
+                } header: {
+                    Text("Where — Meeting Point")
+                        .font(.muckCaption)
+                } footer: {
+                    Text("Where people should physically gather — pan the map to drop the pin.")
+                        .font(.muckMicro)
+                        .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                }
+
                 // ── Suggested mucks ──────────────────────────────────
                 if !suggestedMucks.isEmpty {
                     Section {
@@ -251,82 +327,6 @@ struct ScheduleEventView: View {
                     .font(.muckCaption)
                 }
 
-                // ── Event title ──────────────────────────────────────
-                Section {
-                    TextField("e.g. Princes Park Saturday Blitz", text: $title)
-                        .font(.muckBody)
-                } header: {
-                    Text("Event Title *")
-                        .font(.muckCaption)
-                }
-
-                // ── Meetup location ───────────────────────────────────
-                Section {
-                    MuckLocationPicker(
-                        userLocation: locationService.location,
-                        initialCoordinate: pickedMeetupCoordinate ?? centroidOfSelectedMucks,
-                        isDragging: $isDraggingMeetup,
-                        onCoordinateChanged: { coord in
-                            pickedMeetupCoordinate = coord
-                            reverseGeocodeMeetup(coord)
-                        }
-                    )
-                    .frame(height: 180)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.md)
-                            .strokeBorder(Color.muckNearBlack.opacity(0.1))
-                    )
-                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
-
-                    HStack(spacing: Spacing.xs) {
-                        Image(systemName: "mappin.circle.fill")
-                            .foregroundStyle(Color.muckGreen)
-                            .font(.system(size: 14))
-                        Text(isDraggingMeetup ? "Drop to set the meeting point…" : pickedMeetupAddress)
-                            .font(.muckBody)
-                            .foregroundStyle(isDraggingMeetup
-                                ? Color.muckNearBlack.opacity(0.4)
-                                : Color.muckNearBlack)
-                            .animation(.easeInOut(duration: 0.15), value: isDraggingMeetup)
-                        Spacer()
-                    }
-                } header: {
-                    Text("Where — Meeting Point")
-                        .font(.muckCaption)
-                } footer: {
-                    Text("Where people should physically gather — pan the map to drop the pin.")
-                        .font(.muckMicro)
-                        .foregroundStyle(Color.muckNearBlack.opacity(0.4))
-                }
-
-                // ── Description ──────────────────────────────────────
-                Section {
-                    TextEditor(text: $description)
-                        .font(.muckBody)
-                        .frame(minHeight: 80)
-                } header: {
-                    Text("Description")
-                        .font(.muckCaption)
-                }
-
-                // ── Date ─────────────────────────────────────────────
-                Section {
-                    DatePicker("Date & Time", selection: $eventDate, in: Date.now..., displayedComponents: [.date, .hourAndMinute])
-                        .tint(Color.muckGreen)
-                } header: {
-                    Text("When")
-                        .font(.muckCaption)
-                }
-
-                // ── Submit ───────────────────────────────────────────
-                Section {
-                    PrimaryButton(title: "Create Event", icon: "calendar.badge.plus", isDisabled: !isValid) {
-                        createEvent()
-                    }
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
-                }
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Schedule Event")

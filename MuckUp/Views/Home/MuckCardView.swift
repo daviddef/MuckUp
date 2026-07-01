@@ -90,8 +90,12 @@ struct MuckCardView: View {
             .padding(.vertical, Spacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(Color.muckSurface)
+        .background(hasVoted ? Color.muckGreen.opacity(0.06) : Color.muckSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.md)
+                .strokeBorder(hasVoted ? Color.muckGreen.opacity(0.4) : Color.clear, lineWidth: 1.5)
+        )
         .muckCardShadow()
     }
 }

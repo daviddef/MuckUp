@@ -212,6 +212,15 @@ struct EventRowView: View {
                     .font(.muckTitle)
                     .foregroundStyle(Color.muckNearBlack)
                 Spacer()
+                if event.isAttending {
+                    Label("Going", systemImage: "checkmark.circle.fill")
+                        .font(.muckMicro)
+                        .foregroundStyle(Color.muckGreen)
+                        .padding(.horizontal, Spacing.xs)
+                        .padding(.vertical, 3)
+                        .background(Color.muckGreen.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
                 if event.isToday || event.isLive {
                     Text(event.isLive ? "LIVE" : "TODAY")
                         .font(.muckMicro)
@@ -237,8 +246,12 @@ struct EventRowView: View {
                 .foregroundStyle(Color.muckAmber)
         }
         .padding(Spacing.md)
-        .background(Color.muckSurface)
+        .background(event.isAttending ? Color.muckGreen.opacity(0.06) : Color.muckSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.md)
+                .strokeBorder(event.isAttending ? Color.muckGreen.opacity(0.4) : Color.clear, lineWidth: 1.5)
+        )
         .muckCardShadow()
     }
 }

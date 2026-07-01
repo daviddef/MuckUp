@@ -95,6 +95,11 @@ private struct NearbyEventCard: View {
                         .clipShape(Capsule())
                 }
                 Spacer()
+                if event.isAttending {
+                    Label("Going", systemImage: "checkmark.circle.fill")
+                        .font(.muckMicro)
+                        .foregroundStyle(Color.muckGreen)
+                }
                 if let distance {
                     Text(distance)
                         .font(.muckMicro)
@@ -121,12 +126,18 @@ private struct NearbyEventCard: View {
         }
         .padding(Spacing.sm)
         .frame(width: 190, alignment: .leading)
-        .background(Color.muckSurface)
+        .background(event.isAttending ? Color.muckGreen.opacity(0.06) : Color.muckSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
         .overlay(
             RoundedRectangle(cornerRadius: Radius.md)
-                .strokeBorder(isSoon ? Color.muckAmber.opacity(0.4) : Color.muckNearBlack.opacity(0.08), lineWidth: isSoon ? 1.5 : 1)
+                .strokeBorder(borderColor, lineWidth: (isSoon || event.isAttending) ? 1.5 : 1)
         )
         .muckCardShadow()
+    }
+
+    private var borderColor: Color {
+        if isSoon { return Color.muckAmber.opacity(0.4) }
+        if event.isAttending { return Color.muckGreen.opacity(0.4) }
+        return Color.muckNearBlack.opacity(0.08)
     }
 }
