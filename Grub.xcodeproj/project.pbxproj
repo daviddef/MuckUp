@@ -28,6 +28,7 @@
 		344B7A0F6EA8A59B0214E714 /* StampBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139BB5ED0AA8EE569DB25526 /* StampBadgeView.swift */; };
 		34BFD69DD9FB92C5559C68BF /* MuckCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59E2C9895CEFD0B17F90B4B /* MuckCardView.swift */; };
 		3A2AB350F514DE9C2CBAB16A /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68CB2FF8089A24369F7A521 /* LocationService.swift */; };
+		456C623DBD583B68FD99A4C2 /* GreenEventsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7139996E5F3F38EF5355F49E /* GreenEventsService.swift */; };
 		48A938EF6C6DC7DBA6A8CE25 /* EventWrapUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E096F4AD480067C0E607F83D /* EventWrapUpView.swift */; };
 		4D159D5D63C3E2C48231FA46 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AAC5F994776F115B6E7AE07 /* ProfileView.swift */; };
 		4D93ABE7B2F224F9DD1B9D2B /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D6B3AB481B826B56DCD95 /* SplashView.swift */; };
@@ -92,6 +93,7 @@
 		6C2FC839CB99FD0EAD815C2F /* HelpRequestDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpRequestDetailView.swift; sourceTree = "<group>"; };
 		6F1E83310AF223CD36FB390D /* VoteColumnView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoteColumnView.swift; sourceTree = "<group>"; };
 		6F78D0A959F52B15A35E2B1F /* MuckViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckViewModel.swift; sourceTree = "<group>"; };
+		7139996E5F3F38EF5355F49E /* GreenEventsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GreenEventsService.swift; sourceTree = "<group>"; };
 		79841106617FFAF2DBEEB7C6 /* RaiseMuckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaiseMuckView.swift; sourceTree = "<group>"; };
 		79B8079D8067CFF2013C2174 /* TypeFilterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeFilterBar.swift; sourceTree = "<group>"; };
 		7AB55DFF1B365D9C3E4EA27B /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 				9DCA225904002DF953C5D8CA /* AnimalComplaintsService.swift */,
 				144120405C729ED3B97F8EC8 /* AuthService.swift */,
 				9D95467E9EB25443B7AAB0E5 /* BrisbaneEventsService.swift */,
+				7139996E5F3F38EF5355F49E /* GreenEventsService.swift */,
 				A68CB2FF8089A24369F7A521 /* LocationService.swift */,
 				352AFF936DA4E9C62F7376B5 /* NotificationService.swift */,
 				7DC66CBC2FD20B89C0F193A1 /* StorageService.swift */,
@@ -458,6 +461,7 @@
 				48A938EF6C6DC7DBA6A8CE25 /* EventWrapUpView.swift in Sources */,
 				003AD2891A98AD71BAC07AA8 /* EventsView.swift in Sources */,
 				63132941BBB194FA1A479609 /* FindView.swift in Sources */,
+				456C623DBD583B68FD99A4C2 /* GreenEventsService.swift in Sources */,
 				A453B70EC6E1FDA3250F1C5C /* GrowthPlantView.swift in Sources */,
 				AE358C916A5B13C3D0FA67F7 /* HelpRequest.swift in Sources */,
 				1928CE59946B9388D0A286D7 /* HelpRequestCard.swift in Sources */,

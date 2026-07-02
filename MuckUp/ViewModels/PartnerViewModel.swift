@@ -29,13 +29,13 @@ final class PartnerViewModel: ObservableObject {
         defer { isLoading = false }
 
         // Mock data stands in for the other partner sources for now.
-        // Brisbane City Council Events is the first genuinely live feed —
+        // Brisbane City Council Events and Green Events are live feeds —
         // fetched in parallel and merged in alongside the mock items.
         loadMockData()
-        let liveEvents = await BrisbaneEventsService.shared.fetchNearby(location)
-        if !liveEvents.isEmpty {
-            items.append(contentsOf: liveEvents)
-        }
+        async let councilEvents = BrisbaneEventsService.shared.fetchNearby(location)
+        async let greenEvents = GreenEventsService.shared.fetchNearby(location)
+        items.append(contentsOf: await councilEvents)
+        items.append(contentsOf: await greenEvents)
     }
 
     func toggleSource(_ source: PartnerSource) {

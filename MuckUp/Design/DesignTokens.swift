@@ -62,6 +62,7 @@ extension Color {
         case .openlittermap:      return Color(hex: "EA580C") // orange
         case .epa:                return Color(hex: "DC2626") // red
         case .brisbaneEvents:     return Color(hex: "059669") // emerald
+        case .greenEvents:        return Color(hex: "65A30D") // lime green
         }
     }
 
