@@ -69,7 +69,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
-                Color.muckBg.ignoresSafeArea()
+                Color.muckBg.ignoresSafeArea(edges: .bottom)
 
                 VStack(spacing: 0) {
                     // Filter + sort bar — sits above the map so filtering
