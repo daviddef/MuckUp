@@ -110,6 +110,18 @@ struct MapViewScreen: View {
         .task {
             await awarenessVM.loadWaterwayData()
             await awarenessVM.loadBurnData()
+            // Hazard data (Brisbane waterway sites + planned burns) is
+            // spread across the whole metro area — a tight zoom on the
+            // user's own location means none of it is ever in frame.
+            // Fit the camera to actually show it when the filter is on.
+            if muckVM.typeFilter == .hazard {
+                fitCameraToAwareness()
+            }
+        }
+        .onChange(of: muckVM.typeFilter) { _, newValue in
+            if newValue == .hazard {
+                fitCameraToAwareness()
+            }
         }
         .navigationTitle("Map")
         .navigationBarTitleDisplayMode(.inline)
@@ -124,6 +136,25 @@ struct MapViewScreen: View {
                 ))
             }
             partnerVM.loadMockData()
+        }
+    }
+
+    private func fitCameraToAwareness() {
+        let coordinates = awarenessVM.mapItems.compactMap(\.coordinate)
+        guard !coordinates.isEmpty else { return }
+
+        let lats = coordinates.map(\.latitude)
+        let lons = coordinates.map(\.longitude)
+        let centre = CLLocationCoordinate2D(
+            latitude: (lats.min()! + lats.max()!) / 2,
+            longitude: (lons.min()! + lons.max()!) / 2
+        )
+        let span = MKCoordinateSpan(
+            latitudeDelta: max((lats.max()! - lats.min()!) * 1.4, 0.05),
+            longitudeDelta: max((lons.max()! - lons.min()!) * 1.4, 0.05)
+        )
+        withAnimation {
+            cameraPosition = .region(MKCoordinateRegion(center: centre, span: span))
         }
     }
 }
