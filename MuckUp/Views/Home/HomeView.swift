@@ -10,11 +10,13 @@ struct HomeView: View {
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var partnerVM: PartnerViewModel
     @EnvironmentObject var locationService: LocationService
+    @EnvironmentObject var awarenessVM: AwarenessViewModel
 
     @State private var showRaiseMuck = false
     @State private var selectedMuck: Muck? = nil
     @State private var selectedEvent: MuckEvent? = nil
     @State private var selectedPartnerItem: PartnerItem? = nil
+    @State private var selectedAwarenessItem: AwarenessItem? = nil
 
     // Map-driven area filter — updated as the mini map is panned
     @State private var mapCentre: CLLocationCoordinate2D? = nil
@@ -54,9 +56,11 @@ struct HomeView: View {
                     HomeMiniMapView(
                         mucks: muckVM.filtered(allMucks),
                         partnerItems: visiblePartnerItems,
+                        awarenessItems: muckVM.typeFilter == .hazard ? awarenessVM.mapItems : [],
                         userLocation: locationService.location,
                         onSelectMuck: { selectedMuck = $0 },
                         onSelectPartnerItem: { selectedPartnerItem = $0 },
+                        onSelectAwarenessItem: { selectedAwarenessItem = $0 },
                         onRegionChange: { centre, radius in
                             mapCentre = centre
                             mapRadiusMetres = radius
@@ -116,6 +120,9 @@ struct HomeView: View {
                 .presentationDetents([.height(320)])
                 .presentationDragIndicator(.visible)
             }
+            .sheet(item: $selectedAwarenessItem) { item in
+                AwarenessDetailSheet(item: item)
+            }
         }
         .task {
             if partnerVM.items.isEmpty {
@@ -125,6 +132,7 @@ struct HomeView: View {
                     partnerVM.loadMockData()
                 }
             }
+            await awarenessVM.loadWaterwayData()
         }
     }
 

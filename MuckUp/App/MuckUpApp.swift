@@ -9,6 +9,7 @@ struct MuckUpApp: App {
     @StateObject private var helpVM = HelpViewModel()
     @StateObject private var authService = AuthService()
     @StateObject private var locationService = LocationService()
+    @StateObject private var awarenessVM = AwarenessViewModel()
 
     var body: some Scene {
         WindowGroup {
@@ -19,6 +20,7 @@ struct MuckUpApp: App {
                 .environmentObject(helpVM)
                 .environmentObject(authService)
                 .environmentObject(locationService)
+                .environmentObject(awarenessVM)
                 .onAppear {
                     locationService.requestLocation()
                     NotificationService.shared.requestPermission()

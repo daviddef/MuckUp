@@ -9,6 +9,7 @@ struct ScheduleEventView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var locationService: LocationService
+    @EnvironmentObject var awarenessVM: AwarenessViewModel
     @Query private var allMucks: [Muck]
 
     @State private var title = ""
@@ -24,6 +25,11 @@ struct ScheduleEventView: View {
     @State private var pickedMeetupCoordinate: CLLocationCoordinate2D? = nil
     @State private var pickedMeetupAddress: String = "Locating…"
     @State private var isDraggingMeetup = false
+
+    // "Things to be aware of" near the meetup point
+    @State private var nearbyAwarenessItems: [AwarenessItem] = []
+    @State private var isLoadingAwareness = false
+    @State private var selectedAwarenessItem: AwarenessItem? = nil
 
     // Radius thresholds in metres
     private let nearbyRadius: Double = 10_000   // 10 km
@@ -169,6 +175,7 @@ struct ScheduleEventView: View {
                         onCoordinateChanged: { coord in
                             pickedMeetupCoordinate = coord
                             reverseGeocodeMeetup(coord)
+                            loadAwareness(near: coord)
                         }
                     )
                     .frame(height: 180)
@@ -198,6 +205,37 @@ struct ScheduleEventView: View {
                     Text("Where people should physically gather — pan the map to drop the pin.")
                         .font(.muckMicro)
                         .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                }
+
+                // ── Things to be aware of ─────────────────────────────
+                if isLoadingAwareness || !nearbyAwarenessItems.isEmpty {
+                    Section {
+                        if isLoadingAwareness {
+                            HStack(spacing: Spacing.xs) {
+                                ProgressView().tint(Color.muckGreen)
+                                Text("Checking the area…")
+                                    .font(.muckBody)
+                                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                            }
+                            .padding(.vertical, Spacing.xxs)
+                        } else {
+                            ForEach(nearbyAwarenessItems) { item in
+                                Button {
+                                    selectedAwarenessItem = item
+                                } label: {
+                                    AwarenessRow(item: item)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    } header: {
+                        Text("⚠️ Things to be aware of in this area")
+                            .font(.muckCaption)
+                    } footer: {
+                        Text("From Brisbane City Council open data — waterway safety and animal complaint reports near your meeting point.")
+                            .font(.muckMicro)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                    }
                 }
 
                 // ── Suggested mucks ──────────────────────────────────
@@ -350,6 +388,9 @@ struct ScheduleEventView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
             }
+            .sheet(item: $selectedAwarenessItem) { item in
+                AwarenessDetailSheet(item: item)
+            }
         }
         .onAppear {
             if let muck = preselectedMuck {
@@ -359,6 +400,7 @@ struct ScheduleEventView: View {
             if let start {
                 pickedMeetupCoordinate = start
                 reverseGeocodeMeetup(start)
+                loadAwareness(near: start)
             } else {
                 pickedMeetupAddress = "Move the map to set the meeting point"
             }
@@ -403,6 +445,24 @@ struct ScheduleEventView: View {
             let parts = [place.name, place.locality, place.administrativeArea]
                 .compactMap { $0 }
             pickedMeetupAddress = parts.prefix(2).joined(separator: ", ")
+        }
+    }
+
+    // Debounced — onCoordinateChanged fires on every map region change
+    // while dragging, so this waits for the pin to settle before hitting
+    // the network for waterway/animal-complaint data.
+    @State private var awarenessLoadTask: Task<Void, Never>?
+
+    private func loadAwareness(near coord: CLLocationCoordinate2D) {
+        awarenessLoadTask?.cancel()
+        isLoadingAwareness = true
+        awarenessLoadTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
+            let items = await awarenessVM.fetchNearby(coord)
+            guard !Task.isCancelled else { return }
+            nearbyAwarenessItems = items
+            isLoadingAwareness = false
         }
     }
 
@@ -564,6 +624,44 @@ private struct MuckSuggestionCard: View {
                     .foregroundStyle(Color.muckTypeColor(muck.type))
             }
         }
+    }
+}
+
+// MARK: - Awareness Row
+
+private struct AwarenessRow: View {
+    let item: AwarenessItem
+
+    private var color: Color {
+        switch item.severity {
+        case .warning: return .muckRed
+        case .caution: return .muckAmber
+        case .info:    return .muckGreen
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: item.category.icon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(color)
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title)
+                    .font(.muckHeadline)
+                    .foregroundStyle(Color.muckNearBlack)
+                Text(item.detail)
+                    .font(.muckCaption)
+                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                    .lineLimit(2)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.system(size: 11))
+                .foregroundStyle(Color.muckNearBlack.opacity(0.25))
+        }
+        .padding(.vertical, Spacing.xxs)
     }
 }
 

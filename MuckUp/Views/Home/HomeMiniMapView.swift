@@ -8,9 +8,11 @@ import CoreLocation
 struct HomeMiniMapView: View {
     let mucks: [Muck]
     var partnerItems: [PartnerItem] = []
+    var awarenessItems: [AwarenessItem] = []
     let userLocation: CLLocation?
     let onSelectMuck: (Muck) -> Void
     var onSelectPartnerItem: (PartnerItem) -> Void = { _ in }
+    var onSelectAwarenessItem: (AwarenessItem) -> Void = { _ in }
     let onRegionChange: (CLLocationCoordinate2D, Double) -> Void
 
     @State private var cameraPosition: MapCameraPosition = .automatic
@@ -31,6 +33,14 @@ struct HomeMiniMapView: View {
                     Annotation(item.name, coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)) {
                         PartnerMapMarker(source: item.source)
                             .onTapGesture { onSelectPartnerItem(item) }
+                    }
+                }
+                ForEach(awarenessItems) { item in
+                    if let coordinate = item.coordinate {
+                        Annotation(item.title, coordinate: coordinate) {
+                            AwarenessMapMarker(item: item)
+                                .onTapGesture { onSelectAwarenessItem(item) }
+                        }
                     }
                 }
             }

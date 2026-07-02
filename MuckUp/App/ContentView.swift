@@ -48,4 +48,5 @@ struct ContentView: View {
         .environmentObject(PartnerViewModel())
         .environmentObject(HelpViewModel())
         .environmentObject(LocationService())
+        .environmentObject(AwarenessViewModel())
 }

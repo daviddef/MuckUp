@@ -7,10 +7,12 @@ struct MapViewScreen: View {
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var locationService: LocationService
     @EnvironmentObject var partnerVM: PartnerViewModel
+    @EnvironmentObject var awarenessVM: AwarenessViewModel
 
     @State private var cameraPosition: MapCameraPosition = .automatic
     @State private var selectedMuck: Muck? = nil
     @State private var showPartnerPanel = false
+    @State private var selectedAwarenessItem: AwarenessItem? = nil
 
     private var visibleMucks: [Muck] {
         let filtered = muckVM.filtered(allMucks)
@@ -37,6 +39,20 @@ struct MapViewScreen: View {
                     ForEach(partnerVM.filteredItems) { item in
                         Annotation(item.name, coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)) {
                             PartnerMapMarker(source: item.source)
+                        }
+                    }
+                }
+
+                // Area awareness markers (waterway safety, etc.) — only
+                // shown when the Hazard type filter is active, same
+                // convention as partner markers hiding under a type filter.
+                if muckVM.typeFilter == .hazard {
+                    ForEach(awarenessVM.mapItems) { item in
+                        if let coordinate = item.coordinate {
+                            Annotation(item.title, coordinate: coordinate) {
+                                AwarenessMapMarker(item: item)
+                                    .onTapGesture { selectedAwarenessItem = item }
+                            }
                         }
                     }
                 }
@@ -87,6 +103,12 @@ struct MapViewScreen: View {
             PartnerSourcesPanel()
                 .presentationDetents([.height(360)])
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(item: $selectedAwarenessItem) { item in
+            AwarenessDetailSheet(item: item)
+        }
+        .task {
+            await awarenessVM.loadWaterwayData()
         }
         .navigationTitle("Map")
         .navigationBarTitleDisplayMode(.inline)
