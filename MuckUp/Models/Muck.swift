@@ -119,4 +119,11 @@ enum MuckSortOrder: String, CaseIterable {
         case .date:  return "📅 Date"
         }
     }
+
+    var icon: String {
+        switch self {
+        case .votes: return "flame.fill"
+        case .date:  return "calendar"
+        }
+    }
 }

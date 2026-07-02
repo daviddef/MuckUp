@@ -2,17 +2,19 @@ import SwiftUI
 
 struct TypeFilterBar: View {
     @Binding var selection: MuckType?
+    var iconOnly: Bool = false
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.xs) {
-                FilterPill(title: "All", isActive: selection == nil) {
+                FilterPill(title: "All", icon: "circle.grid.2x2.fill", iconOnly: iconOnly, isActive: selection == nil) {
                     selection = nil
                 }
                 ForEach(MuckType.allCases, id: \.self) { type in
                     FilterPill(
                         title: type.displayName,
                         icon: type.icon,
+                        iconOnly: iconOnly,
                         isActive: selection == type,
                         activeColor: Color.muckTypeColor(type)
                     ) {
@@ -28,23 +30,33 @@ struct TypeFilterBar: View {
 struct FilterPill: View {
     let title: String
     var icon: String? = nil
+    var iconOnly: Bool = false
     let isActive: Bool
     var activeColor: Color = .muckGreen
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: Spacing.xxs) {
-                if let icon {
+            Group {
+                if iconOnly, let icon {
                     Image(systemName: icon)
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
+                        .frame(width: 20, height: 20)
+                } else {
+                    HStack(spacing: Spacing.xxs) {
+                        if let icon {
+                            Image(systemName: icon)
+                                .font(.system(size: 11, weight: .semibold))
+                        }
+                        Text(title)
+                            .font(.muckCaption)
+                    }
                 }
-                Text(title)
-                    .font(.muckCaption)
             }
             .foregroundStyle(isActive ? .white : .muckNearBlack)
-            .padding(.horizontal, Spacing.sm)
-            .padding(.vertical, Spacing.xxs + 2)
+            .padding(iconOnly ? Spacing.xs + 2 : 0)
+            .padding(.horizontal, iconOnly ? 0 : Spacing.sm)
+            .padding(.vertical, iconOnly ? 0 : Spacing.xxs + 2)
             .background(isActive ? activeColor : Color.muckSurface)
             .clipShape(Capsule())
             .overlay(
@@ -53,13 +65,14 @@ struct FilterPill: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(title)
         .animation(.easeInOut(duration: 0.15), value: isActive)
     }
 }
 
 #Preview {
     @Previewable @State var filter: MuckType? = nil
-    TypeFilterBar(selection: $filter)
+    TypeFilterBar(selection: $filter, iconOnly: true)
         .padding(.vertical)
         .background(Color.muckBg)
 }

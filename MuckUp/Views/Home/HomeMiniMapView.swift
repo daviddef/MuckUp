@@ -7,8 +7,10 @@ import CoreLocation
 /// below can re-filter to whatever area is currently in view.
 struct HomeMiniMapView: View {
     let mucks: [Muck]
+    var partnerItems: [PartnerItem] = []
     let userLocation: CLLocation?
     let onSelectMuck: (Muck) -> Void
+    var onSelectPartnerItem: (PartnerItem) -> Void = { _ in }
     let onRegionChange: (CLLocationCoordinate2D, Double) -> Void
 
     @State private var cameraPosition: MapCameraPosition = .automatic
@@ -23,6 +25,12 @@ struct HomeMiniMapView: View {
                     Annotation(muck.location, coordinate: muck.coordinate) {
                         MuckMapMarker(muck: muck)
                             .onTapGesture { onSelectMuck(muck) }
+                    }
+                }
+                ForEach(partnerItems) { item in
+                    Annotation(item.name, coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)) {
+                        PartnerMapMarker(source: item.source)
+                            .onTapGesture { onSelectPartnerItem(item) }
                     }
                 }
             }

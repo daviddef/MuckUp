@@ -4,7 +4,7 @@ import Combine
 
 @MainActor
 final class MuckViewModel: ObservableObject {
-    @Published var sortOrder: MuckSortOrder = .votes
+    @Published var sortOrder: MuckSortOrder = .date
     @Published var typeFilter: MuckType? = nil
     @Published var searchText: String = ""
     @Published var points: Int = 0

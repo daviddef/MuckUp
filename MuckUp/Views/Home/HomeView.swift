@@ -8,11 +8,13 @@ struct HomeView: View {
     @Query(sort: \MuckEvent.eventDate) private var allEvents: [MuckEvent]
 
     @EnvironmentObject var muckVM: MuckViewModel
+    @EnvironmentObject var partnerVM: PartnerViewModel
     @EnvironmentObject var locationService: LocationService
 
     @State private var showRaiseMuck = false
     @State private var selectedMuck: Muck? = nil
     @State private var selectedEvent: MuckEvent? = nil
+    @State private var selectedPartnerItem: PartnerItem? = nil
 
     // Map-driven area filter — updated as the mini map is panned
     @State private var mapCentre: CLLocationCoordinate2D? = nil
@@ -34,6 +36,14 @@ struct HomeView: View {
             }
     }
 
+    // External Find items (World Cleanup, TrashMob, Litter Map, etc.) —
+    // included on the mini map and "Events near you" by default, hidden
+    // when the external-events icon at the top of Home is toggled off.
+    private var visiblePartnerItems: [PartnerItem] {
+        guard partnerVM.showOnHome else { return [] }
+        return partnerVM.items.filter { partnerVM.enabledSources.contains($0.source) }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
@@ -43,8 +53,10 @@ struct HomeView: View {
                     // Mini map — pan to browse a different area
                     HomeMiniMapView(
                         mucks: muckVM.filtered(allMucks),
+                        partnerItems: visiblePartnerItems,
                         userLocation: locationService.location,
                         onSelectMuck: { selectedMuck = $0 },
+                        onSelectPartnerItem: { selectedPartnerItem = $0 },
                         onRegionChange: { centre, radius in
                             mapCentre = centre
                             mapRadiusMetres = radius
@@ -56,8 +68,10 @@ struct HomeView: View {
                     // Upcoming events near you
                     NearbyEventsSection(
                         events: allEvents,
+                        partnerItems: visiblePartnerItems,
                         userLocation: locationService.location,
-                        onSelect: { selectedEvent = $0 }
+                        onSelectEvent: { selectedEvent = $0 },
+                        onSelectPartnerItem: { selectedPartnerItem = $0 }
                     )
 
                     // Filter + sort bar
@@ -89,18 +103,56 @@ struct HomeView: View {
                     EventDetailView(event: event)
                 }
             }
+            .sheet(item: $selectedPartnerItem) { item in
+                NavigationStack {
+                    ScrollView {
+                        PartnerItemRow(item: item)
+                            .padding(Spacing.md)
+                    }
+                    .background(Color.muckBg)
+                    .navigationTitle(item.source.displayName)
+                    .navigationBarTitleDisplayMode(.inline)
+                }
+                .presentationDetents([.height(320)])
+                .presentationDragIndicator(.visible)
+            }
+        }
+        .task {
+            if partnerVM.items.isEmpty {
+                partnerVM.loadMockData()
+            }
         }
     }
 
     // MARK: - Sub-views
 
     private var filterBar: some View {
-        VStack(spacing: Spacing.xs) {
-            TypeFilterBar(selection: $muckVM.typeFilter)
+        HStack(spacing: 0) {
+            // Type filters + external-events toggle — icon only
+            HStack(spacing: Spacing.xs) {
+                TypeFilterBar(selection: $muckVM.typeFilter, iconOnly: true)
 
-            // Sort toggle
-            HStack {
-                Spacer()
+                FilterPill(
+                    title: "External Events",
+                    icon: "building.2.fill",
+                    iconOnly: true,
+                    isActive: partnerVM.showOnHome,
+                    activeColor: Color.muckAmber
+                ) {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        partnerVM.showOnHome.toggle()
+                    }
+                }
+            }
+
+            Spacer()
+
+            // Sort options — visually distinct from the filters above
+            HStack(spacing: Spacing.xxs) {
+                Image(systemName: "arrow.up.arrow.down")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(Color.muckNearBlack.opacity(0.35))
+
                 HStack(spacing: 0) {
                     ForEach(MuckSortOrder.allCases, id: \.self) { order in
                         Button {
@@ -108,15 +160,15 @@ struct HomeView: View {
                                 muckVM.sortOrder = order
                             }
                         } label: {
-                            Text(order.displayName)
-                                .font(.muckCaption)
+                            Image(systemName: order.icon)
+                                .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(muckVM.sortOrder == order ? .white : .muckNearBlack.opacity(0.6))
-                                .padding(.horizontal, Spacing.sm)
-                                .padding(.vertical, Spacing.xxs + 2)
+                                .frame(width: 28, height: 24)
                                 .background(muckVM.sortOrder == order ? Color.muckNearBlack : Color.clear)
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(order.displayName)
                     }
                 }
                 .padding(3)
@@ -125,8 +177,8 @@ struct HomeView: View {
                 .overlay(
                     Capsule().strokeBorder(Color.muckNearBlack.opacity(0.1), lineWidth: 1)
                 )
-                .padding(.trailing, Spacing.md)
             }
+            .padding(.trailing, Spacing.md)
         }
         .padding(.top, Spacing.xs)
         .padding(.bottom, Spacing.sm)

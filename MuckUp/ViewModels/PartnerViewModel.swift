@@ -7,6 +7,10 @@ final class PartnerViewModel: ObservableObject {
     @Published var enabledSources: Set<PartnerSource> = Set(PartnerSource.allCases)
     @Published var isLoading = false
     @Published var sourceFilter: PartnerSource? = nil
+    // Whether external/partner items (from Find) should also surface on
+    // the Home screen's mini map and "Events near you" section — on by
+    // default, toggled off via the icon filter in Home's filter bar.
+    @Published var showOnHome: Bool = true
 
     var filteredItems: [PartnerItem] {
         var result = items.filter { enabledSources.contains($0.source) }
