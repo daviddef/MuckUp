@@ -118,7 +118,7 @@ struct ScheduleEventView: View {
     }
 
     private var isValid: Bool {
-        !title.trimmingCharacters(in: .whitespaces).isEmpty && !selectedMuckIds.isEmpty
+        !title.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
     var body: some View {
