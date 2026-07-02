@@ -1,14 +1,19 @@
 import SwiftUI
 import SwiftData
+import CoreLocation
 
 struct EventLiveView: View {
     @Bindable var event: MuckEvent
     @Environment(\.modelContext) private var modelContext
     @Query private var allMucks: [Muck]
     @EnvironmentObject var muckVM: MuckViewModel
+    @EnvironmentObject var awarenessVM: AwarenessViewModel
 
     @State private var showWrapUp = false
     @State private var checkedIn = false
+    @State private var nearbyAwarenessItems: [AwarenessItem] = []
+    @State private var isLoadingAwareness = false
+    @State private var selectedAwarenessItem: AwarenessItem? = nil
 
     private var linkedMucks: [Muck] {
         allMucks.filter { event.muckIds.contains($0.id) && !$0.isClosed }
@@ -131,6 +136,14 @@ struct EventLiveView: View {
                         }
                     }
 
+                    // Things to be aware of near the meetup point
+                    AwarenessListCard(
+                        items: nearbyAwarenessItems,
+                        isLoading: isLoadingAwareness,
+                        onSelect: { selectedAwarenessItem = $0 }
+                    )
+                    .padding(.horizontal, Spacing.md)
+
                     Spacer(minLength: 100)
                 }
             }
@@ -157,6 +170,16 @@ struct EventLiveView: View {
         }
         .sheet(isPresented: $showWrapUp) {
             EventWrapUpView(event: event)
+        }
+        .sheet(item: $selectedAwarenessItem) { item in
+            AwarenessDetailSheet(item: item)
+        }
+        .task {
+            guard event.meetupLatitude != 0 || event.meetupLongitude != 0 else { return }
+            isLoadingAwareness = true
+            let coord = CLLocationCoordinate2D(latitude: event.meetupLatitude, longitude: event.meetupLongitude)
+            nearbyAwarenessItems = await awarenessVM.fetchNearby(coord)
+            isLoadingAwareness = false
         }
     }
 

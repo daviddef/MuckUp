@@ -67,6 +67,7 @@
 		EAAFF076663A850C5D6808BC /* MuckMiniMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D6B190F2F6105F50AB0C87 /* MuckMiniMapView.swift */; };
 		EB0D0A13E1C675C022C09EA3 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D30E409F88B8591FA4F094 /* User.swift */; };
 		F58484A156015E6669190F7A /* MuckEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0FAEAE3DEFD169BDA719CA /* MuckEvent.swift */; };
+		F6007FFC2E6373389E326B5E /* AwarenessListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5854932C0D165F271153A64 /* AwarenessListView.swift */; };
 		F7014BC8E402EBEF438A43C9 /* Muck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90AB05B21CBFCB7E71B4E85D /* Muck.swift */; };
 		FD914D99BFDBEAC45BC75A55 /* BrisbaneEventsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D95467E9EB25443B7AAB0E5 /* BrisbaneEventsService.swift */; };
 		FDAC794A2F0E144659CEFE1A /* PartnerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52CFF95C2FBC5851A20F18F /* PartnerViewModel.swift */; };
@@ -136,6 +137,7 @@
 		E096F4AD480067C0E607F83D /* EventWrapUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventWrapUpView.swift; sourceTree = "<group>"; };
 		E42870C0041768B846A66DF1 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		E56EBD830F6BAD8615BAC04D /* PhotoPickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPickerButton.swift; sourceTree = "<group>"; };
+		E5854932C0D165F271153A64 /* AwarenessListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessListView.swift; sourceTree = "<group>"; };
 		F3300094284A6263ECBBDAA6 /* ConfettiBurstView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiBurstView.swift; sourceTree = "<group>"; };
 		F52CFF95C2FBC5851A20F18F /* PartnerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerViewModel.swift; sourceTree = "<group>"; };
 		F9F009FA31C2D64E6C0463AD /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthGateView.swift; sourceTree = "<group>"; };
@@ -353,6 +355,7 @@
 		E1BC783966403709474C9E99 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				E5854932C0D165F271153A64 /* AwarenessListView.swift */,
 				2A2E0E1A363992E35A3FD6FB /* AwarenessMapMarker.swift */,
 				F3300094284A6263ECBBDAA6 /* ConfettiBurstView.swift */,
 				980D7DEE51CF22535EDCD846 /* EmptyStateIllustration.swift */,
@@ -463,6 +466,7 @@
 				02AAD08FE0D16506A4F66C02 /* AuthGateView.swift in Sources */,
 				752A0271EEF4B8849BB82637 /* AuthService.swift in Sources */,
 				A9127DC7F5EA0F741C259B6D /* AwarenessItem.swift in Sources */,
+				F6007FFC2E6373389E326B5E /* AwarenessListView.swift in Sources */,
 				09FD73F5CE3806CFA6341AEE /* AwarenessMapMarker.swift in Sources */,
 				28BB28DB265A06B3DC4E1B7D /* AwarenessViewModel.swift in Sources */,
 				FD914D99BFDBEAC45BC75A55 /* BrisbaneEventsService.swift in Sources */,

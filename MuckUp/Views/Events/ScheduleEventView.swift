@@ -691,42 +691,6 @@ private struct MuckSuggestionCard: View {
 
 // MARK: - Awareness Row
 
-private struct AwarenessRow: View {
-    let item: AwarenessItem
-
-    private var color: Color {
-        switch item.severity {
-        case .warning: return .muckRed
-        case .caution: return .muckAmber
-        case .info:    return .muckGreen
-        }
-    }
-
-    var body: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: item.category.icon)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(color)
-                .frame(width: 24)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.title)
-                    .font(.muckHeadline)
-                    .foregroundStyle(Color.muckNearBlack)
-                Text(item.detail)
-                    .font(.muckCaption)
-                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
-                    .lineLimit(2)
-            }
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.system(size: 11))
-                .foregroundStyle(Color.muckNearBlack.opacity(0.25))
-        }
-        .padding(.vertical, Spacing.xxs)
-    }
-}
-
 // MARK: - Muck Picker Card (full list, vertical)
 
 private struct MuckPickerCard: View {

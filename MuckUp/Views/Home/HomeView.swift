@@ -46,6 +46,26 @@ struct HomeView: View {
         return partnerVM.items.filter { partnerVM.enabledSources.contains($0.source) }
     }
 
+    // "Things to be aware of" under the Hazard filter — waterway safety
+    // and planned burns are already fully loaded (Brisbane-wide, not a
+    // per-location fetch), so this is a plain client-side distance filter
+    // against whatever area the mini map is currently showing. Animal
+    // complaints aren't included here (suburb+quarter lookup, better
+    // suited to a fixed point like an event's meetup pin than a map that
+    // pans continuously).
+    private var nearbyAwarenessForHome: [AwarenessItem] {
+        guard muckVM.typeFilter == .hazard else { return [] }
+        guard let centre = mapCentre ?? locationService.location?.coordinate else {
+            return awarenessVM.mapItems
+        }
+        let centreLoc = CLLocation(latitude: centre.latitude, longitude: centre.longitude)
+        return awarenessVM.mapItems.filter { item in
+            guard let coord = item.coordinate else { return false }
+            let loc = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+            return loc.distance(from: centreLoc) <= 15_000
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
@@ -80,6 +100,17 @@ struct HomeView: View {
 
                     // Filter + sort bar
                     filterBar
+
+                    // "Things to be aware of" — always shown under the Hazard filter
+                    if muckVM.typeFilter == .hazard && !nearbyAwarenessForHome.isEmpty {
+                        AwarenessListCard(
+                            items: nearbyAwarenessForHome,
+                            isLoading: false,
+                            onSelect: { selectedAwarenessItem = $0 }
+                        )
+                        .padding(.horizontal, Spacing.md)
+                        .padding(.bottom, Spacing.sm)
+                    }
 
                     // List
                     if mucks.isEmpty {

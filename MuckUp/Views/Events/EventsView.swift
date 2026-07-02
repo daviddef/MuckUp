@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import CoreLocation
 
 struct EventsView: View {
     @Query(sort: \MuckEvent.eventDate) private var allEvents: [MuckEvent]
@@ -95,6 +96,11 @@ struct EventDetailView: View {
     @State private var attending: Bool
     @Query private var allMucks: [Muck]
     @EnvironmentObject var eventVM: EventViewModel
+    @EnvironmentObject var awarenessVM: AwarenessViewModel
+
+    @State private var nearbyAwarenessItems: [AwarenessItem] = []
+    @State private var isLoadingAwareness = false
+    @State private var selectedAwarenessItem: AwarenessItem? = nil
 
     init(event: MuckEvent) {
         self.event = event
@@ -191,12 +197,29 @@ struct EventDetailView: View {
                         }
                     }
                 }
+
+                // Things to be aware of near the meetup point
+                AwarenessListCard(
+                    items: nearbyAwarenessItems,
+                    isLoading: isLoadingAwareness,
+                    onSelect: { selectedAwarenessItem = $0 }
+                )
             }
             .padding(Spacing.md)
         }
         .background(Color.muckBg)
         .navigationTitle(event.title)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $selectedAwarenessItem) { item in
+            AwarenessDetailSheet(item: item)
+        }
+        .task {
+            guard event.meetupLatitude != 0 || event.meetupLongitude != 0 else { return }
+            isLoadingAwareness = true
+            let coord = CLLocationCoordinate2D(latitude: event.meetupLatitude, longitude: event.meetupLongitude)
+            nearbyAwarenessItems = await awarenessVM.fetchNearby(coord)
+            isLoadingAwareness = false
+        }
     }
 }
 
