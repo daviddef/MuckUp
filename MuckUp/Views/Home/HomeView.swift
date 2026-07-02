@@ -119,7 +119,11 @@ struct HomeView: View {
         }
         .task {
             if partnerVM.items.isEmpty {
-                partnerVM.loadMockData()
+                if let loc = locationService.location {
+                    await partnerVM.fetchAll(near: loc)
+                } else {
+                    partnerVM.loadMockData()
+                }
             }
         }
     }
