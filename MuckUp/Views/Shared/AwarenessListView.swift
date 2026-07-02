@@ -52,6 +52,12 @@ struct AwarenessListCard: View {
     var title: String = "⚠️ Things to be aware of"
     var emptyText: String? = nil
 
+    // Capped so a busy area (e.g. a dozen+ planned burns) can't push the
+    // rest of the screen off-viewport with no way to scroll back to it —
+    // beyond this many rows, the card scrolls internally instead.
+    private let maxVisibleRows = 4
+    private let rowHeight: CGFloat = 62
+
     var body: some View {
         if isLoading || !items.isEmpty || emptyText != nil {
             VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -81,19 +87,28 @@ struct AwarenessListCard: View {
                             .clipShape(RoundedRectangle(cornerRadius: Radius.md))
                     }
                 } else {
-                    VStack(spacing: 1) {
-                        ForEach(items) { item in
-                            Button {
-                                onSelect(item)
-                            } label: {
-                                AwarenessRow(item: item)
-                                    .padding(.horizontal, Spacing.sm)
+                    ScrollView {
+                        VStack(spacing: 1) {
+                            ForEach(items) { item in
+                                Button {
+                                    onSelect(item)
+                                } label: {
+                                    AwarenessRow(item: item)
+                                        .padding(.horizontal, Spacing.sm)
+                                }
+                                .buttonStyle(.plain)
+                                .background(Color.muckSurface)
                             }
-                            .buttonStyle(.plain)
-                            .background(Color.muckSurface)
                         }
                     }
+                    .frame(height: min(CGFloat(items.count), CGFloat(maxVisibleRows)) * rowHeight)
                     .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+
+                    if items.count > maxVisibleRows {
+                        Text("\(items.count) total — scroll for more")
+                            .font(.muckMicro)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                    }
                 }
             }
         }
