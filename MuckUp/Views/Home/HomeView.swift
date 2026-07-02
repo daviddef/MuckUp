@@ -22,28 +22,38 @@ struct HomeView: View {
     @State private var mapCentre: CLLocationCoordinate2D? = nil
     @State private var mapRadiusMetres: Double = 3000
 
+    private let nearbyEventRadiusMetres: Double = 30_000
+
     private var mucks: [Muck] {
         let base = muckVM.filtered(allMucks)
         guard let mapCentre else { return base }
         let centreLoc = CLLocation(latitude: mapCentre.latitude, longitude: mapCentre.longitude)
-        return base
-            .filter { muck in
-                let loc = CLLocation(latitude: muck.latitude, longitude: muck.longitude)
-                return loc.distance(from: centreLoc) <= mapRadiusMetres
-            }
-            .sorted { a, b in
-                let da = CLLocation(latitude: a.latitude, longitude: a.longitude).distance(from: centreLoc)
-                let db = CLLocation(latitude: b.latitude, longitude: b.longitude).distance(from: centreLoc)
-                return da < db
-            }
+        return base.filter { muck in
+            let loc = CLLocation(latitude: muck.latitude, longitude: muck.longitude)
+            return loc.distance(from: centreLoc) <= mapRadiusMetres
+        }
     }
 
     // External Find items (World Cleanup, TrashMob, Litter Map, etc.) —
-    // included on the mini map and "Events near you" by default, hidden
-    // when the external-events icon at the top of Home is toggled off.
+    // included on the mini map and feed by default, hidden when the
+    // external-events toggle in the Filters menu is switched off.
     private var visiblePartnerItems: [PartnerItem] {
         guard partnerVM.showOnHome else { return [] }
         return partnerVM.items.filter { partnerVM.enabledSources.contains($0.source) }
+    }
+
+    private var upcomingEvents: [MuckEvent] {
+        let now = Date.now
+        let centre = mapCentre ?? locationService.location?.coordinate
+        return allEvents
+            .filter { $0.eventDate >= now || $0.isLive }
+            .filter { event in
+                guard let centre else { return true }
+                guard event.meetupLatitude != 0 || event.meetupLongitude != 0 else { return true }
+                let loc = CLLocation(latitude: event.meetupLatitude, longitude: event.meetupLongitude)
+                let centreLoc = CLLocation(latitude: centre.latitude, longitude: centre.longitude)
+                return loc.distance(from: centreLoc) <= nearbyEventRadiusMetres
+            }
     }
 
     // A single live line that makes the data feel like something actually
@@ -69,10 +79,7 @@ struct HomeView: View {
     // "Things to be aware of" under the Hazard filter — waterway safety
     // and planned burns are already fully loaded (Brisbane-wide, not a
     // per-location fetch), so this is a plain client-side distance filter
-    // against whatever area the mini map is currently showing. Animal
-    // complaints aren't included here (suburb+quarter lookup, better
-    // suited to a fixed point like an event's meetup pin than a map that
-    // pans continuously).
+    // against whatever area the mini map is currently showing.
     private var nearbyAwarenessForHome: [AwarenessItem] {
         guard muckVM.typeFilter == .hazard else { return [] }
         guard let centre = mapCentre ?? locationService.location?.coordinate else {
@@ -86,6 +93,26 @@ struct HomeView: View {
         }
     }
 
+    // One unified, ordered stream — mucks, events, external items, and
+    // hazard alerts all read as "activity" instead of four stacked,
+    // independently-scrolling sections competing for the same screen.
+    private var activityFeed: [HomeActivityItem] {
+        var items: [HomeActivityItem] = []
+        items += mucks.map { .muck($0) }
+        items += upcomingEvents.map { .event($0) }
+        items += visiblePartnerItems.map { .partner($0) }
+        items += nearbyAwarenessForHome.map { .awareness($0) }
+
+        return items.sorted { a, b in
+            if a.isPriority != b.isPriority { return a.isPriority }
+            if a.isLive != b.isLive { return a.isLive }
+            switch muckVM.sortOrder {
+            case .votes: return a.popularityScore > b.popularityScore
+            case .date:  return a.activityDate > b.activityDate
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
@@ -93,8 +120,8 @@ struct HomeView: View {
 
                 VStack(spacing: 0) {
                     // Filter + sort bar — sits above the map so filtering
-                    // is the first thing you see, and applies to the map,
-                    // "Events near you", and the list below all at once
+                    // is the first thing you see, and applies to the map
+                    // and feed below all at once
                     filterBar
 
                     if let communityPulse {
@@ -123,31 +150,22 @@ struct HomeView: View {
                     .padding(.top, Spacing.xs)
                     .padding(.bottom, Spacing.sm)
 
-                    // Upcoming events near you
-                    NearbyEventsSection(
-                        events: allEvents,
-                        partnerItems: visiblePartnerItems,
-                        userLocation: locationService.location,
-                        onSelectEvent: { selectedEvent = $0 },
-                        onSelectPartnerItem: { selectedPartnerItem = $0 }
-                    )
-
-                    // "Things to be aware of" — always shown under the Hazard filter
-                    if muckVM.typeFilter == .hazard && !nearbyAwarenessForHome.isEmpty {
-                        AwarenessListCard(
-                            items: nearbyAwarenessForHome,
-                            isLoading: false,
-                            onSelect: { selectedAwarenessItem = $0 }
-                        )
-                        .padding(.horizontal, Spacing.md)
-                        .padding(.bottom, Spacing.sm)
-                    }
-
-                    // List
-                    if mucks.isEmpty {
+                    // One unified activity feed
+                    if activityFeed.isEmpty {
                         emptyState
                     } else {
-                        muckList
+                        HomeActivityFeed(
+                            items: activityFeed,
+                            userLocation: locationService.location,
+                            onSelect: { item in
+                                switch item {
+                                case .muck(let muck):           selectedMuck = muck
+                                case .event(let event):         selectedEvent = event
+                                case .partner(let partnerItem): selectedPartnerItem = partnerItem
+                                case .awareness(let item):      selectedAwarenessItem = item
+                                }
+                            }
+                        )
                     }
                 }
 
@@ -246,33 +264,11 @@ struct HomeView: View {
         .background(Color.muckBg)
     }
 
-    private var muckList: some View {
-        List {
-            ForEach(mucks) { muck in
-                MuckCardView(
-                    muck: muck,
-                    hasVoted: !muckVM.canVote(muck),
-                    onVote: { muckVM.upvote(muck) },
-                    userLocation: locationService.location
-                )
-                .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .onTapGesture { selectedMuck = muck }
-            }
-        }
-        .listStyle(.plain)
-        .refreshable {
-            // Refresh hook — live data fetch will go here
-            try? await Task.sleep(nanoseconds: 500_000_000)
-        }
-    }
-
     private var emptyState: some View {
         VStack(spacing: Spacing.md) {
             Spacer()
             EmptyStateIllustration()
-            Text("No mucks here")
+            Text("Nothing happening here yet")
                 .font(.muckTitle)
                 .foregroundStyle(Color.muckNearBlack)
             Text(emptyStateSubtitle)
@@ -288,7 +284,7 @@ struct HomeView: View {
         if muckVM.typeFilter != nil {
             return "Try removing the filter."
         } else if mapCentre != nil {
-            return "No mucks in this part of the map. Try panning around."
+            return "Nothing in this part of the map. Try panning around."
         } else {
             return "Be the first to report an issue in your area."
         }
