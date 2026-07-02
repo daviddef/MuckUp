@@ -46,6 +46,26 @@ struct HomeView: View {
         return partnerVM.items.filter { partnerVM.enabledSources.contains($0.source) }
     }
 
+    // A single live line that makes the data feel like something actually
+    // happening, not a static form — bags collected + mucks cleared in
+    // the last 7 days, from data already loaded (no extra fetch).
+    private var communityPulse: String? {
+        let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: .now) ?? .now
+        let bags = allEvents
+            .filter { ($0.endedDate ?? $0.eventDate) >= weekAgo }
+            .reduce(0) { $0 + $1.bagCount }
+        let cleared = allMucks.filter { muck in
+            guard let closed = muck.closedDate else { return false }
+            return closed >= weekAgo
+        }.count
+
+        guard bags > 0 || cleared > 0 else { return nil }
+        var parts: [String] = []
+        if bags > 0 { parts.append("\(bags) bag\(bags == 1 ? "" : "s") collected") }
+        if cleared > 0 { parts.append("\(cleared) muck\(cleared == 1 ? "" : "s") cleared") }
+        return parts.joined(separator: " · ") + " this week 🎉"
+    }
+
     // "Things to be aware of" under the Hazard filter — waterway safety
     // and planned burns are already fully loaded (Brisbane-wide, not a
     // per-location fetch), so this is a plain client-side distance filter
@@ -76,6 +96,15 @@ struct HomeView: View {
                     // is the first thing you see, and applies to the map,
                     // "Events near you", and the list below all at once
                     filterBar
+
+                    if let communityPulse {
+                        Text(communityPulse)
+                            .font(.muckCaption)
+                            .foregroundStyle(Color.muckGreen)
+                            .padding(.horizontal, Spacing.md)
+                            .padding(.bottom, Spacing.xs)
+                            .transition(.opacity)
+                    }
 
                     // Mini map — pan to browse a different area
                     HomeMiniMapView(
@@ -172,57 +201,43 @@ struct HomeView: View {
 
     // MARK: - Sub-views
 
+    // Just the 4 essentials up front; everything else (external events
+    // toggle, sort order) lives one tap away in the Filters menu — the
+    // top row is the first thing you see, so it should only show what
+    // most people need most of the time.
     private var filterBar: some View {
-        HStack(spacing: 0) {
-            // Type filters + external-events toggle — icon only
-            HStack(spacing: Spacing.xs) {
-                TypeFilterBar(selection: $muckVM.typeFilter, iconOnly: true)
-
-                FilterPill(
-                    title: "External Events",
-                    icon: "building.2.fill",
-                    iconOnly: true,
-                    isActive: partnerVM.showOnHome,
-                    activeColor: Color.muckAmber
-                ) {
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        partnerVM.showOnHome.toggle()
-                    }
-                }
-            }
+        HStack(spacing: Spacing.xs) {
+            TypeFilterBar(selection: $muckVM.typeFilter, iconOnly: true)
 
             Spacer()
 
-            // Sort options — visually distinct from the filters above
-            HStack(spacing: Spacing.xxs) {
-                Image(systemName: "arrow.up.arrow.down")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(Color.muckNearBlack.opacity(0.35))
+            Menu {
+                Toggle(isOn: $partnerVM.showOnHome) {
+                    Label("External Events", systemImage: "building.2.fill")
+                }
 
-                HStack(spacing: 0) {
+                Section("Sort by") {
                     ForEach(MuckSortOrder.allCases, id: \.self) { order in
                         Button {
-                            withAnimation(.easeInOut(duration: 0.15)) {
-                                muckVM.sortOrder = order
-                            }
+                            muckVM.sortOrder = order
                         } label: {
-                            Image(systemName: order.icon)
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(muckVM.sortOrder == order ? .white : .muckNearBlack.opacity(0.6))
-                                .frame(width: 28, height: 24)
-                                .background(muckVM.sortOrder == order ? Color.muckNearBlack : Color.clear)
-                                .clipShape(Capsule())
+                            Label(order.displayName, systemImage: order.icon)
+                            if muckVM.sortOrder == order {
+                                Image(systemName: "checkmark")
+                            }
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(order.displayName)
                     }
                 }
-                .padding(3)
-                .background(Color.muckSurface)
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule().strokeBorder(Color.muckNearBlack.opacity(0.1), lineWidth: 1)
-                )
+            } label: {
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.muckNearBlack)
+                    .frame(width: 36, height: 36)
+                    .background(Color.muckSurface)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle().strokeBorder(Color.muckNearBlack.opacity(0.12), lineWidth: 1)
+                    )
             }
             .padding(.trailing, Spacing.md)
         }

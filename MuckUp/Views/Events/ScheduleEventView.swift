@@ -860,6 +860,7 @@ private struct MuckQuickLookSheet: View {
 
 struct EventSavedView: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var celebrate = false
 
     var body: some View {
         VStack(spacing: Spacing.xl) {
@@ -867,6 +868,7 @@ struct EventSavedView: View {
             Image(systemName: "calendar.badge.checkmark")
                 .font(.system(size: 72))
                 .foregroundStyle(Color.muckGreen)
+                .confettiBurst(trigger: $celebrate)
             Text("Event Scheduled!")
                 .font(.muckDisplay)
                 .foregroundStyle(Color.muckNearBlack)
@@ -887,5 +889,6 @@ struct EventSavedView: View {
         }
         .background(Color.muckBg.ignoresSafeArea())
         .navigationBarBackButtonHidden()
+        .onAppear { celebrate = true }
     }
 }

@@ -468,6 +468,7 @@ private struct TypeSelectorCard: View {
 struct MuckSavedView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showScheduleEvent = false
+    @State private var celebrate = false
 
     var body: some View {
         VStack(spacing: Spacing.xl) {
@@ -475,6 +476,7 @@ struct MuckSavedView: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 72))
                 .foregroundStyle(Color.muckGreen)
+                .confettiBurst(trigger: $celebrate)
             Text("Muck Raised!")
                 .font(.muckDisplay)
                 .foregroundStyle(Color.muckNearBlack)
@@ -498,6 +500,7 @@ struct MuckSavedView: View {
         .sheet(isPresented: $showScheduleEvent) {
             ScheduleEventView(preselectedMuck: nil)
         }
+        .onAppear { celebrate = true }
     }
 }
 

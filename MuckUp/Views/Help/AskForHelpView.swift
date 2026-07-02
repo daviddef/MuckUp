@@ -222,6 +222,7 @@ struct AskForHelpView: View {
 
 struct HelpRequestSavedView: View {
     let onDone: () -> Void
+    @State private var celebrate = false
 
     var body: some View {
         VStack(spacing: Spacing.xl) {
@@ -229,6 +230,7 @@ struct HelpRequestSavedView: View {
             Image(systemName: "hand.raised.fill")
                 .font(.system(size: 72))
                 .foregroundStyle(Color.muckGreen)
+                .confettiBurst(trigger: $celebrate)
             Text("Request Posted!")
                 .font(.muckDisplay)
                 .foregroundStyle(Color.muckNearBlack)
@@ -246,5 +248,6 @@ struct HelpRequestSavedView: View {
         }
         .background(Color.muckBg.ignoresSafeArea())
         .navigationBarBackButtonHidden()
+        .onAppear { celebrate = true }
     }
 }
