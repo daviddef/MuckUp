@@ -14,23 +14,27 @@ struct SplashView: View {
         ZStack {
             Color.muckGreen.ignoresSafeArea()
 
-            VStack(spacing: Spacing.md) {
+            // Sizing/spacing matched to LaunchScreen.storyboard so the handoff
+            // from the system launch screen to this view is seamless — no
+            // visible jump in icon size or text position.
+            VStack(spacing: 0) {
                 Image("LaunchIcon")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 130, height: 130)
+                    .frame(width: 150, height: 150)
                     .scaleEffect(iconScale)
+                    .padding(.bottom, 16)
 
-                VStack(spacing: 4) {
-                    Text("GRUB")
-                        .font(.system(size: 40, weight: .black))
-                        .foregroundStyle(.white)
-                        .kerning(1)
-                    Text("spot it · log it · clean it up")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.65))
-                }
+                Text("GRUB")
+                    .font(.system(size: 48, weight: .black))
+                    .foregroundStyle(.white)
+
+                Text("spot it · log it · clean it up")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.65))
+                    .padding(.top, 6)
             }
+            .offset(y: -30)
             .opacity(contentOpacity)
         }
         .opacity(isFadingOut ? 0 : 1)
