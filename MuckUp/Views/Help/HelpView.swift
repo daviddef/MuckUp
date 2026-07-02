@@ -176,9 +176,7 @@ struct HelpView: View {
 
                     if requests.isEmpty {
                         VStack(spacing: Spacing.sm) {
-                            Image(systemName: "hand.raised.fill")
-                                .font(.system(size: 44))
-                                .foregroundStyle(Color.muckNearBlack.opacity(0.2))
+                            EmptyStateIllustration(systemImage: "hand.raised.fill")
                             Text("No open requests nearby")
                                 .font(.muckTitle)
                                 .foregroundStyle(Color.muckNearBlack)

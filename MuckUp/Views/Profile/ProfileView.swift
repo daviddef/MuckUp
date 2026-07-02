@@ -60,11 +60,11 @@ struct ProfileView: View {
 
     // Lightweight badges derived from cumulative activity — a nudge toward
     // both lanes of community contribution, not a full achievements system.
-    private var badges: [String] {
-        var result: [String] = []
-        if myClosedMucks.count >= 5 { result.append("🌍 Eco Warrior") }
-        if myOfferedRequests.count >= 3 { result.append("🤝 Good Neighbour") }
-        if muckVM.streak >= 7 { result.append("🔥 On Fire") }
+    private var badges: [(emoji: String, label: String)] {
+        var result: [(String, String)] = []
+        if myClosedMucks.count >= 5 { result.append(("🌍", "Eco Warrior")) }
+        if myOfferedRequests.count >= 3 { result.append(("🤝", "Good Neighbour")) }
+        if muckVM.streak >= 7 { result.append(("🔥", "On Fire")) }
         return result
     }
 
@@ -129,20 +129,22 @@ struct ProfileView: View {
     // MARK: - Hero
 
     private var heroSection: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: Spacing.xxs) {
-                Text("Muck Points")
-                    .font(.muckCaption)
-                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
-                HStack(alignment: .firstTextBaseline, spacing: Spacing.xxs) {
-                    Image(systemName: "bolt.fill")
-                        .foregroundStyle(Color.muckAmber)
-                    Text("\(muckVM.points)")
-                        .font(.muckDisplay)
-                        .foregroundStyle(Color.muckNearBlack)
-                }
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    Text("Muck Points")
+                        .font(.muckCaption)
+                        .foregroundStyle(.white.opacity(0.75))
+                    HStack(alignment: .firstTextBaseline, spacing: Spacing.xxs) {
+                        Image(systemName: "bolt.fill")
+                            .foregroundStyle(.white)
+                        Text("\(muckVM.points)")
+                            .font(.system(size: 34, weight: .black, design: .rounded))
+                            .foregroundStyle(.white)
+                            .contentTransition(.numericText())
+                            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: muckVM.points)
+                    }
 
-                HStack(spacing: Spacing.xxs) {
                     if muckVM.streak > 0 {
                         HStack(spacing: Spacing.xxs) {
                             Image(systemName: "flame.fill")
@@ -150,36 +152,33 @@ struct ProfileView: View {
                             Text("\(muckVM.streak) day streak")
                                 .font(.muckCaption)
                         }
-                        .foregroundStyle(Color.muckRed)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, Spacing.xs)
                         .padding(.vertical, 3)
-                        .background(Color.muckRed.opacity(0.1))
+                        .background(.white.opacity(0.18))
                         .clipShape(Capsule())
                     }
                 }
-
-                if !badges.isEmpty {
-                    HStack(spacing: Spacing.xxs) {
-                        ForEach(badges, id: \.self) { badge in
-                            Text(badge)
-                                .font(.muckMicro)
-                                .foregroundStyle(Color.muckNearBlack.opacity(0.6))
-                                .padding(.horizontal, Spacing.xs)
-                                .padding(.vertical, 3)
-                                .background(Color.muckNearBlack.opacity(0.06))
-                                .clipShape(Capsule())
-                        }
-                    }
-                    .padding(.top, Spacing.xxxs)
+                Spacer()
+                VStack(spacing: 2) {
+                    GrowthPlantView(stage: PlantStage.forStreak(muckVM.streak), size: 56)
+                    Text(PlantStage.forStreak(muckVM.streak).label)
+                        .font(.muckMicro)
+                        .foregroundStyle(.white.opacity(0.75))
                 }
             }
-            Spacer()
-            Image(systemName: "person.circle.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(Color.muckNearBlack.opacity(0.2))
+
+            if !badges.isEmpty {
+                HStack(spacing: Spacing.sm) {
+                    ForEach(badges, id: \.label) { badge in
+                        StampBadgeView(emoji: badge.emoji, label: badge.label)
+                    }
+                }
+                .padding(.top, Spacing.xxs)
+            }
         }
         .padding(Spacing.md)
-        .background(Color.muckSurface)
+        .background(LinearGradient.muckGrowth)
     }
 
     // MARK: - Impact grids

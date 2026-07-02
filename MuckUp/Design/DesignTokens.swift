@@ -8,10 +8,26 @@ extension Color {
     static let muckAmber    = Color("MuckAmber")      // Warm amber — nav accents, urgency
     static let muckRed      = Color("MuckRed")        // Alert red — hazard
 
+    // Extended green family — real forests aren't one green. Used for
+    // gradients, growth stages, and depth instead of flat brand-green fills.
+    static let muckMoss  = Color(hex: "3D6B4F")  // deep shaded moss
+    static let muckFern  = Color(hex: "5A9367")  // mid fern
+    static let muckLime  = Color(hex: "9BD86B")  // bright new-growth lime
+
     // Surfaces
     static let muckSurface  = Color("MuckSurface")    // Card background
     static let muckBg       = Color("MuckBg")         // App background (off-white / near-black)
     static let muckNearBlack = Color("MuckNearBlack") // Primary text
+}
+
+extension LinearGradient {
+    // Signature "growth" gradient — moss to lime, used behind hero
+    // elements (points counter, impact cards, splash) for a living feel.
+    static let muckGrowth = LinearGradient(
+        colors: [Color.muckMoss, Color.muckGreen, Color.muckLime],
+        startPoint: .bottomLeading,
+        endPoint: .topTrailing
+    )
 }
 
 extension Color {
@@ -63,10 +79,12 @@ extension Color {
 // MARK: - Typography
 
 extension Font {
-    // Display — heavy condensed for headers
-    static let muckDisplay  = Font.system(size: 28, weight: .black, design: .default)
-    static let muckTitle    = Font.system(size: 17, weight: .bold,  design: .default)
-    static let muckHeadline = Font.system(size: 15, weight: .semibold)
+    // Display/title/headline use rounded design for a friendlier, more
+    // playful read — body/caption/micro stay default for legibility at
+    // small sizes.
+    static let muckDisplay  = Font.system(size: 28, weight: .black, design: .rounded)
+    static let muckTitle    = Font.system(size: 17, weight: .bold,  design: .rounded)
+    static let muckHeadline = Font.system(size: 15, weight: .semibold, design: .rounded)
     static let muckBody     = Font.system(size: 13, weight: .regular)
     static let muckCaption  = Font.system(size: 11, weight: .semibold)
     static let muckMicro    = Font.system(size: 10, weight: .medium)

@@ -7,6 +7,7 @@ struct CloseMuckSheet: View {
 
     @State private var afterPhotoData: Data?
     @State private var done = false
+    @State private var celebrate = false
 
     var body: some View {
         NavigationStack {
@@ -16,6 +17,7 @@ struct CloseMuckSheet: View {
                     Image(systemName: "checkmark.seal.fill")
                         .font(.system(size: 72))
                         .foregroundStyle(Color.muckGreen)
+                        .confettiBurst(trigger: $celebrate)
                     Text("Muck Cleared!")
                         .font(.muckDisplay)
                         .foregroundStyle(Color.muckNearBlack)
@@ -28,6 +30,7 @@ struct CloseMuckSheet: View {
                         .padding(.bottom, Spacing.xl)
                 }
                 .background(Color.muckBg.ignoresSafeArea())
+                .onAppear { celebrate = true }
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: Spacing.lg) {

@@ -10,6 +10,7 @@ struct HelpRequestDetailView: View {
     @EnvironmentObject var locationService: LocationService
 
     @State private var justOffered = false
+    @State private var celebrate = false
 
     private var isMine: Bool { helpVM.isMine(request) }
     private var hasOffered: Bool { helpVM.hasOffered(request) }
@@ -84,29 +85,32 @@ struct HelpRequestDetailView: View {
                 }
 
                 // Actions
-                if isMine {
-                    if request.status != .completed {
-                        PrimaryButton(title: "Mark as Resolved", icon: "checkmark.seal.fill") {
-                            markResolved()
+                Group {
+                    if isMine {
+                        if request.status != .completed {
+                            PrimaryButton(title: "Mark as Resolved", icon: "checkmark.seal.fill") {
+                                markResolved()
+                            }
+                        } else {
+                            Label("Resolved — thank your helpers!", systemImage: "checkmark.seal.fill")
+                                .font(.muckHeadline)
+                                .foregroundStyle(Color.muckGreen)
                         }
-                    } else {
-                        Label("Resolved — thank your helpers!", systemImage: "checkmark.seal.fill")
+                    } else if request.status == .completed {
+                        Label("This request has been resolved", systemImage: "checkmark.seal.fill")
+                            .font(.muckHeadline)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                    } else if hasOffered || justOffered {
+                        Label("You offered to help — the requester can see your interest", systemImage: "checkmark.circle.fill")
                             .font(.muckHeadline)
                             .foregroundStyle(Color.muckGreen)
-                    }
-                } else if request.status == .completed {
-                    Label("This request has been resolved", systemImage: "checkmark.seal.fill")
-                        .font(.muckHeadline)
-                        .foregroundStyle(Color.muckNearBlack.opacity(0.4))
-                } else if hasOffered || justOffered {
-                    Label("You offered to help — the requester can see your interest", systemImage: "checkmark.circle.fill")
-                        .font(.muckHeadline)
-                        .foregroundStyle(Color.muckGreen)
-                } else {
-                    PrimaryButton(title: "I Can Help", icon: "hand.raised.fill") {
-                        offerHelp()
+                    } else {
+                        PrimaryButton(title: "I Can Help", icon: "hand.raised.fill") {
+                            offerHelp()
+                        }
                     }
                 }
+                .confettiBurst(trigger: $celebrate)
             }
             .padding(Spacing.md)
         }
@@ -131,6 +135,7 @@ struct HelpRequestDetailView: View {
         muckVM.recordHelpOffered(request.id)
         muckVM.award(.offerHelp)
         justOffered = true
+        celebrate = true
     }
 
     private func markResolved() {
@@ -142,6 +147,7 @@ struct HelpRequestDetailView: View {
             muckVM.recordHelpCompleted(request.id)
             muckVM.award(.helpCompleted)
         }
+        celebrate = true
     }
 }
 

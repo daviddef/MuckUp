@@ -210,9 +210,7 @@ struct HomeView: View {
     private var emptyState: some View {
         VStack(spacing: Spacing.md) {
             Spacer()
-            Image(systemName: "leaf.circle")
-                .font(.system(size: 56))
-                .foregroundStyle(Color.muckGreen.opacity(0.4))
+            EmptyStateIllustration()
             Text("No mucks here")
                 .font(.muckTitle)
                 .foregroundStyle(Color.muckNearBlack)
