@@ -72,6 +72,11 @@ struct HomeView: View {
                 Color.muckBg.ignoresSafeArea()
 
                 VStack(spacing: 0) {
+                    // Filter + sort bar — sits above the map so filtering
+                    // is the first thing you see, and applies to the map,
+                    // "Events near you", and the list below all at once
+                    filterBar
+
                     // Mini map — pan to browse a different area
                     HomeMiniMapView(
                         mucks: muckVM.filtered(allMucks),
@@ -97,9 +102,6 @@ struct HomeView: View {
                         onSelectEvent: { selectedEvent = $0 },
                         onSelectPartnerItem: { selectedPartnerItem = $0 }
                     )
-
-                    // Filter + sort bar
-                    filterBar
 
                     // "Things to be aware of" — always shown under the Hazard filter
                     if muckVM.typeFilter == .hazard && !nearbyAwarenessForHome.isEmpty {
