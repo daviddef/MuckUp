@@ -109,6 +109,7 @@ struct MapViewScreen: View {
         }
         .task {
             await awarenessVM.loadWaterwayData()
+            await awarenessVM.loadBurnData()
         }
         .navigationTitle("Map")
         .navigationBarTitleDisplayMode(.inline)

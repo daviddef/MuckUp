@@ -22,11 +22,13 @@ struct HelpView: View {
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var helpVM: HelpViewModel
     @EnvironmentObject var locationService: LocationService
+    @EnvironmentObject var partnerVM: PartnerViewModel
 
     @State private var lane: HelpLane = .helpWorld
     @State private var showAskForHelp = false
     @State private var showRaiseMuck = false
     @State private var selectedRequest: HelpRequest?
+    @State private var selectedGoldEvent: PartnerItem?
     @State private var showNearbyMucks = false
     @State private var showUpcomingEvents = false
 
@@ -63,6 +65,28 @@ struct HelpView: View {
             }
             .navigationDestination(item: $selectedRequest) { request in
                 HelpRequestDetailView(request: request)
+            }
+            .sheet(item: $selectedGoldEvent) { item in
+                NavigationStack {
+                    ScrollView {
+                        PartnerItemRow(item: item)
+                            .padding(Spacing.md)
+                    }
+                    .background(Color.muckBg)
+                    .navigationTitle(item.source.displayName)
+                    .navigationBarTitleDisplayMode(.inline)
+                }
+                .presentationDetents([.height(320)])
+                .presentationDragIndicator(.visible)
+            }
+        }
+        .task {
+            if partnerVM.items.isEmpty {
+                if let loc = locationService.location {
+                    await partnerVM.fetchAll(near: loc)
+                } else {
+                    partnerVM.loadMockData()
+                }
             }
         }
     }
@@ -152,6 +176,24 @@ struct HelpView: View {
                     HStack(spacing: Spacing.sm) {
                         HelpStatCard(icon: "hand.raised.fill", value: "\(openRequestCount)", label: "open requests nearby")
                         HelpStatCard(icon: "hands.sparkles.fill", value: "\(offeredByMeCount)", label: "you've offered")
+                    }
+
+                    // Community programs for seniors — Growing Old Program events
+                    let goldEvents = partnerVM.items.filter { $0.source == .goldEvents }
+                    if !goldEvents.isEmpty {
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("👴 Community programs for seniors")
+                                .font(.muckHeadline)
+                                .foregroundStyle(Color.muckNearBlack)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: Spacing.sm) {
+                                    ForEach(goldEvents.prefix(10)) { item in
+                                        GoldEventCard(item: item)
+                                            .onTapGesture { selectedGoldEvent = item }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     // Category filter
@@ -330,6 +372,36 @@ private struct HelpMeMiniMapView: View {
             ?? requests.first?.blurredCoordinate
             ?? CLLocationCoordinate2D(latitude: -37.8136, longitude: 144.9631)
         cameraPosition = .camera(MapCamera(centerCoordinate: target, distance: 4000))
+    }
+}
+
+// MARK: - Gold Event Card (seniors' programs)
+
+private struct GoldEventCard: View {
+    let item: PartnerItem
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.xxs) {
+            SourceBadgeView(source: item.source)
+            Text(item.name)
+                .font(.muckHeadline)
+                .foregroundStyle(Color.muckNearBlack)
+                .lineLimit(2)
+            if let date = item.displayDate {
+                Text(date)
+                    .font(.muckCaption)
+                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+            }
+        }
+        .padding(Spacing.sm)
+        .frame(width: 170, alignment: .leading)
+        .background(Color.muckSurface)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.md)
+                .strokeBorder(Color.partnerColor(.goldEvents).opacity(0.3), lineWidth: 1)
+        )
+        .muckCardShadow()
     }
 }
 

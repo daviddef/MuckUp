@@ -133,6 +133,7 @@ struct HomeView: View {
                 }
             }
             await awarenessVM.loadWaterwayData()
+            await awarenessVM.loadBurnData()
         }
     }
 

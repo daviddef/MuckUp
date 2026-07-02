@@ -61,8 +61,12 @@ extension Color {
         case .volunteerconnector: return Color(hex: "4F46E5") // indigo
         case .openlittermap:      return Color(hex: "EA580C") // orange
         case .epa:                return Color(hex: "DC2626") // red
-        case .brisbaneEvents:     return Color(hex: "059669") // emerald
-        case .greenEvents:        return Color(hex: "65A30D") // lime green
+        case .brisbaneEvents:      return Color(hex: "059669") // emerald
+        case .greenEvents:         return Color(hex: "65A30D") // lime green
+        case .parksEvents:         return Color(hex: "16A34A") // forest green
+        case .goldEvents:          return Color(hex: "CA8A04") // gold
+        case .compostingHub:       return Color(hex: "78350F") // earthy brown
+        case .wasteTransferStation: return Color(hex: "0891B2") // cyan
         }
     }
 

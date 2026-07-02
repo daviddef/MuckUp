@@ -4,33 +4,43 @@ import Foundation
 // MARK: - PartnerSource
 
 enum PartnerSource: String, CaseIterable, Identifiable {
-    case trashmob, wcd, justserve, volunteerconnector, openlittermap, epa, brisbaneEvents, greenEvents
+    case trashmob, wcd, justserve, volunteerconnector, openlittermap, epa
+    case brisbaneEvents, greenEvents, parksEvents, goldEvents
+    case compostingHub, wasteTransferStation
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
-        case .trashmob:           return "TrashMob"
-        case .wcd:                return "World Cleanup"
-        case .justserve:          return "JustServe"
-        case .volunteerconnector: return "VolConnector"
-        case .openlittermap:      return "Litter Map"
-        case .epa:                return "EPA"
-        case .brisbaneEvents:     return "Council Events"
-        case .greenEvents:        return "Green Events"
+        case .trashmob:            return "TrashMob"
+        case .wcd:                 return "World Cleanup"
+        case .justserve:           return "JustServe"
+        case .volunteerconnector:  return "VolConnector"
+        case .openlittermap:       return "Litter Map"
+        case .epa:                 return "EPA"
+        case .brisbaneEvents:      return "Council Events"
+        case .greenEvents:         return "Green Events"
+        case .parksEvents:         return "Parks Events"
+        case .goldEvents:          return "Seniors' Programs"
+        case .compostingHub:       return "Composting Hub"
+        case .wasteTransferStation: return "Resource Recovery"
         }
     }
 
     var emoji: String {
         switch self {
-        case .trashmob:           return "🤝"
-        case .wcd:                return "🌍"
-        case .justserve:          return "⚜️"
-        case .volunteerconnector: return "🙌"
-        case .openlittermap:      return "🗑️"
-        case .epa:                return "☢️"
-        case .brisbaneEvents:     return "🏛️"
-        case .greenEvents:        return "🌱"
+        case .trashmob:            return "🤝"
+        case .wcd:                 return "🌍"
+        case .justserve:           return "⚜️"
+        case .volunteerconnector:  return "🙌"
+        case .openlittermap:       return "🗑️"
+        case .epa:                 return "☢️"
+        case .brisbaneEvents:      return "🏛️"
+        case .greenEvents:         return "🌱"
+        case .parksEvents:         return "🌳"
+        case .goldEvents:          return "👴"
+        case .compostingHub:       return "🪱"
+        case .wasteTransferStation: return "♻️"
         }
     }
 

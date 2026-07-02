@@ -29,13 +29,22 @@ final class PartnerViewModel: ObservableObject {
         defer { isLoading = false }
 
         // Mock data stands in for the other partner sources for now.
-        // Brisbane City Council Events and Green Events are live feeds —
-        // fetched in parallel and merged in alongside the mock items.
+        // Everything else here is a live feed, fetched concurrently and
+        // merged in alongside the mock items.
         loadMockData()
         async let councilEvents = BrisbaneEventsService.shared.fetchNearby(location)
         async let greenEvents = GreenEventsService.shared.fetchNearby(location)
+        async let parksEvents = ParksEventsService.shared.fetchNearby(location)
+        async let goldEvents = GoldEventsService.shared.fetchNearby(location)
+        async let compostingHubs = WasteResourceLocationsService.shared.fetchCompostingHubs()
+        async let transferStations = WasteResourceLocationsService.shared.fetchWasteTransferStations()
+
         items.append(contentsOf: await councilEvents)
         items.append(contentsOf: await greenEvents)
+        items.append(contentsOf: await parksEvents)
+        items.append(contentsOf: await goldEvents)
+        items.append(contentsOf: await compostingHubs)
+        items.append(contentsOf: await transferStations)
     }
 
     func toggleSource(_ source: PartnerSource) {

@@ -6,11 +6,13 @@ import CoreLocation
 enum AwarenessCategory: String {
     case waterwaySafety
     case animalComplaint
+    case plannedBurn
 
     var displayName: String {
         switch self {
         case .waterwaySafety:  return "Waterway Safety"
         case .animalComplaint: return "Animal Complaints"
+        case .plannedBurn:     return "Planned Burn"
         }
     }
 
@@ -18,6 +20,7 @@ enum AwarenessCategory: String {
         switch self {
         case .waterwaySafety:  return "drop.triangle.fill"
         case .animalComplaint: return "pawprint.fill"
+        case .plannedBurn:     return "flame.fill"
         }
     }
 }
