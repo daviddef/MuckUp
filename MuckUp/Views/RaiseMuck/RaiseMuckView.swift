@@ -247,6 +247,12 @@ struct MuckLocationPicker: UIViewRepresentable {
     @Binding var isDragging: Bool
     let onCoordinateChanged: (CLLocationCoordinate2D) -> Void
 
+    // Programmatic recenter (e.g. from an address search field). Bump
+    // recenterToken whenever recenterCoordinate changes so the picker can
+    // tell "same coordinate, re-rendered" apart from "new place to jump to".
+    var recenterCoordinate: CLLocationCoordinate2D? = nil
+    var recenterToken: Int = 0
+
     func makeCoordinator() -> Coordinator {
         let coordinator = Coordinator(isDragging: $isDragging, onCoordinateChanged: onCoordinateChanged)
         coordinator.hasDragged = initialCoordinate != nil
@@ -284,6 +290,15 @@ struct MuckLocationPicker: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
+        // Address search jump — takes priority over the GPS auto-centre below.
+        if let recenterCoordinate, recenterToken != context.coordinator.lastRecenterToken {
+            context.coordinator.lastRecenterToken = recenterToken
+            context.coordinator.hasDragged = true
+            let region = MKCoordinateRegion(center: recenterCoordinate, latitudinalMeters: 500, longitudinalMeters: 500)
+            mapView.setRegion(region, animated: true)
+            return
+        }
+
         // If we just got a user location and haven't been dragged yet, re-centre
         if !context.coordinator.hasDragged, let loc = userLocation {
             let region = MKCoordinateRegion(center: loc.coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
@@ -297,6 +312,7 @@ struct MuckLocationPicker: UIViewRepresentable {
         @Binding var isDragging: Bool
         let onCoordinateChanged: (CLLocationCoordinate2D) -> Void
         var hasDragged = false
+        var lastRecenterToken = 0
         weak var crosshair: CrosshairView?
 
         init(isDragging: Binding<Bool>, onCoordinateChanged: @escaping (CLLocationCoordinate2D) -> Void) {

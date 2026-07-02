@@ -26,6 +26,13 @@ struct ScheduleEventView: View {
     @State private var pickedMeetupAddress: String = "Locating…"
     @State private var isDraggingMeetup = false
 
+    // Address search — jumps the map picker to a typed address
+    @State private var addressSearchText = ""
+    @State private var isSearchingAddress = false
+    @State private var addressSearchError: String? = nil
+    @State private var mapRecenterCoordinate: CLLocationCoordinate2D? = nil
+    @State private var mapRecenterToken = 0
+
     // "Things to be aware of" near the meetup point
     @State private var nearbyAwarenessItems: [AwarenessItem] = []
     @State private var isLoadingAwareness = false
@@ -168,6 +175,41 @@ struct ScheduleEventView: View {
                 }
                 // ── Meetup location ───────────────────────────────────
                 Section {
+                    // Address search — jumps the map to a typed address
+                    HStack(spacing: Spacing.xs) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.35))
+                        TextField("Search an address…", text: $addressSearchText)
+                            .font(.muckBody)
+                            .foregroundStyle(Color.muckNearBlack)
+                            .submitLabel(.search)
+                            .onSubmit { searchAddress() }
+                        if isSearchingAddress {
+                            ProgressView().tint(Color.muckGreen)
+                        } else if !addressSearchText.isEmpty {
+                            Button {
+                                searchAddress()
+                            } label: {
+                                Text("Go")
+                                    .font(.muckCaption)
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, Spacing.sm)
+                                    .padding(.vertical, Spacing.xxs)
+                                    .background(Color.muckGreen)
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, Spacing.xxxs)
+
+                    if let addressSearchError {
+                        Text(addressSearchError)
+                            .font(.muckCaption)
+                            .foregroundStyle(Color.muckRed)
+                    }
+
                     MuckLocationPicker(
                         userLocation: locationService.location,
                         initialCoordinate: pickedMeetupCoordinate ?? centroidOfSelectedMucks,
@@ -176,7 +218,9 @@ struct ScheduleEventView: View {
                             pickedMeetupCoordinate = coord
                             reverseGeocodeMeetup(coord)
                             loadAwareness(near: coord)
-                        }
+                        },
+                        recenterCoordinate: mapRecenterCoordinate,
+                        recenterToken: mapRecenterToken
                     )
                     .frame(height: 180)
                     .clipShape(RoundedRectangle(cornerRadius: Radius.md))
@@ -202,7 +246,7 @@ struct ScheduleEventView: View {
                     Text("Where — Meeting Point")
                         .font(.muckCaption)
                 } footer: {
-                    Text("Where people should physically gather — pan the map to drop the pin.")
+                    Text("Search an address to jump the map, then fine-tune by dragging the pin.")
                         .font(.muckMicro)
                         .foregroundStyle(Color.muckNearBlack.opacity(0.4))
                 }
@@ -445,6 +489,24 @@ struct ScheduleEventView: View {
             let parts = [place.name, place.locality, place.administrativeArea]
                 .compactMap { $0 }
             pickedMeetupAddress = parts.prefix(2).joined(separator: ", ")
+        }
+    }
+
+    private func searchAddress() {
+        let query = addressSearchText.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return }
+        addressSearchError = nil
+        isSearchingAddress = true
+
+        let geocoder = CLGeocoder()
+        geocoder.geocodeAddressString(query) { placemarks, _ in
+            isSearchingAddress = false
+            guard let coordinate = placemarks?.first?.location?.coordinate else {
+                addressSearchError = "Couldn't find that address — try adding a suburb."
+                return
+            }
+            mapRecenterCoordinate = coordinate
+            mapRecenterToken += 1
         }
     }
 
