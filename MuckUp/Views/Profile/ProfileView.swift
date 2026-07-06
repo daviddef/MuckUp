@@ -145,6 +145,30 @@ struct ProfileView: View {
                             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: muckVM.points)
                     }
 
+                    HStack(spacing: Spacing.xxs) {
+                        Text(muckVM.rank.emoji)
+                        Text(muckVM.rank.title)
+                            .font(.muckCaption)
+                    }
+                    .foregroundStyle(.white.opacity(0.9))
+
+                    if let toNext = muckVM.rank.pointsToNext(from: muckVM.points) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            GeometryReader { geo in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(.white.opacity(0.2))
+                                    Capsule().fill(.white)
+                                        .frame(width: geo.size.width * muckVM.rank.progress(from: muckVM.points))
+                                }
+                            }
+                            .frame(width: 110, height: 4)
+                            Text("\(toNext) to \(muckVM.rank.next?.title ?? "")")
+                                .font(.muckMicro)
+                                .foregroundStyle(.white.opacity(0.7))
+                        }
+                        .padding(.top, 2)
+                    }
+
                     if muckVM.streak > 0 {
                         HStack(spacing: Spacing.xxs) {
                             Image(systemName: "flame.fill")

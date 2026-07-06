@@ -5,6 +5,20 @@ struct ContentView: View {
     @State private var selectedTab = 0
 
     var body: some View {
+        ZStack(alignment: .top) {
+            tabView
+
+            if let rank = muckVM.justRankedUp {
+                RankUpBanner(rank: rank) {
+                    muckVM.justRankedUp = nil
+                }
+                .zIndex(1)
+                .transition(.identity)
+            }
+        }
+    }
+
+    private var tabView: some View {
         TabView(selection: $selectedTab) {
             HomeView()
                 .tabItem {

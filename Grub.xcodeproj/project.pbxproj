@@ -17,6 +17,7 @@
 		117FB8019BE5CC4FD510524F /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23C3B99BF27711D8EBC4E3D3 /* OnboardingView.swift */; };
 		12853CF997870A1D3EC801F9 /* MuckViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F78D0A959F52B15A35E2B1F /* MuckViewModel.swift */; };
 		1928CE59946B9388D0A286D7 /* HelpRequestCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289429F90BF35752C92D95A7 /* HelpRequestCard.swift */; };
+		19F0D826F704A80CD3799CC7 /* MuckRank.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54D716A4E143B89A7DE5E6E /* MuckRank.swift */; };
 		1ADD6A012E28944AEA17517E /* Partner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E52903B99A781403A7CD32 /* Partner.swift */; };
 		1BF5BA6F0C1B1EC68F7F851C /* HomeMiniMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9BA6E45986AFCA7FCDD6E2 /* HomeMiniMapView.swift */; };
 		209F0C047DD6977FA33EF086 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90A910FF716602F8D53AFF16 /* HelpView.swift */; };
@@ -62,6 +63,7 @@
 		BB0D812482C336D08F11EBC6 /* AddToEventSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7C2114E3847FEBAE6B5B3 /* AddToEventSheet.swift */; };
 		BD187811AF5BF7E23CD8DCF4 /* EventLiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B986405B5BABD48CAD63D7E /* EventLiveView.swift */; };
 		C3AEDBFD3F194F4CB06C5621 /* AnimalComplaintsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DCA225904002DF953C5D8CA /* AnimalComplaintsService.swift */; };
+		D2F781146285C1BE80681699 /* RankUpBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 777E0C9551602A8331FCC4C1 /* RankUpBanner.swift */; };
 		D5ACD10D9019DBD60DC01307 /* VoteColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1E83310AF223CD36FB390D /* VoteColumnView.swift */; };
 		DFBF21BE9BFA3A3E9FC1B730 /* MapViewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A75924861FE271F11D81B905 /* MapViewScreen.swift */; };
 		EAAFF076663A850C5D6808BC /* MuckMiniMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D6B190F2F6105F50AB0C87 /* MuckMiniMapView.swift */; };
@@ -102,6 +104,7 @@
 		6F78D0A959F52B15A35E2B1F /* MuckViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckViewModel.swift; sourceTree = "<group>"; };
 		7076D420C3B07A445C0C2CF6 /* GoldEventsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldEventsService.swift; sourceTree = "<group>"; };
 		7139996E5F3F38EF5355F49E /* GreenEventsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GreenEventsService.swift; sourceTree = "<group>"; };
+		777E0C9551602A8331FCC4C1 /* RankUpBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankUpBanner.swift; sourceTree = "<group>"; };
 		79841106617FFAF2DBEEB7C6 /* RaiseMuckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaiseMuckView.swift; sourceTree = "<group>"; };
 		79B8079D8067CFF2013C2174 /* TypeFilterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeFilterBar.swift; sourceTree = "<group>"; };
 		7AB55DFF1B365D9C3E4EA27B /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -119,6 +122,7 @@
 		9D95467E9EB25443B7AAB0E5 /* BrisbaneEventsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrisbaneEventsService.swift; sourceTree = "<group>"; };
 		9DCA225904002DF953C5D8CA /* AnimalComplaintsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimalComplaintsService.swift; sourceTree = "<group>"; };
 		A231AF8AFCD3609BAA6D179D /* MuckUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckUpApp.swift; sourceTree = "<group>"; };
+		A54D716A4E143B89A7DE5E6E /* MuckRank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckRank.swift; sourceTree = "<group>"; };
 		A68CB2FF8089A24369F7A521 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		A75924861FE271F11D81B905 /* MapViewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewScreen.swift; sourceTree = "<group>"; };
 		AAC775A383F0883ED5F75A29 /* EventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewModel.swift; sourceTree = "<group>"; };
@@ -337,6 +341,7 @@
 				1A4922B1A8934CCF066F638A /* HelpRequest.swift */,
 				90AB05B21CBFCB7E71B4E85D /* Muck.swift */,
 				2A0FAEAE3DEFD169BDA719CA /* MuckEvent.swift */,
+				A54D716A4E143B89A7DE5E6E /* MuckRank.swift */,
 				23E52903B99A781403A7CD32 /* Partner.swift */,
 				43D30E409F88B8591FA4F094 /* User.swift */,
 			);
@@ -362,6 +367,7 @@
 				5CBE17945598E5D51FD3EED0 /* GrowthPlantView.swift */,
 				E56EBD830F6BAD8615BAC04D /* PhotoPickerButton.swift */,
 				8204790B4A659E31ABDC9920 /* PrimaryButton.swift */,
+				777E0C9551602A8331FCC4C1 /* RankUpBanner.swift */,
 				139BB5ED0AA8EE569DB25526 /* StampBadgeView.swift */,
 				677E75E37C1C41678CE8A50A /* TypeBadgeView.swift */,
 				79B8079D8067CFF2013C2174 /* TypeFilterBar.swift */,
@@ -498,6 +504,7 @@
 				34BFD69DD9FB92C5559C68BF /* MuckCardView.swift in Sources */,
 				F58484A156015E6669190F7A /* MuckEvent.swift in Sources */,
 				EAAFF076663A850C5D6808BC /* MuckMiniMapView.swift in Sources */,
+				19F0D826F704A80CD3799CC7 /* MuckRank.swift in Sources */,
 				222074DF393D3FDE09468072 /* MuckUpApp.swift in Sources */,
 				12853CF997870A1D3EC801F9 /* MuckViewModel.swift in Sources */,
 				0C32683227A9F89484467B59 /* NotificationService.swift in Sources */,
@@ -511,6 +518,7 @@
 				A94B02A979415ACAE475E80E /* PrimaryButton.swift in Sources */,
 				4D159D5D63C3E2C48231FA46 /* ProfileView.swift in Sources */,
 				A22933096E4ADD0CA76F339A /* RaiseMuckView.swift in Sources */,
+				D2F781146285C1BE80681699 /* RankUpBanner.swift in Sources */,
 				03B70C81FB38E8636867B61B /* RootView.swift in Sources */,
 				518CBED455A9BF2EC75C3E73 /* ScheduleEventView.swift in Sources */,
 				4D93ABE7B2F224F9DD1B9D2B /* SplashView.swift in Sources */,

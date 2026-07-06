@@ -8,6 +8,11 @@ final class MuckViewModel: ObservableObject {
     @Published var typeFilter: MuckType? = nil
     @Published var searchText: String = ""
     @Published var points: Int = 0
+    // Set the moment points cross into a new rank; views observe this to
+    // show a celebratory rank-up moment, then clear it back to nil.
+    @Published var justRankedUp: MuckRank? = nil
+
+    var rank: MuckRank { MuckRank.forPoints(points) }
 
     private let storage = StorageService.shared
     var userId: String = AppUser.guest.id
@@ -84,10 +89,15 @@ final class MuckViewModel: ObservableObject {
     // MARK: - Points
 
     func award(_ action: PointAction) {
+        let previousRank = rank
         storage.addPoints(action.value, for: userId)
         points = storage.loadPoints(for: userId)
         storage.recordActivityToday(for: userId)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+
+        if rank > previousRank {
+            justRankedUp = rank
+        }
     }
 
     // MARK: - Personal history
