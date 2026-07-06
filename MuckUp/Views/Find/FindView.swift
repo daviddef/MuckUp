@@ -297,6 +297,7 @@ struct PartnerItemRow: View {
         modelContext.insert(muck)
         muckVM.recordRaised(muck.id)
         scheduleMuck = muck
+        Task { await CloudKitMuckSyncService.shared.upload(muck) }
     }
 }
 

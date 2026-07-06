@@ -246,6 +246,10 @@ struct RaiseMuckView: View {
         muckVM.award(.raiseMuck)
         muckVM.recordRaised(newMuck.id)
         isSaved = true
+
+        // Push to the shared public database so other users see it too —
+        // fire-and-forget, local state is already saved regardless.
+        Task { await CloudKitMuckSyncService.shared.upload(newMuck) }
     }
 }
 

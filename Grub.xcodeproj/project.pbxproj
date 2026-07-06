@@ -49,6 +49,7 @@
 		8CCB42C3576493D1D13D0AE1 /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632C2F91DD7B35B2A04BEB89 /* MockData.swift */; };
 		8CD0E54F18E4E2C617B9AD91 /* PhotoPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E56EBD830F6BAD8615BAC04D /* PhotoPickerButton.swift */; };
 		9DF45C8629F11BCC6C38485F /* CloseMuckSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC8024B54B25D5878D6A4A0 /* CloseMuckSheet.swift */; };
+		A2056DB9CF38A2D453219C7F /* CloudKitMuckSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C78AF72E4717D651B053C5E /* CloudKitMuckSyncService.swift */; };
 		A22933096E4ADD0CA76F339A /* RaiseMuckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79841106617FFAF2DBEEB7C6 /* RaiseMuckView.swift */; };
 		A453B70EC6E1FDA3250F1C5C /* GrowthPlantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CBE17945598E5D51FD3EED0 /* GrowthPlantView.swift */; };
 		A6274C089F8901AC4E3B9F18 /* HomeActivityFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59FF7A22575970A65F11716 /* HomeActivityFeed.swift */; };
@@ -117,6 +118,7 @@
 		90AB05B21CBFCB7E71B4E85D /* Muck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Muck.swift; sourceTree = "<group>"; };
 		980D7DEE51CF22535EDCD846 /* EmptyStateIllustration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateIllustration.swift; sourceTree = "<group>"; };
 		9BB21888E0DD634338526D36 /* ScheduleEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventView.swift; sourceTree = "<group>"; };
+		9C78AF72E4717D651B053C5E /* CloudKitMuckSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitMuckSyncService.swift; sourceTree = "<group>"; };
 		9C9A262C367E9690FB5D8BF2 /* EventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsView.swift; sourceTree = "<group>"; };
 		9D0D6B3AB481B826B56DCD95 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		9D95467E9EB25443B7AAB0E5 /* BrisbaneEventsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrisbaneEventsService.swift; sourceTree = "<group>"; };
@@ -185,6 +187,7 @@
 				9DCA225904002DF953C5D8CA /* AnimalComplaintsService.swift */,
 				144120405C729ED3B97F8EC8 /* AuthService.swift */,
 				9D95467E9EB25443B7AAB0E5 /* BrisbaneEventsService.swift */,
+				9C78AF72E4717D651B053C5E /* CloudKitMuckSyncService.swift */,
 				7076D420C3B07A445C0C2CF6 /* GoldEventsService.swift */,
 				7139996E5F3F38EF5355F49E /* GreenEventsService.swift */,
 				A68CB2FF8089A24369F7A521 /* LocationService.swift */,
@@ -477,6 +480,7 @@
 				28BB28DB265A06B3DC4E1B7D /* AwarenessViewModel.swift in Sources */,
 				FD914D99BFDBEAC45BC75A55 /* BrisbaneEventsService.swift in Sources */,
 				9DF45C8629F11BCC6C38485F /* CloseMuckSheet.swift in Sources */,
+				A2056DB9CF38A2D453219C7F /* CloudKitMuckSyncService.swift in Sources */,
 				2B903AE0D2A005EE66BF9E3C /* ConfettiBurstView.swift in Sources */,
 				31B1CA5286B739BB30900EF9 /* ContentView.swift in Sources */,
 				2575BB2B761ABE31631419CC /* DesignTokens.swift in Sources */,

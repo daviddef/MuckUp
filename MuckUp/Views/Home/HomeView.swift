@@ -214,6 +214,16 @@ struct HomeView: View {
             }
             await awarenessVM.loadWaterwayData()
             await awarenessVM.loadBurnData()
+
+            // Pull in mucks other users have raised nearby (shared public
+            // database) and merge any not already present locally.
+            if let loc = locationService.location {
+                let remote = await CloudKitMuckSyncService.shared.fetchNearby(loc.coordinate, radiusMetres: 50_000)
+                let localIds = Set(allMucks.map(\.id))
+                for muck in remote where !localIds.contains(muck.id) {
+                    modelContext.insert(muck)
+                }
+            }
         }
     }
 
