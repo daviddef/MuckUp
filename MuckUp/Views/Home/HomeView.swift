@@ -128,12 +128,23 @@ struct HomeView: View {
         items += visiblePartnerItems.map { .partner($0) }
         items += nearbyAwarenessForHome.map { .awareness($0) }
 
+        let now = Date.now
         return items.sorted { a, b in
             if a.isPriority != b.isPriority { return a.isPriority }
             if a.isLive != b.isLive { return a.isLive }
             switch muckVM.sortOrder {
-            case .votes: return a.popularityScore > b.popularityScore
-            case .date:  return a.activityDate > b.activityDate
+            case .votes:
+                return a.popularityScore > b.popularityScore
+            case .date:
+                // "What's up next" — upcoming items (events still to come)
+                // sort soonest-first; anything already in the past sorts
+                // most-recent-first below them. A plain descending sort
+                // put the furthest-out future date at the very top, which
+                // read as "December, then October" instead of "what's next".
+                let aUpcoming = a.activityDate >= now
+                let bUpcoming = b.activityDate >= now
+                if aUpcoming != bUpcoming { return aUpcoming }
+                return aUpcoming ? a.activityDate < b.activityDate : a.activityDate > b.activityDate
             }
         }
     }
