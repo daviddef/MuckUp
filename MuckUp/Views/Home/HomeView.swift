@@ -322,10 +322,11 @@ struct HomeView: View {
                     .foregroundStyle(Color.muckNearBlack)
             }
 
-            // Points badge
+            // Points + rank badge — surfaces rank on the daily screen
+            // instead of it only ever being visible in Profile
             HStack(spacing: Spacing.xxs) {
-                Image(systemName: "bolt.fill")
-                    .font(.system(size: 10, weight: .bold))
+                Text(muckVM.rank.emoji)
+                    .font(.system(size: 11))
                 Text("\(muckVM.points)")
                     .font(.muckCaption)
                     .monospacedDigit()
