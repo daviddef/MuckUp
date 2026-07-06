@@ -23,6 +23,7 @@ struct RaiseMuckView: View {
     @State private var reportedDate = Date.now
     @State private var isSaved = false
     @State private var photoData: Data? = nil
+    @State private var showDetails = false
 
     // Location picker state
     @State private var pickedCoordinate: CLLocationCoordinate2D? = nil
@@ -38,125 +39,15 @@ struct RaiseMuckView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.lg) {
 
-                    // Type selector
+                    // Photo comes first — snap it, then everything else
+                    // follows. This is the evidence the whole report is
+                    // built around, so it shouldn't be buried mid-form.
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("What type of muck is this?")
-                            .font(.muckTitle)
+                        Text("What did you find?")
+                            .font(.muckDisplay)
                             .foregroundStyle(Color.muckNearBlack)
-
-                        HStack(spacing: Spacing.sm) {
-                            ForEach(MuckType.allCases, id: \.self) { type in
-                                TypeSelectorCard(type: type, isSelected: selectedType == type) {
-                                    selectedType = type
-                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                }
-                            }
-                        }
-                    }
-
-                    // WHERE — location picker map
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Where is it?")
-                            .font(.muckTitle)
-                            .foregroundStyle(Color.muckNearBlack)
-
-                        MuckLocationPicker(
-                            userLocation: locationService.location,
-                            initialCoordinate: prefill.coordinate,
-                            isDragging: $isDragging,
-                            onCoordinateChanged: { coord in
-                                pickedCoordinate = coord
-                                reverseGeocode(coord)
-                            }
-                        )
-                        .frame(height: 220)
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Radius.md)
-                                .strokeBorder(Color.muckNearBlack.opacity(0.1))
-                        )
-
-                        // Address readout
-                        HStack(spacing: Spacing.xs) {
-                            Image(systemName: "mappin.circle.fill")
-                                .foregroundStyle(Color.muckGreen)
-                                .font(.system(size: 14))
-                            Text(isDragging ? "Drop to set location…" : pickedAddress)
-                                .font(.muckBody)
-                                .foregroundStyle(isDragging
-                                    ? Color.muckNearBlack.opacity(0.4)
-                                    : Color.muckNearBlack)
-                                .animation(.easeInOut(duration: 0.15), value: isDragging)
-                            Spacer()
-                        }
-                        .padding(.horizontal, Spacing.xs)
-                    }
-
-                    // Hazardous toggle
-                    Toggle(isOn: $isHazardous) {
-                        HStack(spacing: Spacing.xs) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(isHazardous ? Color.muckRed : Color.muckNearBlack.opacity(0.4))
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text("Mark as Hazardous")
-                                    .font(.muckHeadline)
-                                    .foregroundStyle(Color.muckNearBlack)
-                                Text("Chemical, biological, or dangerous to approach")
-                                    .font(.muckCaption)
-                                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
-                            }
-                        }
-                    }
-                    .tint(Color.muckRed)
-                    .padding(Spacing.sm)
-                    .background(isHazardous ? Color.muckRed.opacity(0.06) : Color.muckSurface)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-
-                    // Description
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Describe the issue")
-                            .font(.muckTitle)
-                            .foregroundStyle(Color.muckNearBlack)
-                        TextEditor(text: $description)
+                        Text("Take a photo to get started — the details below fill in around it.")
                             .font(.muckBody)
-                            .foregroundStyle(Color.muckNearBlack)
-                            .frame(minHeight: 100)
-                            .padding(Spacing.sm)
-                            .background(Color.muckSurface)
-                            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: Radius.md)
-                                    .strokeBorder(Color.muckNearBlack.opacity(0.1))
-                            )
-                        if description.count < 10 && !description.isEmpty {
-                            Text("Please add a bit more detail (at least 10 characters)")
-                                .font(.muckCaption)
-                                .foregroundStyle(Color.muckRed)
-                        }
-                    }
-
-                    // Date
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("When did you notice this?")
-                            .font(.muckTitle)
-                            .foregroundStyle(Color.muckNearBlack)
-                        DatePicker("", selection: $reportedDate, in: ...Date.now, displayedComponents: [.date, .hourAndMinute])
-                            .labelsHidden()
-                            .tint(Color.muckGreen)
-                    }
-
-                    // Photo evidence — required
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        HStack(spacing: Spacing.xxs) {
-                            Text("Add a photo")
-                                .font(.muckTitle)
-                                .foregroundStyle(Color.muckNearBlack)
-                            Text("*")
-                                .font(.muckTitle)
-                                .foregroundStyle(Color.muckRed)
-                        }
-                        Text("A photo is what turns this into real evidence — for the community, and for councils.")
-                            .font(.muckCaption)
                             .foregroundStyle(Color.muckNearBlack.opacity(0.5))
                         PhotoPickerButton(
                             label: "Take or choose a photo",
@@ -165,16 +56,135 @@ struct RaiseMuckView: View {
                         )
                     }
 
-                    PrimaryButton(
-                        title: "Submit Muck",
-                        icon: "checkmark",
-                        isDisabled: !isValid
-                    ) {
-                        submitMuck()
+                    if photoData != nil {
+                        // Type selector
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("What type of muck is this?")
+                                .font(.muckTitle)
+                                .foregroundStyle(Color.muckNearBlack)
+
+                            HStack(spacing: Spacing.sm) {
+                                ForEach(MuckType.allCases, id: \.self) { type in
+                                    TypeSelectorCard(type: type, isSelected: selectedType == type) {
+                                        selectedType = type
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    }
+                                }
+                            }
+                        }
+
+                        // WHERE — location picker map
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Where is it?")
+                                .font(.muckTitle)
+                                .foregroundStyle(Color.muckNearBlack)
+
+                            MuckLocationPicker(
+                                userLocation: locationService.location,
+                                initialCoordinate: prefill.coordinate,
+                                isDragging: $isDragging,
+                                onCoordinateChanged: { coord in
+                                    pickedCoordinate = coord
+                                    reverseGeocode(coord)
+                                }
+                            )
+                            .frame(height: 220)
+                            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Radius.md)
+                                    .strokeBorder(Color.muckNearBlack.opacity(0.1))
+                            )
+
+                            // Address readout
+                            HStack(spacing: Spacing.xs) {
+                                Image(systemName: "mappin.circle.fill")
+                                    .foregroundStyle(Color.muckGreen)
+                                    .font(.system(size: 14))
+                                Text(isDragging ? "Drop to set location…" : pickedAddress)
+                                    .font(.muckBody)
+                                    .foregroundStyle(isDragging
+                                        ? Color.muckNearBlack.opacity(0.4)
+                                        : Color.muckNearBlack)
+                                    .animation(.easeInOut(duration: 0.15), value: isDragging)
+                                Spacer()
+                            }
+                            .padding(.horizontal, Spacing.xs)
+                        }
+
+                        // Description
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Describe the issue")
+                                .font(.muckTitle)
+                                .foregroundStyle(Color.muckNearBlack)
+                            TextEditor(text: $description)
+                                .font(.muckBody)
+                                .foregroundStyle(Color.muckNearBlack)
+                                .frame(minHeight: 100)
+                                .padding(Spacing.sm)
+                                .background(Color.muckSurface)
+                                .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: Radius.md)
+                                        .strokeBorder(Color.muckNearBlack.opacity(0.1))
+                                )
+                            if description.count < 10 && !description.isEmpty {
+                                Text("Please add a bit more detail (at least 10 characters)")
+                                    .font(.muckCaption)
+                                    .foregroundStyle(Color.muckRed)
+                            }
+                        }
+
+                        // More details — collapsed by default, most
+                        // reports don't need to touch these
+                        DisclosureGroup(isExpanded: $showDetails) {
+                            VStack(alignment: .leading, spacing: Spacing.md) {
+                                Toggle(isOn: $isHazardous) {
+                                    HStack(spacing: Spacing.xs) {
+                                        Image(systemName: "exclamationmark.triangle.fill")
+                                            .foregroundStyle(isHazardous ? Color.muckRed : Color.muckNearBlack.opacity(0.4))
+                                        VStack(alignment: .leading, spacing: 1) {
+                                            Text("Mark as Hazardous")
+                                                .font(.muckHeadline)
+                                                .foregroundStyle(Color.muckNearBlack)
+                                            Text("Chemical, biological, or dangerous to approach")
+                                                .font(.muckCaption)
+                                                .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                                        }
+                                    }
+                                }
+                                .tint(Color.muckRed)
+
+                                VStack(alignment: .leading, spacing: Spacing.xs) {
+                                    Text("When did you notice this?")
+                                        .font(.muckHeadline)
+                                        .foregroundStyle(Color.muckNearBlack)
+                                    DatePicker("", selection: $reportedDate, in: ...Date.now, displayedComponents: [.date, .hourAndMinute])
+                                        .labelsHidden()
+                                        .tint(Color.muckGreen)
+                                }
+                            }
+                            .padding(.top, Spacing.sm)
+                        } label: {
+                            Label(isHazardous ? "Hazardous · custom date" : "Hazard flag, date & more", systemImage: "slider.horizontal.3")
+                                .font(.muckCaption)
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.6))
+                        }
+                        .padding(Spacing.sm)
+                        .background(Color.muckSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+
+                        PrimaryButton(
+                            title: "Submit Muck",
+                            icon: "checkmark",
+                            isDisabled: !isValid
+                        ) {
+                            submitMuck()
+                        }
+                        .padding(.top, Spacing.xs)
                     }
-                    .padding(.top, Spacing.xs)
                 }
                 .padding(Spacing.md)
+                .animation(.easeInOut(duration: 0.25), value: photoData == nil)
             }
             .background(Color.muckBg)
             .navigationTitle("Raise a Muck")
@@ -249,7 +259,7 @@ struct MuckLocationPicker: UIViewRepresentable {
 
     // Programmatic recenter (e.g. from an address search field). Bump
     // recenterToken whenever recenterCoordinate changes so the picker can
-    // tell "same coordinate, re-rendered" apart from "new place to jump to".
+    // tell "same coordinate re-rendered" apart from "new place to jump to".
     var recenterCoordinate: CLLocationCoordinate2D? = nil
     var recenterToken: Int = 0
 
@@ -345,90 +355,93 @@ struct MuckLocationPicker: UIViewRepresentable {
 // MARK: - Crosshair View
 
 final class CrosshairView: UIView {
-    private let pinBody = UIView()
-    private let pinShadow = UIView()
-    private let pulseRing = UIView()
+    private let shadowLayer = CAShapeLayer()
+    private let pinLayer = CAShapeLayer()
+    private let dotLayer = CAShapeLayer()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        backgroundColor = .clear
         setup()
     }
-    required init?(coder: NSCoder) { fatalError() }
 
-    private func setup() {
-        backgroundColor = .clear
-
-        // Pulse ring — visible when dropped
-        pulseRing.frame = CGRect(x: 10, y: 10, width: 24, height: 24)
-        pulseRing.layer.cornerRadius = 12
-        pulseRing.layer.borderWidth = 2
-        pulseRing.layer.borderColor = UIColor(Color.muckGreen).withAlphaComponent(0.4).cgColor
-        pulseRing.backgroundColor = UIColor(Color.muckGreen).withAlphaComponent(0.1)
-        addSubview(pulseRing)
-
-        // Pin shadow — small ellipse below pin tip
-        pinShadow.frame = CGRect(x: 16, y: 36, width: 12, height: 4)
-        pinShadow.layer.cornerRadius = 2
-        pinShadow.backgroundColor = UIColor.black.withAlphaComponent(0.2)
-        addSubview(pinShadow)
-
-        // Pin body — teardrop shape via CAShapeLayer
-        let pinSize: CGFloat = 28
-        let pinLayer = CAShapeLayer()
-        pinLayer.path = teardropPath(size: pinSize).cgPath
-        pinLayer.fillColor = UIColor(Color.muckGreen).cgColor
-        pinLayer.shadowColor = UIColor.black.cgColor
-        pinLayer.shadowOpacity = 0.25
-        pinLayer.shadowOffset = CGSize(width: 0, height: 3)
-        pinLayer.shadowRadius = 4
-
-        pinBody.frame = CGRect(x: (44 - pinSize) / 2, y: 2, width: pinSize, height: pinSize + 6)
-        pinBody.backgroundColor = .clear
-        pinBody.layer.addSublayer(pinLayer)
-        addSubview(pinBody)
-
-        // White dot in centre of pin
-        let dot = UIView(frame: CGRect(x: (pinSize - 8) / 2, y: (pinSize - 8) / 2 - 3, width: 8, height: 8))
-        dot.layer.cornerRadius = 4
-        dot.backgroundColor = .white
-        pinBody.addSubview(dot)
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setup()
     }
 
-    private func teardropPath(size: CGFloat) -> UIBezierPath {
-        let path = UIBezierPath()
-        let r = size / 2
-        let cx = r
-        let cy = r - 2
-        // Circle top
-        path.addArc(withCenter: CGPoint(x: cx, y: cy), radius: r, startAngle: .pi, endAngle: 0, clockwise: true)
-        // Taper to point at bottom
-        path.addLine(to: CGPoint(x: cx + r, y: cy))
-        path.addQuadCurve(to: CGPoint(x: cx, y: size + 4), controlPoint: CGPoint(x: cx + r, y: size))
-        path.addQuadCurve(to: CGPoint(x: cx - r, y: cy), controlPoint: CGPoint(x: cx - r, y: size))
-        path.close()
-        return path
+    private func setup() {
+        shadowLayer.fillColor = UIColor.black.withAlphaComponent(0.25).cgColor
+        layer.addSublayer(shadowLayer)
+
+        pinLayer.fillColor = UIColor.white.cgColor
+        pinLayer.shadowColor = UIColor.black.cgColor
+        pinLayer.shadowOpacity = 0.25
+        pinLayer.shadowOffset = CGSize(width: 0, height: 2)
+        pinLayer.shadowRadius = 3
+        layer.addSublayer(pinLayer)
+
+        dotLayer.fillColor = UIColor(Color.muckGreen).cgColor
+        layer.addSublayer(dotLayer)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        drawPin(lifted: false)
     }
 
     func setLifted(_ lifted: Bool) {
-        UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseOut) {
-            // Lift pin up, shrink shadow
-            self.pinBody.transform = lifted
-                ? CGAffineTransform(translationX: 0, y: -10)
-                : .identity
-            self.pinShadow.transform = lifted
-                ? CGAffineTransform(scaleX: 0.5, y: 0.5)
-                : .identity
-            self.pinShadow.alpha = lifted ? 0.15 : 0.7
-            // Hide pulse ring while dragging
-            self.pulseRing.alpha = lifted ? 0 : 1
+        UIView.animate(withDuration: 0.15) {
+            self.drawPin(lifted: lifted)
         }
-        // Pulse animation when dropped
-        if !lifted {
-            pulseRing.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
-            UIView.animate(withDuration: 0.4, delay: 0.1, usingSpringWithDamping: 0.5, initialSpringVelocity: 1) {
-                self.pulseRing.transform = .identity
-            }
-        }
+    }
+
+    private func drawPin(lifted: Bool) {
+        let w = bounds.width
+        let h = bounds.height
+        let liftOffset: CGFloat = lifted ? -8 : 0
+
+        // Teardrop pin shape
+        let pinWidth: CGFloat = w * 0.55
+        let pinHeight: CGFloat = h * 0.8
+        let cx = w / 2
+        let topY = (h - pinHeight) / 2 + liftOffset
+
+        let path = UIBezierPath()
+        let radius = pinWidth / 2
+        path.addArc(withCenter: CGPoint(x: cx, y: topY + radius), radius: radius, startAngle: .pi, endAngle: 0, clockwise: true)
+        path.addQuadCurve(
+            to: CGPoint(x: cx, y: topY + pinHeight),
+            controlPoint: CGPoint(x: cx + radius, y: topY + pinHeight * 0.7)
+        )
+        path.addQuadCurve(
+            to: CGPoint(x: cx - radius, y: topY + radius),
+            controlPoint: CGPoint(x: cx - radius, y: topY + pinHeight * 0.7)
+        )
+        path.close()
+        pinLayer.path = path.cgPath
+
+        // Inner dot
+        let dotRadius = radius * 0.4
+        let dotPath = UIBezierPath(
+            arcCenter: CGPoint(x: cx, y: topY + radius),
+            radius: dotRadius,
+            startAngle: 0,
+            endAngle: .pi * 2,
+            clockwise: true
+        )
+        dotLayer.path = dotPath.cgPath
+
+        // Shadow ellipse at ground level — shrinks when lifted
+        let shadowScale: CGFloat = lifted ? 0.7 : 1.0
+        let shadowWidth = pinWidth * 0.6 * shadowScale
+        let shadowRect = CGRect(
+            x: cx - shadowWidth / 2,
+            y: h - 6,
+            width: shadowWidth,
+            height: 5
+        )
+        shadowLayer.path = UIBezierPath(ovalIn: shadowRect).cgPath
     }
 }
 
@@ -441,16 +454,15 @@ private struct TypeSelectorCard: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: Spacing.xs) {
+            VStack(spacing: Spacing.xxs) {
                 Image(systemName: type.icon)
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(isSelected ? .white : Color.muckTypeColor(type))
+                    .font(.system(size: 20))
                 Text(type.displayName)
                     .font(.muckCaption)
-                    .foregroundStyle(isSelected ? .white : Color.muckNearBlack)
             }
+            .foregroundStyle(isSelected ? .white : Color.muckNearBlack)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.md)
+            .padding(.vertical, Spacing.sm)
             .background(isSelected ? Color.muckTypeColor(type) : Color.muckSurface)
             .clipShape(RoundedRectangle(cornerRadius: Radius.md))
             .overlay(
@@ -502,11 +514,4 @@ struct MuckSavedView: View {
         }
         .onAppear { celebrate = true }
     }
-}
-
-#Preview {
-    RaiseMuckView()
-        .modelContainer(previewContainer)
-        .environmentObject(MuckViewModel())
-        .environmentObject(LocationService())
 }
