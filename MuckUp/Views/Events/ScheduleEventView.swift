@@ -20,6 +20,7 @@ struct ScheduleEventView: View {
     @State private var muckSearch = ""
     @State private var expandedRadius = false
     @State private var quickLookMuck: Muck?
+    @State private var showMuckLinking = false
 
     // Meetup location picker state
     @State private var pickedMeetupCoordinate: CLLocationCoordinate2D? = nil
@@ -282,8 +283,40 @@ struct ScheduleEventView: View {
                     }
                 }
 
+                // ── Link mucks — collapsed by default; optional add-on,
+                // not every event has (or needs) a muck attached ────────
+                Section {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showMuckLinking.toggle()
+                        }
+                    } label: {
+                        HStack {
+                            Label("Link Mucks to this Event", systemImage: "mappin.and.ellipse")
+                                .font(.muckHeadline)
+                                .foregroundStyle(Color.muckNearBlack)
+                            Spacer()
+                            if !selectedMuckIds.isEmpty {
+                                Text("\(selectedMuckIds.count) selected")
+                                    .font(.muckCaption)
+                                    .foregroundStyle(Color.muckGreen)
+                            }
+                            Image(systemName: showMuckLinking ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                        }
+                    }
+                    .buttonStyle(.plain)
+                } footer: {
+                    if !showMuckLinking {
+                        Text("Optional — tap to browse nearby mucks to clean up at this event.")
+                            .font(.muckMicro)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                    }
+                }
+
                 // ── Suggested mucks ──────────────────────────────────
-                if !suggestedMucks.isEmpty {
+                if showMuckLinking && !suggestedMucks.isEmpty {
                     Section {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: Spacing.sm) {
@@ -311,7 +344,7 @@ struct ScheduleEventView: View {
                 }
 
                 // ── Selected mucks proximity map ─────────────────────
-                if selectedMucks.count > 1 {
+                if showMuckLinking && selectedMucks.count > 1 {
                     Section {
                         SelectedMucksMapView(mucks: selectedMucks, onSelect: { quickLookMuck = $0 })
                             .listRowInsets(EdgeInsets(top: 0, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
@@ -326,6 +359,7 @@ struct ScheduleEventView: View {
                 }
 
                 // ── Muck picker ──────────────────────────────────────
+                if showMuckLinking {
                 Section {
                     // Inline search when list is non-trivial
                     if eligibleMucks.count > 4 {
@@ -408,6 +442,7 @@ struct ScheduleEventView: View {
                     }
                     .font(.muckCaption)
                 }
+                }
 
             }
             .listStyle(.insetGrouped)
@@ -439,6 +474,7 @@ struct ScheduleEventView: View {
         .onAppear {
             if let muck = preselectedMuck {
                 selectedMuckIds.insert(muck.id)
+                showMuckLinking = true
             }
             let start = centroidOfSelectedMucks ?? locationService.location?.coordinate
             if let start {
