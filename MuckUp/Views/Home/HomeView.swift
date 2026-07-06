@@ -215,6 +215,10 @@ struct HomeView: View {
             await awarenessVM.loadWaterwayData()
             await awarenessVM.loadBurnData()
 
+            // Retry any local mucks that were raised offline or hit a
+            // transient error before their public-database upload confirmed.
+            await CloudKitMuckSyncService.shared.retryPendingUploads(allMucks)
+
             // Pull in mucks other users have raised nearby (shared public
             // database) and merge any not already present locally.
             if let loc = locationService.location {

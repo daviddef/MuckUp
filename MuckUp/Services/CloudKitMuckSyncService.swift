@@ -39,12 +39,25 @@ final class CloudKitMuckSyncService {
         record["eventCount"] = muck.eventCount
         record["isClosed"] = muck.isClosed ? 1 : 0
         record["ownerId"] = muck.ownerId
+        record["flagCount"] = muck.flagCount
         record["location_loc"] = CLLocation(latitude: muck.latitude, longitude: muck.longitude)
 
         do {
             _ = try await database.save(record)
+            muck.syncedToCloud = true
         } catch {
-            print("⚠️ CloudKitMuckSyncService.upload failed: \(error)")
+            print("⚠️ CloudKitMuckSyncService.upload failed, will retry later: \(error)")
+        }
+    }
+
+    /// Re-attempts upload for any local mucks that never confirmed a
+    /// successful sync — the case where Raise a Muck happened offline,
+    /// or the earlier attempt hit a transient CloudKit/network error.
+    /// Call this opportunistically (e.g. on Home's load) rather than
+    /// wiring up a persistent background queue.
+    func retryPendingUploads(_ mucks: [Muck]) async {
+        for muck in mucks where !muck.syncedToCloud {
+            await upload(muck)
         }
     }
 
@@ -56,6 +69,7 @@ final class CloudKitMuckSyncService {
             let record = try await database.record(for: CKRecord.ID(recordName: muck.id))
             record["votes"] = muck.votes
             record["isClosed"] = muck.isClosed ? 1 : 0
+            record["flagCount"] = muck.flagCount
             _ = try await database.save(record)
         } catch {
             print("⚠️ CloudKitMuckSyncService.update failed: \(error)")
@@ -64,7 +78,10 @@ final class CloudKitMuckSyncService {
 
     /// Fetch mucks other users have raised nearby. Returns plain, unmanaged
     /// Muck instances — the caller is responsible for de-duping against
-    /// local SwiftData by `id` before inserting.
+    /// local SwiftData by `id` before inserting. Mucks that have already
+    /// been flagged past the hide threshold on the shared database are
+    /// filtered out here so they never even reach a device that hasn't
+    /// seen them yet.
     func fetchNearby(_ coordinate: CLLocationCoordinate2D, radiusMetres: Double) async -> [Muck] {
         let centre = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         let predicate = NSPredicate(
@@ -78,10 +95,25 @@ final class CloudKitMuckSyncService {
             return results.compactMap { _, result in
                 guard let record = try? result.get() else { return nil }
                 return Muck(from: record)
-            }
+            }.filter { !$0.isHiddenByFlags }
         } catch {
             print("⚠️ CloudKitMuckSyncService.fetchNearby failed: \(error)")
             return []
+        }
+    }
+
+    /// A user flagged a muck as spam/abuse/duplicate — increments the
+    /// shared flag count. Read-modify-write against the current record
+    /// rather than the caller's stale copy, since multiple people may be
+    /// flagging concurrently.
+    func flag(muckId: String) async {
+        do {
+            let record = try await database.record(for: CKRecord.ID(recordName: muckId))
+            let current = record["flagCount"] as? Int ?? 0
+            record["flagCount"] = current + 1
+            _ = try await database.save(record)
+        } catch {
+            print("⚠️ CloudKitMuckSyncService.flag failed: \(error)")
         }
     }
 }
@@ -111,7 +143,8 @@ extension Muck {
             votes: record["votes"] as? Int ?? 0,
             eventCount: record["eventCount"] as? Int ?? 0,
             isClosed: (record["isClosed"] as? Int ?? 0) == 1,
-            ownerId: record["ownerId"] as? String ?? ""
+            ownerId: record["ownerId"] as? String ?? "",
+            flagCount: record["flagCount"] as? Int ?? 0
         )
     }
 }

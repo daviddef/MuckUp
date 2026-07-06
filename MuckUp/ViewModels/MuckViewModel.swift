@@ -33,7 +33,7 @@ final class MuckViewModel: ObservableObject {
     // MARK: - Filtering & Sorting
 
     func filtered(_ mucks: [Muck]) -> [Muck] {
-        var result = mucks.filter { !$0.isClosed }
+        var result = mucks.filter { !$0.isClosed && !$0.isHiddenByFlags }
 
         if let filter = typeFilter {
             result = result.filter { $0.type == filter }
@@ -66,6 +66,23 @@ final class MuckViewModel: ObservableObject {
         muck.votes += 1
         storage.recordVoteLocally(muckId: muck.id, userId: userId)
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+
+    // MARK: - Moderation
+
+    func canFlag(_ muck: Muck) -> Bool {
+        !storage.hasFlagged(muckId: muck.id, userId: userId)
+    }
+
+    /// Records the flag locally (so this device only flags once) and
+    /// bumps the muck's own count so it disappears from this device
+    /// immediately, while pushing the increment to the shared database
+    /// in the background so other users see the same thing.
+    func flag(_ muck: Muck) {
+        guard canFlag(muck) else { return }
+        storage.recordFlagLocally(muckId: muck.id, userId: userId)
+        muck.flagCount += 1
+        Task { await CloudKitMuckSyncService.shared.flag(muckId: muck.id) }
     }
 
     // MARK: - Favourites

@@ -11,6 +11,8 @@ struct ViewMuckView: View {
     @State private var showCloseMuck = false
     @State private var isFavourite = false
     @State private var afterPhotoData: Data?
+    @State private var showReportConfirm = false
+    @State private var didReport = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -182,6 +184,21 @@ struct ViewMuckView: View {
         }
         .navigationTitle(muck.type.displayName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button(role: .destructive) {
+                        showReportConfirm = true
+                    } label: {
+                        Label("Report this Muck", systemImage: "flag")
+                    }
+                    .disabled(!muckVM.canFlag(muck) || didReport)
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .foregroundStyle(Color.muckNearBlack.opacity(0.6))
+                }
+            }
+        }
         .onAppear {
             isFavourite = muckVM.isFavourite(muckId: muck.id)
         }
@@ -190,6 +207,18 @@ struct ViewMuckView: View {
         }
         .sheet(isPresented: $showCloseMuck) {
             CloseMuckSheet(muck: muck)
+        }
+        .confirmationDialog(
+            "Report this muck as spam, abuse, or a duplicate?",
+            isPresented: $showReportConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Report", role: .destructive) {
+                muckVM.flag(muck)
+                didReport = true
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
         }
     }
 }

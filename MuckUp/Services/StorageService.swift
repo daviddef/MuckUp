@@ -146,6 +146,37 @@ final class StorageService {
         return f.string(from: date)
     }
 
+    // MARK: - Rate limiting
+
+    /// Client-side throttle on how fast one device can write to the
+    /// shared public database — not a substitute for server-side abuse
+    /// protection, but enough to stop a runaway loop or an accidental
+    /// double-tap storm from flooding every other user's feed.
+    static let maxRaisesPerHour = 20
+
+    func recordRaiseTimestamp() {
+        var stamps = defaults.array(forKey: "raiseTimestamps") as? [Double] ?? []
+        stamps.append(Date.now.timeIntervalSince1970)
+        defaults.set(stamps, forKey: "raiseTimestamps")
+    }
+
+    func raiseCountInLastHour() -> Int {
+        let stamps = defaults.array(forKey: "raiseTimestamps") as? [Double] ?? []
+        let hourAgo = Date.now.timeIntervalSince1970 - 3600
+        return stamps.filter { $0 >= hourAgo }.count
+    }
+
+    // MARK: - Moderation
+
+    func hasFlagged(muckId: String, userId: String) -> Bool {
+        let flagged = defaults.array(forKey: "flagged_\(userId)") as? [String] ?? []
+        return flagged.contains(muckId)
+    }
+
+    func recordFlagLocally(muckId: String, userId: String) {
+        appendUnique(muckId, key: "flagged_\(userId)")
+    }
+
     // MARK: - Onboarding
 
     func hasSeenOnboarding() -> Bool {

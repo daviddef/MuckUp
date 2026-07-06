@@ -58,6 +58,20 @@ final class Muck {
     // Owning user's stable ID (Sign in with Apple identifier). Used to
     // scope "my mucks" once accounts exist; not enforced server-side yet.
     var ownerId: String = ""
+    // Community moderation on the shared public database — anyone can
+    // write a muck, so anyone can flag one. Auto-hidden once enough
+    // people agree something's wrong with it (spam, abuse, duplicate).
+    var flagCount: Int = 0
+
+    static let hiddenFlagThreshold = 3
+    var isHiddenByFlags: Bool { flagCount >= Muck.hiddenFlagThreshold }
+
+    // True once this device has confirmed the CloudKit public-database
+    // upload succeeded. A report made offline (or during an outage)
+    // stays false so a later retry pass knows to push it again — the
+    // local SwiftData row is always saved regardless, this only tracks
+    // whether other users can see it yet.
+    var syncedToCloud: Bool = false
 
     var type: MuckType {
         get { MuckType(rawValue: typeRaw) ?? .cleanup }
@@ -80,7 +94,8 @@ final class Muck {
         votes: Int = 0,
         eventCount: Int = 0,
         isClosed: Bool = false,
-        ownerId: String = ""
+        ownerId: String = "",
+        flagCount: Int = 0
     ) {
         self.id = id
         self.location = location
@@ -94,6 +109,7 @@ final class Muck {
         self.eventCount = eventCount
         self.isClosed = isClosed
         self.ownerId = ownerId
+        self.flagCount = flagCount
     }
 
     func distance(from userLocation: CLLocation?) -> String? {

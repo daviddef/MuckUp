@@ -34,6 +34,13 @@ struct RaiseMuckView: View {
         description.trimmingCharacters(in: .whitespaces).count >= 10 && photoData != nil
     }
 
+    // A generous per-device throttle so a runaway loop or a mis-tap
+    // storm can't flood the shared public database — real usage never
+    // gets close to this.
+    private var isRateLimited: Bool {
+        StorageService.shared.raiseCountInLastHour() >= StorageService.maxRaisesPerHour
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -173,10 +180,17 @@ struct RaiseMuckView: View {
                         .background(Color.muckSurface)
                         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
 
+                        if isRateLimited {
+                            Text("You've raised a lot of mucks in the last hour — give it a little while before the next one.")
+                                .font(.muckCaption)
+                                .foregroundStyle(Color.muckRed)
+                                .padding(.top, Spacing.xs)
+                        }
+
                         PrimaryButton(
                             title: "Submit Muck",
                             icon: "checkmark",
-                            isDisabled: !isValid
+                            isDisabled: !isValid || isRateLimited
                         ) {
                             submitMuck()
                         }
@@ -245,6 +259,7 @@ struct RaiseMuckView: View {
         modelContext.insert(newMuck)
         muckVM.award(.raiseMuck)
         muckVM.recordRaised(newMuck.id)
+        StorageService.shared.recordRaiseTimestamp()
         isSaved = true
 
         // Push to the shared public database so other users see it too —
