@@ -23,6 +23,7 @@ struct HomeView: View {
     @State private var mapRadiusMetres: Double = 3000
 
     private let nearbyEventRadiusMetres: Double = 30_000
+    private let patchRadiusMetres: Double = 5_000
 
     private var mucks: [Muck] {
         let base = muckVM.filtered(allMucks)
@@ -76,6 +77,29 @@ struct HomeView: View {
         return parts.joined(separator: " · ") + " this week 🎉"
     }
 
+    // Local mucks (all, not just the filtered/open set) within the patch
+    // radius — used to score how "healthy" the area around you is.
+    private var patchMucks: [Muck] {
+        guard let centre = mapCentre ?? locationService.location?.coordinate else { return [] }
+        let centreLoc = CLLocation(latitude: centre.latitude, longitude: centre.longitude)
+        return allMucks.filter { muck in
+            guard !muck.isHiddenByFlags else { return false }
+            let loc = CLLocation(latitude: muck.latitude, longitude: muck.longitude)
+            return loc.distance(from: centreLoc) <= patchRadiusMetres
+        }
+    }
+
+    private var patchHealth: PatchHealth {
+        let closed = patchMucks.filter(\.isClosed).count
+        let open = patchMucks.count - closed
+        let hazards = patchMucks.filter { !$0.isClosed && $0.isHazardous }.count
+        return PatchHealth.score(openCount: open, closedCount: closed, openHazards: hazards)
+    }
+
+    private var patchOpenHazards: Int {
+        patchMucks.filter { !$0.isClosed && $0.isHazardous }.count
+    }
+
     // "Things to be aware of" under the Hazard filter — waterway safety
     // and planned burns are already fully loaded (Brisbane-wide, not a
     // per-location fetch), so this is a plain client-side distance filter
@@ -123,6 +147,9 @@ struct HomeView: View {
                     // is the first thing you see, and applies to the map
                     // and feed below all at once
                     filterBar
+
+                    PatchHealthBanner(health: patchHealth, openHazards: patchOpenHazards)
+                        .padding(.bottom, Spacing.xs)
 
                     if let communityPulse {
                         Text(communityPulse)

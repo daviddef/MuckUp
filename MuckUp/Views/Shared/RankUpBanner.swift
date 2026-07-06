@@ -14,8 +14,7 @@ struct RankUpBanner: View {
     var body: some View {
         VStack {
             HStack(spacing: Spacing.sm) {
-                Text(rank.emoji)
-                    .font(.system(size: 32))
+                GrubCharacterView(mood: .celebrating, size: 44)
                     .confettiBurst(trigger: $celebrate)
 
                 VStack(alignment: .leading, spacing: 1) {

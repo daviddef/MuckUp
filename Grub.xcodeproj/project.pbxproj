@@ -39,6 +39,7 @@
 		501FC1672ECFA500A5B3A81D /* TypeBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677E75E37C1C41678CE8A50A /* TypeBadgeView.swift */; };
 		518CBED455A9BF2EC75C3E73 /* ScheduleEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB21888E0DD634338526D36 /* ScheduleEventView.swift */; };
 		5624B82EE53897B1C60DCBD0 /* ODSTrumbaEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455B2032EEB7CF2751C44CFC /* ODSTrumbaEvent.swift */; };
+		59426096AECBB4DB3E389C6C /* GrubCharacterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF5ABC1EFB5CCFBBADEFD64 /* GrubCharacterView.swift */; };
 		5AE27B81533AAF53FA16B58B /* TypeFilterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79B8079D8067CFF2013C2174 /* TypeFilterBar.swift */; };
 		63132941BBB194FA1A479609 /* FindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA063252DBC1328E556667A9 /* FindView.swift */; };
 		6750A6FC845706972947F4D3 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC66CBC2FD20B89C0F193A1 /* StorageService.swift */; };
@@ -65,6 +66,7 @@
 		BB0D812482C336D08F11EBC6 /* AddToEventSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7C2114E3847FEBAE6B5B3 /* AddToEventSheet.swift */; };
 		BD187811AF5BF7E23CD8DCF4 /* EventLiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B986405B5BABD48CAD63D7E /* EventLiveView.swift */; };
 		C3AEDBFD3F194F4CB06C5621 /* AnimalComplaintsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DCA225904002DF953C5D8CA /* AnimalComplaintsService.swift */; };
+		C5BEAE335281FC72B42BFA01 /* PatchHealthBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFCABB318589F20C206D2FB3 /* PatchHealthBanner.swift */; };
 		D2F781146285C1BE80681699 /* RankUpBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 777E0C9551602A8331FCC4C1 /* RankUpBanner.swift */; };
 		D5ACD10D9019DBD60DC01307 /* VoteColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1E83310AF223CD36FB390D /* VoteColumnView.swift */; };
 		DFBF21BE9BFA3A3E9FC1B730 /* MapViewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A75924861FE271F11D81B905 /* MapViewScreen.swift */; };
@@ -132,6 +134,7 @@
 		AAC775A383F0883ED5F75A29 /* EventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewModel.swift; sourceTree = "<group>"; };
 		ADC8024B54B25D5878D6A4A0 /* CloseMuckSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseMuckSheet.swift; sourceTree = "<group>"; };
 		AE2F46CD1DC640BDE694CA72 /* WaterwaySafetyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterwaySafetyService.swift; sourceTree = "<group>"; };
+		AEF5ABC1EFB5CCFBBADEFD64 /* GrubCharacterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrubCharacterView.swift; sourceTree = "<group>"; };
 		AF3A5A0B75FA13C0BAA40334 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B59E2C9895CEFD0B17F90B4B /* MuckCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckCardView.swift; sourceTree = "<group>"; };
 		B6A85B785407C09EC464806B /* AskForHelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskForHelpView.swift; sourceTree = "<group>"; };
@@ -140,6 +143,7 @@
 		C9455DE84640673F26CB2BE1 /* ParksEventsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParksEventsService.swift; sourceTree = "<group>"; };
 		C9AE63513E766A7DEBDD253A /* ViewMuckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewMuckView.swift; sourceTree = "<group>"; };
 		CA063252DBC1328E556667A9 /* FindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindView.swift; sourceTree = "<group>"; };
+		CFCABB318589F20C206D2FB3 /* PatchHealthBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchHealthBanner.swift; sourceTree = "<group>"; };
 		D2565138CBCB64F05E55048C /* WasteResourceLocationsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WasteResourceLocationsService.swift; sourceTree = "<group>"; };
 		DDB7C2114E3847FEBAE6B5B3 /* AddToEventSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToEventSheet.swift; sourceTree = "<group>"; };
 		E096F4AD480067C0E607F83D /* EventWrapUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventWrapUpView.swift; sourceTree = "<group>"; };
@@ -276,6 +280,7 @@
 				5C9BA6E45986AFCA7FCDD6E2 /* HomeMiniMapView.swift */,
 				E42870C0041768B846A66DF1 /* HomeView.swift */,
 				B59E2C9895CEFD0B17F90B4B /* MuckCardView.swift */,
+				CFCABB318589F20C206D2FB3 /* PatchHealthBanner.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -371,6 +376,7 @@
 				F3300094284A6263ECBBDAA6 /* ConfettiBurstView.swift */,
 				980D7DEE51CF22535EDCD846 /* EmptyStateIllustration.swift */,
 				5CBE17945598E5D51FD3EED0 /* GrowthPlantView.swift */,
+				AEF5ABC1EFB5CCFBBADEFD64 /* GrubCharacterView.swift */,
 				E56EBD830F6BAD8615BAC04D /* PhotoPickerButton.swift */,
 				8204790B4A659E31ABDC9920 /* PrimaryButton.swift */,
 				777E0C9551602A8331FCC4C1 /* RankUpBanner.swift */,
@@ -497,6 +503,7 @@
 				73D03465830214BBE4C34767 /* GoldEventsService.swift in Sources */,
 				456C623DBD583B68FD99A4C2 /* GreenEventsService.swift in Sources */,
 				A453B70EC6E1FDA3250F1C5C /* GrowthPlantView.swift in Sources */,
+				59426096AECBB4DB3E389C6C /* GrubCharacterView.swift in Sources */,
 				AE358C916A5B13C3D0FA67F7 /* HelpRequest.swift in Sources */,
 				1928CE59946B9388D0A286D7 /* HelpRequestCard.swift in Sources */,
 				ABDA78FAD5F51163EAA8ADD1 /* HelpRequestDetailView.swift in Sources */,
@@ -521,6 +528,7 @@
 				0CDD78431D1E215F82860179 /* ParksEventsService.swift in Sources */,
 				1ADD6A012E28944AEA17517E /* Partner.swift in Sources */,
 				FDAC794A2F0E144659CEFE1A /* PartnerViewModel.swift in Sources */,
+				C5BEAE335281FC72B42BFA01 /* PatchHealthBanner.swift in Sources */,
 				8CD0E54F18E4E2C617B9AD91 /* PhotoPickerButton.swift in Sources */,
 				FDF15167A590D22A030D4F49 /* PlannedBurnsService.swift in Sources */,
 				A94B02A979415ACAE475E80E /* PrimaryButton.swift in Sources */,

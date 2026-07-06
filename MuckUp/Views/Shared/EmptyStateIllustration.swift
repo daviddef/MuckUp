@@ -1,9 +1,12 @@
 import SwiftUI
 
-/// Small hand-drawn vector illustration for empty states — a leaf resting
-/// in a soft circle — instead of a plain grey SF Symbol.
+/// Small hand-drawn vector illustration for empty states, in a soft
+/// circle. Contexts where nothing has happened *yet* near the user (the
+/// default, no-argument case) get Grub itself, waiting for a mission —
+/// everywhere else keeps a plain SF Symbol so the icon reads instantly
+/// rather than forcing the character into places it doesn't fit the copy.
 struct EmptyStateIllustration: View {
-    var systemImage: String = "leaf.fill"
+    var systemImage: String? = nil
     var size: CGFloat = 88
 
     var body: some View {
@@ -18,10 +21,14 @@ struct EmptyStateIllustration: View {
                 )
                 .frame(width: size, height: size)
 
-            Image(systemName: systemImage)
-                .font(.system(size: size * 0.4))
-                .foregroundStyle(Color.muckGreen.opacity(0.6))
-                .rotationEffect(.degrees(-8))
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: size * 0.4))
+                    .foregroundStyle(Color.muckGreen.opacity(0.6))
+                    .rotationEffect(.degrees(-8))
+            } else {
+                GrubCharacterView(mood: .idle, size: size * 0.62)
+            }
         }
     }
 }
