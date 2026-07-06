@@ -10,6 +10,7 @@ struct MuckUpApp: App {
     @StateObject private var authService = AuthService()
     @StateObject private var locationService = LocationService()
     @StateObject private var awarenessVM = AwarenessViewModel()
+    @StateObject private var squadVM = SquadViewModel()
 
     var body: some Scene {
         WindowGroup {
@@ -21,9 +22,13 @@ struct MuckUpApp: App {
                 .environmentObject(authService)
                 .environmentObject(locationService)
                 .environmentObject(awarenessVM)
+                .environmentObject(squadVM)
                 .onAppear {
                     locationService.requestLocation()
                     NotificationService.shared.requestPermission()
+                    muckVM.onAward = { [weak squadVM] amount in
+                        squadVM?.addPoints(amount)
+                    }
                 }
         }
         .modelContainer(Self.sharedModelContainer)

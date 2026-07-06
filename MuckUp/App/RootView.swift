@@ -6,6 +6,7 @@ struct RootView: View {
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var eventVM: EventViewModel
     @EnvironmentObject var helpVM: HelpViewModel
+    @EnvironmentObject var squadVM: SquadViewModel
 
     @State private var showSplash = true
     @State private var showOnboarding = !StorageService.shared.hasSeenOnboarding()
@@ -45,6 +46,8 @@ struct RootView: View {
             muckVM.updateUser(newId)
             eventVM.userId = newId
             helpVM.userId = newId
+            squadVM.userId = newId
+            Task { await squadVM.loadMySquad() }
         }
     }
 }

@@ -16,6 +16,10 @@ final class MuckViewModel: ObservableObject {
 
     private let storage = StorageService.shared
     var userId: String = AppUser.guest.id
+    // Set once at app launch so every awarded point also lands on the
+    // user's squad total, without MuckViewModel needing to know
+    // SquadViewModel exists.
+    var onAward: ((Int) -> Void)?
 
     init() {
         points = storage.loadPoints(for: userId)
@@ -111,6 +115,7 @@ final class MuckViewModel: ObservableObject {
         points = storage.loadPoints(for: userId)
         storage.recordActivityToday(for: userId)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+        onAward?(action.value)
 
         if rank > previousRank {
             justRankedUp = rank

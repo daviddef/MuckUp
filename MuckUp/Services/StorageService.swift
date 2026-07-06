@@ -177,6 +177,16 @@ final class StorageService {
         appendUnique(muckId, key: "flagged_\(userId)")
     }
 
+    // MARK: - Squad
+
+    func mySquadCode(for userId: String) -> String? {
+        defaults.string(forKey: "squadCode_\(userId)")
+    }
+
+    func setMySquadCode(_ code: String?, for userId: String) {
+        defaults.set(code, forKey: "squadCode_\(userId)")
+    }
+
     // MARK: - Onboarding
 
     func hasSeenOnboarding() -> Bool {

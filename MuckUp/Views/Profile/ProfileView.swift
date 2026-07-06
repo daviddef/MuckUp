@@ -8,6 +8,7 @@ struct ProfileView: View {
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var eventVM: EventViewModel
     @EnvironmentObject var authService: AuthService
+    @EnvironmentObject var squadVM: SquadViewModel
 
     @State private var selectedTab = 0
 
@@ -75,14 +76,26 @@ struct ProfileView: View {
         return "You've " + parts.joined(separator: ", ") + " for your neighbourhood."
     }
 
-    // Lightweight badges derived from cumulative activity — a nudge toward
-    // both lanes of community contribution, not a full achievements system.
+    // A real, checkable collection — every badge maps to something the
+    // user actually did, so it grows as more milestones unlock instead
+    // of being permanently fixed at 3.
+    private var badgeContext: Badge.Context {
+        Badge.Context(
+            raisedCount: myMucks.count,
+            closedCount: myClosedMucks.count,
+            closedHazards: myClosedMucks.filter { $0.isHazardous }.count,
+            closedRepairs: myClosedMucks.filter { $0.type == .repair }.count,
+            offeredHelpCount: myOfferedRequests.count,
+            streak: muckVM.streak,
+            isInSquad: squadVM.isInSquad,
+            rank: muckVM.rank
+        )
+    }
+
     private var badges: [(emoji: String, label: String)] {
-        var result: [(String, String)] = []
-        if myClosedMucks.count >= 5 { result.append(("🌍", "Eco Warrior")) }
-        if myOfferedRequests.count >= 3 { result.append(("🤝", "Good Neighbour")) }
-        if muckVM.streak >= 7 { result.append(("🔥", "On Fire")) }
-        return result
+        Badge.allCases
+            .filter { $0.isUnlocked(badgeContext) }
+            .map { ($0.emoji, $0.label) }
     }
 
     private var historyItems: [HistoryItem] {
@@ -124,6 +137,12 @@ struct ProfileView: View {
             .background(Color.muckBg)
             .navigationTitle("My Profile")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    NavigationLink(destination: SquadView()) {
+                        Image(systemName: "person.3.fill")
+                            .foregroundStyle(Color.muckNearBlack)
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         if authService.isGuest {

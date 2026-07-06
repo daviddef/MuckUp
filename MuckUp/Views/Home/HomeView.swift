@@ -24,6 +24,7 @@ struct HomeView: View {
 
     private let nearbyEventRadiusMetres: Double = 30_000
     private let patchRadiusMetres: Double = 5_000
+    private let weeklyChallenge = WeeklyChallenge.current()
 
     private var mucks: [Muck] {
         let base = muckVM.filtered(allMucks)
@@ -149,6 +150,9 @@ struct HomeView: View {
                     filterBar
 
                     PatchHealthBanner(health: patchHealth, openHazards: patchOpenHazards)
+                        .padding(.bottom, Spacing.xs)
+
+                    WeeklyChallengeCard(challenge: weeklyChallenge, progressCount: weeklyChallenge.progress(in: allMucks))
                         .padding(.bottom, Spacing.xs)
 
                     if let communityPulse {
