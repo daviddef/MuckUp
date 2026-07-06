@@ -23,9 +23,19 @@ struct EventsView: View {
                 let filtered = eventVM.filtered(allEvents)
                 if filtered.isEmpty {
                     Spacer()
-                    Text(eventVM.showAttendingOnly ? "You're not attending any events yet." : "No events yet.")
-                        .font(.muckBody)
-                        .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                    VStack(spacing: Spacing.md) {
+                        EmptyStateIllustration(systemImage: "calendar")
+                        Text(eventVM.showAttendingOnly ? "Not attending anything yet" : "No events yet")
+                            .font(.muckTitle)
+                            .foregroundStyle(Color.muckNearBlack)
+                        Text(eventVM.showAttendingOnly
+                             ? "RSVP to something nearby and it'll show up here."
+                             : "Be the first to schedule a community cleanup.")
+                            .font(.muckBody)
+                            .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, Spacing.xl)
+                    }
                     Spacer()
                 } else {
                     List {

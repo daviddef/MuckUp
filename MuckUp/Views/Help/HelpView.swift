@@ -460,9 +460,7 @@ private struct NearbyMucksSheet: View {
             Group {
                 if mucks.isEmpty {
                     VStack(spacing: Spacing.sm) {
-                        Image(systemName: "mappin.slash")
-                            .font(.system(size: 40))
-                            .foregroundStyle(Color.muckNearBlack.opacity(0.2))
+                        EmptyStateIllustration(systemImage: "mappin.slash")
                         Text("No open mucks nearby")
                             .font(.muckBody)
                             .foregroundStyle(Color.muckNearBlack.opacity(0.5))
@@ -510,9 +508,7 @@ private struct UpcomingEventsSheet: View {
             Group {
                 if events.isEmpty {
                     VStack(spacing: Spacing.sm) {
-                        Image(systemName: "calendar.badge.exclamationmark")
-                            .font(.system(size: 40))
-                            .foregroundStyle(Color.muckNearBlack.opacity(0.2))
+                        EmptyStateIllustration(systemImage: "calendar.badge.exclamationmark")
                         Text("No upcoming events")
                             .font(.muckBody)
                             .foregroundStyle(Color.muckNearBlack.opacity(0.5))

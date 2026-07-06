@@ -186,9 +186,15 @@ struct FindTimelineView: View {
     var body: some View {
         if items.isEmpty {
             Spacer()
-            Text("Nothing to show yet.")
-                .font(.muckBody)
-                .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+            VStack(spacing: Spacing.md) {
+                EmptyStateIllustration(systemImage: "calendar.day.timeline.left")
+                Text("Nothing on the timeline yet")
+                    .font(.muckTitle)
+                    .foregroundStyle(Color.muckNearBlack)
+                Text("Try a different filter or check back soon.")
+                    .font(.muckBody)
+                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+            }
             Spacer()
         } else {
             List {
