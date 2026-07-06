@@ -54,29 +54,24 @@ struct ViewMuckView: View {
                     // Mini map with nearby mucks
                     MuckMiniMapView(muck: muck)
 
-                    // Before photo
-                    if let data = muck.photoData, let ui = UIImage(data: data) {
+                    // If both photos exist, the drag-to-reveal slider is the
+                    // whole point of the app made visible — the transformation
+                    // itself, not two static photos scrolled past separately.
+                    if let beforeData = muck.photoData, let beforeUI = UIImage(data: beforeData),
+                       let afterData = muck.afterPhotoData, let afterUI = UIImage(data: afterData) {
                         VStack(alignment: .leading, spacing: Spacing.xs) {
-                            Text("Before")
+                            Text("Drag to compare")
                                 .font(.muckCaption)
                                 .foregroundStyle(Color.muckNearBlack.opacity(0.4))
-                            Image(uiImage: ui)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 200)
-                                .clipped()
-                                .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                            BeforeAfterSliderView(beforeImage: beforeUI, afterImage: afterUI)
                         }
-                    }
-
-                    // After photo (only if closed or has one)
-                    if muck.isClosed || muck.afterPhotoData != nil {
-                        VStack(alignment: .leading, spacing: Spacing.xs) {
-                            Text("After")
-                                .font(.muckCaption)
-                                .foregroundStyle(Color.muckNearBlack.opacity(0.4))
-                            if let data = muck.afterPhotoData, let ui = UIImage(data: data) {
+                    } else {
+                        // Before photo
+                        if let data = muck.photoData, let ui = UIImage(data: data) {
+                            VStack(alignment: .leading, spacing: Spacing.xs) {
+                                Text("Before")
+                                    .font(.muckCaption)
+                                    .foregroundStyle(Color.muckNearBlack.opacity(0.4))
                                 Image(uiImage: ui)
                                     .resizable()
                                     .scaledToFill()
@@ -84,7 +79,15 @@ struct ViewMuckView: View {
                                     .frame(height: 200)
                                     .clipped()
                                     .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-                            } else {
+                            }
+                        }
+
+                        // After photo (only if closed, no before shown yet)
+                        if muck.isClosed {
+                            VStack(alignment: .leading, spacing: Spacing.xs) {
+                                Text("After")
+                                    .font(.muckCaption)
+                                    .foregroundStyle(Color.muckNearBlack.opacity(0.4))
                                 Text("No after photo recorded")
                                     .font(.muckBody)
                                     .foregroundStyle(Color.muckNearBlack.opacity(0.3))

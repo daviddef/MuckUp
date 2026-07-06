@@ -20,6 +20,7 @@
 		19F0D826F704A80CD3799CC7 /* MuckRank.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54D716A4E143B89A7DE5E6E /* MuckRank.swift */; };
 		1ADD6A012E28944AEA17517E /* Partner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E52903B99A781403A7CD32 /* Partner.swift */; };
 		1BF5BA6F0C1B1EC68F7F851C /* HomeMiniMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9BA6E45986AFCA7FCDD6E2 /* HomeMiniMapView.swift */; };
+		1DDECD1FB5B187860D6C71DF /* BeforeAfterSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374B5FD5726924A652D0B6D8 /* BeforeAfterSliderView.swift */; };
 		209F0C047DD6977FA33EF086 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90A910FF716602F8D53AFF16 /* HelpView.swift */; };
 		222074DF393D3FDE09468072 /* MuckUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A231AF8AFCD3609BAA6D179D /* MuckUpApp.swift */; };
 		2575BB2B761ABE31631419CC /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C12B9181C016426450F8CFF /* DesignTokens.swift */; };
@@ -89,6 +90,7 @@
 		2A0FAEAE3DEFD169BDA719CA /* MuckEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckEvent.swift; sourceTree = "<group>"; };
 		2A2E0E1A363992E35A3FD6FB /* AwarenessMapMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessMapMarker.swift; sourceTree = "<group>"; };
 		352AFF936DA4E9C62F7376B5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		374B5FD5726924A652D0B6D8 /* BeforeAfterSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeforeAfterSliderView.swift; sourceTree = "<group>"; };
 		3D099E6959C84BE3875D39EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3E6513AD99C719D47586E88E /* HelpViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewModel.swift; sourceTree = "<group>"; };
 		42225768AEF86FC287F0FD4F /* PlannedBurnsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannedBurnsService.swift; sourceTree = "<group>"; };
@@ -365,6 +367,7 @@
 			children = (
 				E5854932C0D165F271153A64 /* AwarenessListView.swift */,
 				2A2E0E1A363992E35A3FD6FB /* AwarenessMapMarker.swift */,
+				374B5FD5726924A652D0B6D8 /* BeforeAfterSliderView.swift */,
 				F3300094284A6263ECBBDAA6 /* ConfettiBurstView.swift */,
 				980D7DEE51CF22535EDCD846 /* EmptyStateIllustration.swift */,
 				5CBE17945598E5D51FD3EED0 /* GrowthPlantView.swift */,
@@ -478,6 +481,7 @@
 				F6007FFC2E6373389E326B5E /* AwarenessListView.swift in Sources */,
 				09FD73F5CE3806CFA6341AEE /* AwarenessMapMarker.swift in Sources */,
 				28BB28DB265A06B3DC4E1B7D /* AwarenessViewModel.swift in Sources */,
+				1DDECD1FB5B187860D6C71DF /* BeforeAfterSliderView.swift in Sources */,
 				FD914D99BFDBEAC45BC75A55 /* BrisbaneEventsService.swift in Sources */,
 				9DF45C8629F11BCC6C38485F /* CloseMuckSheet.swift in Sources */,
 				A2056DB9CF38A2D453219C7F /* CloudKitMuckSyncService.swift in Sources */,

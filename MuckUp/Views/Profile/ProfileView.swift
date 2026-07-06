@@ -58,6 +58,23 @@ struct ProfileView: View {
         totalBagsCollected * 3
     }
 
+    // A raw "12 cleared" number doesn't say anything about what actually
+    // changed — this reframes the same data (myClosedMucks, already
+    // loaded) around what each type of cleanup means in the real world.
+    private var impactHeadline: String? {
+        guard !myClosedMucks.isEmpty else { return nil }
+        let hazards = myClosedMucks.filter { $0.isHazardous }.count
+        let repairs = myClosedMucks.filter { $0.type == .repair }.count
+        let cleanups = max(0, myClosedMucks.count - hazards - repairs)
+
+        var parts: [String] = []
+        if hazards > 0 { parts.append("\(hazards) hazard\(hazards == 1 ? "" : "s") made safe") }
+        if cleanups > 0 { parts.append("\(cleanups) spot\(cleanups == 1 ? "" : "s") cleaned up") }
+        if repairs > 0 { parts.append("\(repairs) thing\(repairs == 1 ? "" : "s") fixed") }
+        guard !parts.isEmpty else { return nil }
+        return "You've " + parts.joined(separator: ", ") + " for your neighbourhood."
+    }
+
     // Lightweight badges derived from cumulative activity — a nudge toward
     // both lanes of community contribution, not a full achievements system.
     private var badges: [(emoji: String, label: String)] {
@@ -209,6 +226,17 @@ struct ProfileView: View {
 
     private var impactGrid: some View {
         VStack(spacing: 1) {
+            if let impactHeadline {
+                Text(impactHeadline)
+                    .font(.muckBody)
+                    .foregroundStyle(Color.muckNearBlack.opacity(0.75))
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.top, Spacing.sm)
+                    .padding(.bottom, Spacing.xs)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.muckBg)
+            }
+
             Text("🌍 Help Us Cleanup")
                 .font(.muckMicro)
                 .foregroundStyle(Color.muckNearBlack.opacity(0.4))
