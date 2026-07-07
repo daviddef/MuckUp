@@ -7,8 +7,14 @@ struct TypeFilterBar: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.xs) {
-                FilterPill(title: "All", icon: "circle.grid.2x2.fill", iconOnly: iconOnly, isActive: selection == nil) {
-                    selection = nil
+                // In icon-only mode, "All" isn't its own button — tapping
+                // the active type again already clears the filter, so a
+                // 4th icon that just says "all" reads as an unrelated,
+                // unexplained button rather than part of the same group.
+                if !iconOnly {
+                    FilterPill(title: "All", icon: "circle.grid.2x2.fill", iconOnly: iconOnly, isActive: selection == nil) {
+                        selection = nil
+                    }
                 }
                 ForEach(MuckType.allCases, id: \.self) { type in
                     FilterPill(

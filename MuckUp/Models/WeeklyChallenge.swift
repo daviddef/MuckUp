@@ -11,9 +11,15 @@ struct WeeklyChallenge {
     let targetCount: Int
     let weekOfYear: Int
 
+    // Hazards are deliberately excluded — they're authority-managed
+    // (see ViewMuckView's "Contact your local council or EPA" notice)
+    // and "closed" just means someone tapped a button, not that the
+    // hazard is actually safe. A weekly goal built on that count would
+    // reward marking hazards done instead of reporting and stepping
+    // back, so the challenge only ever covers things a person can
+    // safely resolve themselves.
     private static let rotation: [(type: MuckType, target: Int)] = [
         (.cleanup, 15),
-        (.hazard, 4),
         (.repair, 6),
     ]
 
@@ -25,8 +31,8 @@ struct WeeklyChallenge {
 
     var title: String {
         switch type {
-        case .cleanup: return "Clear \(targetCount) clean-ups this week"
-        case .hazard:  return "Make \(targetCount) hazards safe this week"
+        case .cleanup: return "Clean up \(targetCount) messes this week"
+        case .hazard:  return "Flag \(targetCount) hazards for the council this week"
         case .repair:  return "Fix \(targetCount) things this week"
         }
     }
