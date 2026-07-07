@@ -171,11 +171,14 @@ struct HomeView: View {
                     // and feed below all at once
                     filterBar
 
-                    PatchHealthBanner(health: patchHealth, openHazards: patchOpenHazards, stage: GrubLifecycleStage.forRank(muckVM.rank))
-                        .padding(.bottom, Spacing.xs)
-
-                    WeeklyChallengeCard(challenge: weeklyChallenge, progressCount: weeklyChallenge.progress(in: allMucks))
-                        .padding(.bottom, Spacing.xs)
+                    PatchHealthBanner(
+                        health: patchHealth,
+                        openHazards: patchOpenHazards,
+                        stage: GrubLifecycleStage.forRank(muckVM.rank),
+                        challenge: weeklyChallenge,
+                        challengeProgress: weeklyChallenge.progress(in: allMucks)
+                    )
+                    .padding(.bottom, Spacing.xs)
 
                     if let communityPulse {
                         Text(communityPulse)

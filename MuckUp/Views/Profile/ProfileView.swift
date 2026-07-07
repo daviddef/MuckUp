@@ -11,6 +11,7 @@ struct ProfileView: View {
     @EnvironmentObject var squadVM: SquadViewModel
 
     @State private var selectedTab = 0
+    @State private var showSettings = false
 
     private var myMucks: [Muck] {
         let ids = Set(muckVM.raisedMuckIds)
@@ -144,26 +145,16 @@ struct ProfileView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        if authService.isGuest {
-                            Text("Guest mode — data stays on this device")
-                        } else if let email = authService.currentUser?.email, !email.isEmpty {
-                            Text(email)
-                        }
-
-                        Toggle(isOn: $muckVM.isJuniorMode) {
-                            Label("Junior Mode", systemImage: "figure.child")
-                        }
-                        Text("Blurs your position on the map and only shows suburb-level location on new mucks")
-
-                        Button("Sign Out", role: .destructive) {
-                            authService.signOut()
-                        }
+                    Button {
+                        showSettings = true
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Image(systemName: "gearshape")
                             .foregroundStyle(Color.muckNearBlack)
                     }
                 }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
             }
         }
     }

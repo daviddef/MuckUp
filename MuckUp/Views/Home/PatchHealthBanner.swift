@@ -37,10 +37,17 @@ enum PatchHealth: CaseIterable {
     }
 }
 
+/// The single Home hero card — patch health and this week's community
+/// challenge used to be two separate cards stacked on top of each
+/// other; folded into one here since they're both "what's the state of
+/// things nearby" at a glance, and stacking them cost a full card's
+/// worth of vertical space before the feed even started.
 struct PatchHealthBanner: View {
     let health: PatchHealth
     let openHazards: Int
     var stage: GrubLifecycleStage = .grub
+    var challenge: WeeklyChallenge? = nil
+    var challengeProgress: Int = 0
 
     private var mood: GrubMood {
         if openHazards > 0 && health == .barren { return .concerned }
@@ -48,25 +55,70 @@ struct PatchHealthBanner: View {
         return .idle
     }
 
-    var body: some View {
-        HStack(spacing: Spacing.sm) {
-            GrubCharacterView(stage: stage, mood: mood, size: 52)
+    private var challengeFraction: Double {
+        guard let challenge, challenge.targetCount > 0 else { return 0 }
+        return min(1, Double(challengeProgress) / Double(challenge.targetCount))
+    }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(health.label)
-                    .font(.muckHeadline)
-                    .foregroundStyle(.white)
-                if openHazards > 0 {
-                    Text("\(openHazards) hazard\(openHazards == 1 ? "" : "s") still need attention")
+    private var isChallengeComplete: Bool {
+        guard let challenge else { return false }
+        return challengeProgress >= challenge.targetCount
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            HStack(spacing: Spacing.sm) {
+                GrubCharacterView(stage: stage, mood: mood, size: 52)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(health.label)
+                        .font(.muckHeadline)
+                        .foregroundStyle(.white)
+                    if openHazards > 0 {
+                        Text("\(openHazards) hazard\(openHazards == 1 ? "" : "s") still need attention")
+                            .font(.muckCaption)
+                            .foregroundStyle(.white.opacity(0.85))
+                    } else {
+                        Text("Raise or clear a muck nearby to help it grow")
+                            .font(.muckCaption)
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                }
+                Spacer()
+            }
+
+            if let challenge {
+                Divider().background(.white.opacity(0.25))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: Spacing.xxs) {
+                        Text("THIS WEEK")
+                            .font(.muckMicro)
+                            .foregroundStyle(.white.opacity(0.7))
+                        if isChallengeComplete {
+                            Text("· Complete!")
+                                .font(.muckMicro)
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    Text(challenge.title)
                         .font(.muckCaption)
-                        .foregroundStyle(.white.opacity(0.85))
-                } else {
-                    Text("Raise or clear a muck nearby to help it grow")
-                        .font(.muckCaption)
-                        .foregroundStyle(.white.opacity(0.85))
+                        .foregroundStyle(.white)
+
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(.white.opacity(0.2))
+                            Capsule().fill(.white)
+                                .frame(width: geo.size.width * challengeFraction)
+                        }
+                    }
+                    .frame(height: 5)
+
+                    Text("\(min(challengeProgress, challenge.targetCount)) / \(challenge.targetCount)")
+                        .font(.muckMicro)
+                        .foregroundStyle(.white.opacity(0.7))
                 }
             }
-            Spacer()
         }
         .padding(Spacing.sm)
         .background(health.gradient)
