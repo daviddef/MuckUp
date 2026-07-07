@@ -171,7 +171,7 @@ struct HomeView: View {
                     // and feed below all at once
                     filterBar
 
-                    PatchHealthBanner(health: patchHealth, openHazards: patchOpenHazards)
+                    PatchHealthBanner(health: patchHealth, openHazards: patchOpenHazards, stage: GrubLifecycleStage.forRank(muckVM.rank))
                         .padding(.bottom, Spacing.xs)
 
                     WeeklyChallengeCard(challenge: weeklyChallenge, progressCount: weeklyChallenge.progress(in: allMucks))

@@ -40,6 +40,7 @@ enum PatchHealth: CaseIterable {
 struct PatchHealthBanner: View {
     let health: PatchHealth
     let openHazards: Int
+    var stage: GrubLifecycleStage = .grub
 
     private var mood: GrubMood {
         if openHazards > 0 && health == .barren { return .concerned }
@@ -49,7 +50,7 @@ struct PatchHealthBanner: View {
 
     var body: some View {
         HStack(spacing: Spacing.sm) {
-            GrubCharacterView(mood: mood, size: 52)
+            GrubCharacterView(stage: stage, mood: mood, size: 52)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(health.label)

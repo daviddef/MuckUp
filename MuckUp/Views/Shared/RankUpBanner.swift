@@ -14,7 +14,7 @@ struct RankUpBanner: View {
     var body: some View {
         VStack {
             HStack(spacing: Spacing.sm) {
-                GrubCharacterView(mood: .celebrating, size: 44)
+                GrubCharacterView(stage: GrubLifecycleStage.forRank(rank), mood: .celebrating, size: 44)
                     .confettiBurst(trigger: $celebrate)
 
                 VStack(alignment: .leading, spacing: 1) {
