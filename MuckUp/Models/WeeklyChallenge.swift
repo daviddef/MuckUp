@@ -1,40 +1,34 @@
 import Foundation
 
-/// A lightweight, no-backend seasonal layer: a single community goal for
-/// the current calendar week, deterministically derived from the week
-/// number so every device shows the same challenge without needing a
-/// server to coordinate it. Progress counts real, already-loaded muck
-/// data (no separate fetch) — this rides on top of the existing type/
-/// location filters rather than introducing a new system.
+/// A personal, no-backend weekly goal — how many mucks *this user* has
+/// cleared this week, against a target that starts at "your first one"
+/// and climbs gradually as their own lifetime count grows. Originally
+/// this counted every muck closed by anyone nearby, which produced
+/// targets like "clear 15 this week" for a single person — a mismatch
+/// between a community-wide number and an individual ask. Scoped to one
+/// person's own pace, it stays achievable at every stage.
 struct WeeklyChallenge {
-    let type: MuckType
     let targetCount: Int
-    let weekOfYear: Int
+    let isFirstEver: Bool
 
-    // Hazards are deliberately excluded — they're authority-managed
-    // (see ViewMuckView's "Contact your local council or EPA" notice)
-    // and "closed" just means someone tapped a button, not that the
-    // hazard is actually safe. A weekly goal built on that count would
-    // reward marking hazards done instead of reporting and stepping
-    // back, so the challenge only ever covers things a person can
-    // safely resolve themselves.
-    private static let rotation: [(type: MuckType, target: Int)] = [
-        (.cleanup, 15),
-        (.repair, 6),
-    ]
-
-    static func current(referenceDate: Date = .now) -> WeeklyChallenge {
-        let week = Calendar.current.component(.weekOfYear, from: referenceDate)
-        let pick = rotation[week % rotation.count]
-        return WeeklyChallenge(type: pick.type, targetCount: pick.target, weekOfYear: week)
+    /// `lifetimeClosedCount` is this user's total mucks cleared, ever —
+    /// used only to pick a realistic target, never to gate anything.
+    static func current(lifetimeClosedCount: Int) -> WeeklyChallenge {
+        if lifetimeClosedCount == 0 {
+            return WeeklyChallenge(targetCount: 1, isFirstEver: true)
+        }
+        let target: Int
+        switch lifetimeClosedCount {
+        case 1..<5:   target = 2
+        case 5..<15:  target = 3
+        default:      target = 5
+        }
+        return WeeklyChallenge(targetCount: target, isFirstEver: false)
     }
 
     var title: String {
-        switch type {
-        case .cleanup: return "Clean up \(targetCount) messes this week"
-        case .hazard:  return "Flag \(targetCount) hazards for the council this week"
-        case .repair:  return "Fix \(targetCount) things this week"
-        }
+        if isFirstEver { return "Let's get started on your first clean-up!" }
+        return "Clear \(targetCount) muck\(targetCount == 1 ? "" : "s") this week"
     }
 
     /// Start of the current calendar week (Monday, per Calendar's
@@ -46,10 +40,11 @@ struct WeeklyChallenge {
         return cal.date(from: components) ?? now
     }
 
-    func progress(in mucks: [Muck]) -> Int {
+    /// How many of *this user's own* closed mucks fall within the
+    /// current week — pass only the mucks they personally closed
+    /// (MuckViewModel.closedMuckIds), not the whole community feed.
+    func progress(myClosedMucks: [Muck]) -> Int {
         let start = Self.startOfWeek
-        return mucks.filter { muck in
-            muck.type == type && muck.isClosed && (muck.closedDate ?? .distantPast) >= start
-        }.count
+        return myClosedMucks.filter { ($0.closedDate ?? .distantPast) >= start }.count
     }
 }

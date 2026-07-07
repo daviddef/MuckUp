@@ -66,44 +66,34 @@ struct PatchHealthBanner: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack(spacing: Spacing.sm) {
-                GrubCharacterView(stage: stage, mood: mood, size: 52)
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HStack(spacing: Spacing.xs) {
+                GrubCharacterView(stage: stage, mood: mood, size: 36)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(health.label)
-                        .font(.muckHeadline)
-                        .foregroundStyle(.white)
-                    if openHazards > 0 {
-                        Text("\(openHazards) hazard\(openHazards == 1 ? "" : "s") still need attention")
-                            .font(.muckCaption)
-                            .foregroundStyle(.white.opacity(0.85))
-                    } else {
-                        Text("Raise or clear a muck nearby to help it grow")
-                            .font(.muckCaption)
-                            .foregroundStyle(.white.opacity(0.85))
-                    }
-                }
+                Text(health.label)
+                    .font(.muckHeadline)
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+
                 Spacer()
+
+                if openHazards > 0 {
+                    Text("\(openHazards) hazard\(openHazards == 1 ? "" : "s")")
+                        .font(.muckMicro)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, Spacing.xs)
+                        .padding(.vertical, 2)
+                        .background(.white.opacity(0.2))
+                        .clipShape(Capsule())
+                }
             }
 
             if let challenge {
-                Divider().background(.white.opacity(0.25))
-
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: Spacing.xxs) {
-                        Text("THIS WEEK")
-                            .font(.muckMicro)
-                            .foregroundStyle(.white.opacity(0.7))
-                        if isChallengeComplete {
-                            Text("· Complete!")
-                                .font(.muckMicro)
-                                .foregroundStyle(.white)
-                        }
-                    }
+                HStack(spacing: Spacing.xs) {
                     Text(challenge.title)
-                        .font(.muckCaption)
-                        .foregroundStyle(.white)
+                        .font(.muckMicro)
+                        .foregroundStyle(.white.opacity(0.9))
+                        .lineLimit(1)
 
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
@@ -112,15 +102,17 @@ struct PatchHealthBanner: View {
                                 .frame(width: geo.size.width * challengeFraction)
                         }
                     }
-                    .frame(height: 5)
+                    .frame(height: 4)
 
-                    Text("\(min(challengeProgress, challenge.targetCount)) / \(challenge.targetCount)")
+                    Text(isChallengeComplete ? "✓" : "\(min(challengeProgress, challenge.targetCount))/\(challenge.targetCount)")
                         .font(.muckMicro)
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .fixedSize()
                 }
             }
         }
-        .padding(Spacing.sm)
+        .padding(.horizontal, Spacing.sm)
+        .padding(.vertical, Spacing.xs + 2)
         .background(health.gradient)
         .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
         .padding(.horizontal, Spacing.md)

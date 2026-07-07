@@ -24,7 +24,18 @@ struct HomeView: View {
 
     private let nearbyEventRadiusMetres: Double = 30_000
     private let patchRadiusMetres: Double = 5_000
-    private let weeklyChallenge = WeeklyChallenge.current()
+
+    // Personal, not community-wide — the challenge only ever counts
+    // mucks this user closed themselves, with a target scaled to their
+    // own lifetime pace, so it's the same shape whether someone's just
+    // getting started or is well into a habit.
+    private var myClosedMucks: [Muck] {
+        let ids = Set(muckVM.closedMuckIds)
+        return allMucks.filter { ids.contains($0.id) }
+    }
+    private var weeklyChallenge: WeeklyChallenge {
+        WeeklyChallenge.current(lifetimeClosedCount: muckVM.closedMuckIds.count)
+    }
 
     // Junior Mode blurs the map's own displayed position so a child's
     // exact whereabouts (often near home) isn't pinpointable from the
@@ -176,7 +187,7 @@ struct HomeView: View {
                         openHazards: patchOpenHazards,
                         stage: GrubLifecycleStage.forRank(muckVM.rank),
                         challenge: weeklyChallenge,
-                        challengeProgress: weeklyChallenge.progress(in: allMucks)
+                        challengeProgress: weeklyChallenge.progress(myClosedMucks: myClosedMucks)
                     )
                     .padding(.bottom, Spacing.xs)
 

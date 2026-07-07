@@ -17,7 +17,7 @@ enum MuckType: String, Codable, CaseIterable {
 
     var icon: String {
         switch self {
-        case .cleanup: return "arrow.3.trianglepath"
+        case .cleanup: return "trash.fill"
         case .hazard:  return "exclamationmark.triangle.fill"
         case .repair:  return "wrench.and.screwdriver.fill"
         }
