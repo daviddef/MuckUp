@@ -227,8 +227,8 @@ struct ProfileView: View {
                 }
                 Spacer()
                 VStack(spacing: 2) {
-                    GrowthPlantView(stage: PlantStage.forStreak(muckVM.streak), size: 56)
-                    Text(PlantStage.forStreak(muckVM.streak).label)
+                    GrubCharacterView(stage: GrubLifecycleStage.forRank(muckVM.rank), mood: .idle, size: 56)
+                    Text(GrubLifecycleStage.forRank(muckVM.rank).label)
                         .font(.muckMicro)
                         .foregroundStyle(.white.opacity(0.75))
                 }

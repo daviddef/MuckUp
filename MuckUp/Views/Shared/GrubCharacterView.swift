@@ -46,23 +46,47 @@ struct GrubCharacterView: View {
     @State private var isBlinking = false
     @State private var blinkTask: Task<Void, Never>?
 
+    // A Canvas can't interpolate between two completely different body
+    // plans on its own — .animation() only tweens real View properties.
+    // To crossfade a stage change (e.g. rank-up), keep the outgoing
+    // stage's Canvas around at fading opacity while the new one fades in.
+    @State private var outgoingStage: GrubLifecycleStage?
+    @State private var crossfade: Double = 1
+
     var body: some View {
-        TimelineView(.animation(paused: reduceMotion)) { timeline in
-            Canvas { context, canvasSize in
-                draw(in: &context, size: canvasSize, time: timeline.date.timeIntervalSinceReferenceDate)
+        ZStack {
+            if let outgoingStage, crossfade < 1 {
+                canvas(for: outgoingStage)
+                    .opacity(1 - crossfade)
             }
+            canvas(for: stage)
+                .opacity(outgoingStage == nil ? 1 : crossfade)
         }
         .frame(width: size, height: size)
         .offset(y: (breathe && !reduceMotion ? -2 : 0) + mood.bounce)
         .animation(reduceMotion ? nil : .easeInOut(duration: 1.6).repeatForever(autoreverses: true), value: breathe)
         .animation(.spring(response: 0.4, dampingFraction: 0.6), value: mood.bounce)
-        .animation(.easeInOut(duration: 0.4), value: stage)
         .onAppear {
             breathe = true
             startBlinkLoop()
         }
         .onDisappear { blinkTask?.cancel() }
+        .onChange(of: stage) { oldStage, _ in
+            guard !reduceMotion else { return }
+            outgoingStage = oldStage
+            crossfade = 0
+            withAnimation(.easeInOut(duration: 0.5)) { crossfade = 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { outgoingStage = nil }
+        }
         .accessibilityHidden(true)
+    }
+
+    private func canvas(for stage: GrubLifecycleStage) -> some View {
+        TimelineView(.animation(paused: reduceMotion)) { timeline in
+            Canvas { context, canvasSize in
+                draw(stage: stage, in: &context, size: canvasSize, time: timeline.date.timeIntervalSinceReferenceDate)
+            }
+        }
     }
 
     // Randomised 3–6s blink cycle — the single highest-leverage idle
@@ -82,7 +106,7 @@ struct GrubCharacterView: View {
         }
     }
 
-    private func draw(in context: inout GraphicsContext, size canvasSize: CGSize, time: TimeInterval) {
+    private func draw(stage: GrubLifecycleStage, in context: inout GraphicsContext, size canvasSize: CGSize, time: TimeInterval) {
         let w = canvasSize.width
         let h = canvasSize.height
         let sway: CGFloat = reduceMotion ? 0 : CGFloat(sin(time * 1.3)) * (w * 0.03)

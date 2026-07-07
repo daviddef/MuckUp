@@ -505,15 +505,17 @@ private struct TypeSelectorCard: View {
 
 struct MuckSavedView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @EnvironmentObject var muckVM: MuckViewModel
     @State private var showScheduleEvent = false
     @State private var celebrate = false
+    @State private var munchScale: CGFloat = 1
 
     var body: some View {
         VStack(spacing: Spacing.xl) {
             Spacer()
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 72))
-                .foregroundStyle(Color.muckGreen)
+            GrubCharacterView(stage: GrubLifecycleStage.forRank(muckVM.rank), mood: .celebrating, size: 88)
+                .scaleEffect(munchScale)
                 .confettiBurst(trigger: $celebrate)
             Text("Muck Raised!")
                 .font(.muckDisplay)
@@ -538,6 +540,22 @@ struct MuckSavedView: View {
         .sheet(isPresented: $showScheduleEvent) {
             ScheduleEventView(preselectedMuck: nil)
         }
-        .onAppear { celebrate = true }
+        .onAppear {
+            guard !reduceMotion else {
+                celebrate = true
+                return
+            }
+            // A single exaggerated "chomp" — squash then stretch — right
+            // before the confetti fires, so Grub itself reacts to the
+            // action instead of just a checkmark sitting there.
+            withAnimation(.easeOut(duration: 0.12)) { munchScale = 0.8 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.4)) { munchScale = 1.1 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { munchScale = 1 }
+                    celebrate = true
+                }
+            }
+        }
     }
 }
