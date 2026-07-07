@@ -73,6 +73,7 @@
 		BD187811AF5BF7E23CD8DCF4 /* EventLiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B986405B5BABD48CAD63D7E /* EventLiveView.swift */; };
 		C3AEDBFD3F194F4CB06C5621 /* AnimalComplaintsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DCA225904002DF953C5D8CA /* AnimalComplaintsService.swift */; };
 		C5BEAE335281FC72B42BFA01 /* PatchHealthBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFCABB318589F20C206D2FB3 /* PatchHealthBanner.swift */; };
+		CAA4C945A99919942C4B7938 /* CLLocationCoordinate2D+Fuzz.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07176DE3C408E19E7A23AE53 /* CLLocationCoordinate2D+Fuzz.swift */; };
 		D2F781146285C1BE80681699 /* RankUpBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 777E0C9551602A8331FCC4C1 /* RankUpBanner.swift */; };
 		D5ACD10D9019DBD60DC01307 /* VoteColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1E83310AF223CD36FB390D /* VoteColumnView.swift */; };
 		DFBF21BE9BFA3A3E9FC1B730 /* MapViewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A75924861FE271F11D81B905 /* MapViewScreen.swift */; };
@@ -87,6 +88,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		07176DE3C408E19E7A23AE53 /* CLLocationCoordinate2D+Fuzz.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CLLocationCoordinate2D+Fuzz.swift"; sourceTree = "<group>"; };
 		09CF7D5D90EACBF809B6AF1D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0C83654B410F44CEAB8DA98D /* WeeklyChallenge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyChallenge.swift; sourceTree = "<group>"; };
 		139BB5ED0AA8EE569DB25526 /* StampBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StampBadgeView.swift; sourceTree = "<group>"; };
@@ -205,6 +207,7 @@
 				9DCA225904002DF953C5D8CA /* AnimalComplaintsService.swift */,
 				144120405C729ED3B97F8EC8 /* AuthService.swift */,
 				9D95467E9EB25443B7AAB0E5 /* BrisbaneEventsService.swift */,
+				07176DE3C408E19E7A23AE53 /* CLLocationCoordinate2D+Fuzz.swift */,
 				9C78AF72E4717D651B053C5E /* CloudKitMuckSyncService.swift */,
 				F2B24C8FCC5AB3A6A0EEB883 /* CloudKitSquadSyncService.swift */,
 				7076D420C3B07A445C0C2CF6 /* GoldEventsService.swift */,
@@ -508,6 +511,7 @@
 				60D8E4B517F95A8BA0E1AC0C /* Badge.swift in Sources */,
 				1DDECD1FB5B187860D6C71DF /* BeforeAfterSliderView.swift in Sources */,
 				FD914D99BFDBEAC45BC75A55 /* BrisbaneEventsService.swift in Sources */,
+				CAA4C945A99919942C4B7938 /* CLLocationCoordinate2D+Fuzz.swift in Sources */,
 				9DF45C8629F11BCC6C38485F /* CloseMuckSheet.swift in Sources */,
 				A2056DB9CF38A2D453219C7F /* CloudKitMuckSyncService.swift in Sources */,
 				B06BDEBC9C0B2E5032DC61DF /* CloudKitSquadSyncService.swift in Sources */,

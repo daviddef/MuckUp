@@ -150,6 +150,12 @@ struct ProfileView: View {
                         } else if let email = authService.currentUser?.email, !email.isEmpty {
                             Text(email)
                         }
+
+                        Toggle(isOn: $muckVM.isJuniorMode) {
+                            Label("Junior Mode", systemImage: "figure.child")
+                        }
+                        Text("Blurs your position on the map and only shows suburb-level location on new mucks")
+
                         Button("Sign Out", role: .destructive) {
                             authService.signOut()
                         }

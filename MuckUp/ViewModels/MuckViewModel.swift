@@ -14,6 +14,16 @@ final class MuckViewModel: ObservableObject {
 
     var rank: MuckRank { MuckRank.forPoints(points) }
 
+    // Light-touch Junior Mode — fuzzes the displayed map position and
+    // trims raised-muck locations to suburb level. No guardian-account
+    // system yet; any user can opt in from Profile.
+    @Published var isJuniorMode: Bool = false {
+        didSet {
+            guard isJuniorMode != oldValue else { return }
+            storage.setJuniorMode(isJuniorMode, for: userId)
+        }
+    }
+
     private let storage = StorageService.shared
     var userId: String = AppUser.guest.id
     // Set once at app launch so every awarded point also lands on the
@@ -23,6 +33,7 @@ final class MuckViewModel: ObservableObject {
 
     init() {
         points = storage.loadPoints(for: userId)
+        isJuniorMode = storage.isJuniorMode(for: userId)
     }
 
     /// Called once the real signed-in (or guest) user is known — swaps the
@@ -31,6 +42,7 @@ final class MuckViewModel: ObservableObject {
         guard newUserId != userId else { return }
         userId = newUserId
         points = storage.loadPoints(for: userId)
+        isJuniorMode = storage.isJuniorMode(for: userId)
         objectWillChange.send()
     }
 

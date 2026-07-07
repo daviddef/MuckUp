@@ -177,6 +177,19 @@ final class StorageService {
         appendUnique(muckId, key: "flagged_\(userId)")
     }
 
+    // MARK: - Junior Mode
+
+    /// Light-touch safety setting: fuzzes the displayed map position and
+    /// stores only suburb-level (not street-level) location text when
+    /// raising a muck. No separate account system — any user can opt in.
+    func isJuniorMode(for userId: String) -> Bool {
+        defaults.bool(forKey: "juniorMode_\(userId)")
+    }
+
+    func setJuniorMode(_ enabled: Bool, for userId: String) {
+        defaults.set(enabled, forKey: "juniorMode_\(userId)")
+    }
+
     // MARK: - Squad
 
     func mySquadCode(for userId: String) -> String? {

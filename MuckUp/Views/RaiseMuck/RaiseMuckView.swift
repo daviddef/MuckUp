@@ -235,9 +235,16 @@ struct RaiseMuckView: View {
         let loc = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
         geocoder.reverseGeocodeLocation(loc) { placemarks, _ in
             guard let place = placemarks?.first else { return }
-            let parts = [place.name, place.locality, place.administrativeArea]
-                .compactMap { $0 }
-            pickedAddress = parts.prefix(2).joined(separator: ", ")
+            if muckVM.isJuniorMode {
+                // Suburb-level only — no street name or POI, so a raised
+                // muck doesn't broadcast a precise address for the report.
+                let parts = [place.locality, place.administrativeArea].compactMap { $0 }
+                pickedAddress = parts.isEmpty ? "Nearby area" : parts.joined(separator: ", ")
+            } else {
+                let parts = [place.name, place.locality, place.administrativeArea]
+                    .compactMap { $0 }
+                pickedAddress = parts.prefix(2).joined(separator: ", ")
+            }
         }
     }
 

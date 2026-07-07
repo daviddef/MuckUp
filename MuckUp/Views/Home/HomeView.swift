@@ -26,6 +26,17 @@ struct HomeView: View {
     private let patchRadiusMetres: Double = 5_000
     private let weeklyChallenge = WeeklyChallenge.current()
 
+    // Junior Mode blurs the map's own displayed position so a child's
+    // exact whereabouts (often near home) isn't pinpointable from the
+    // camera centre — "nearby" content queries still use the real
+    // location elsewhere, only this on-screen marker is fuzzed.
+    private var displayUserLocation: CLLocation? {
+        guard let real = locationService.location else { return nil }
+        guard muckVM.isJuniorMode else { return real }
+        let fuzzed = real.coordinate.fuzzed()
+        return CLLocation(latitude: fuzzed.latitude, longitude: fuzzed.longitude)
+    }
+
     private var mucks: [Muck] {
         let base = muckVM.filtered(allMucks)
         guard let mapCentre else { return base }
@@ -180,7 +191,7 @@ struct HomeView: View {
                         mucks: muckVM.filtered(allMucks),
                         partnerItems: visiblePartnerItems,
                         awarenessItems: muckVM.typeFilter == .hazard ? awarenessVM.mapItems : [],
-                        userLocation: locationService.location,
+                        userLocation: displayUserLocation,
                         onSelectMuck: { selectedMuck = $0 },
                         onSelectPartnerItem: { selectedPartnerItem = $0 },
                         onSelectAwarenessItem: { selectedAwarenessItem = $0 },
@@ -347,13 +358,14 @@ struct HomeView: View {
     }
 
     private var fab: some View {
-        Button {
+        let size: CGFloat = muckVM.isJuniorMode ? 68 : 56
+        return Button {
             showRaiseMuck = true
         } label: {
             Image(systemName: "plus")
-                .font(.system(size: 22, weight: .bold))
+                .font(.system(size: muckVM.isJuniorMode ? 26 : 22, weight: .bold))
                 .foregroundStyle(.white)
-                .frame(width: 56, height: 56)
+                .frame(width: size, height: size)
                 .background(Color.muckGreen)
                 .clipShape(Circle())
                 .muckFloatShadow()
