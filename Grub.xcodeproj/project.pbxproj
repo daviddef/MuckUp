@@ -17,6 +17,7 @@
 		0CDD78431D1E215F82860179 /* ParksEventsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9455DE84640673F26CB2BE1 /* ParksEventsService.swift */; };
 		117FB8019BE5CC4FD510524F /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23C3B99BF27711D8EBC4E3D3 /* OnboardingView.swift */; };
 		12853CF997870A1D3EC801F9 /* MuckViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F78D0A959F52B15A35E2B1F /* MuckViewModel.swift */; };
+		13F069EFB91553FC878C5E74 /* ScheduleEventSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25360391A9F1A00BDE3F67EE /* ScheduleEventSections.swift */; };
 		1928CE59946B9388D0A286D7 /* HelpRequestCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289429F90BF35752C92D95A7 /* HelpRequestCard.swift */; };
 		19F0D826F704A80CD3799CC7 /* MuckRank.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54D716A4E143B89A7DE5E6E /* MuckRank.swift */; };
 		1ADD6A012E28944AEA17517E /* Partner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E52903B99A781403A7CD32 /* Partner.swift */; };
@@ -32,6 +33,7 @@
 		344B7A0F6EA8A59B0214E714 /* StampBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139BB5ED0AA8EE569DB25526 /* StampBadgeView.swift */; };
 		34BFD69DD9FB92C5559C68BF /* MuckCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59E2C9895CEFD0B17F90B4B /* MuckCardView.swift */; };
 		3A2AB350F514DE9C2CBAB16A /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68CB2FF8089A24369F7A521 /* LocationService.swift */; };
+		3E7C351A1ED6FD4D0E137AD3 /* MuckLinkingComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84986A613B9FEB77627BBF9D /* MuckLinkingComponents.swift */; };
 		4315D038DFE4E1E435EB11E3 /* SquadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D858F57B0C9A4EA77AF56221 /* SquadViewModel.swift */; };
 		456C623DBD583B68FD99A4C2 /* GreenEventsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7139996E5F3F38EF5355F49E /* GreenEventsService.swift */; };
 		48A938EF6C6DC7DBA6A8CE25 /* EventWrapUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E096F4AD480067C0E607F83D /* EventWrapUpView.swift */; };
@@ -39,6 +41,7 @@
 		4D93ABE7B2F224F9DD1B9D2B /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D6B3AB481B826B56DCD95 /* SplashView.swift */; };
 		4E88A712709F2294BDD8F60C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF3A5A0B75FA13C0BAA40334 /* Assets.xcassets */; };
 		501FC1672ECFA500A5B3A81D /* TypeBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677E75E37C1C41678CE8A50A /* TypeBadgeView.swift */; };
+		50F52FDFD612A99B3A8B137C /* EventSavedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F4595150261C2DC7C00B674 /* EventSavedView.swift */; };
 		518CBED455A9BF2EC75C3E73 /* ScheduleEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB21888E0DD634338526D36 /* ScheduleEventView.swift */; };
 		5624B82EE53897B1C60DCBD0 /* ODSTrumbaEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455B2032EEB7CF2751C44CFC /* ODSTrumbaEvent.swift */; };
 		59426096AECBB4DB3E389C6C /* GrubCharacterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF5ABC1EFB5CCFBBADEFD64 /* GrubCharacterView.swift */; };
@@ -96,6 +99,7 @@
 		1C12B9181C016426450F8CFF /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		23C3B99BF27711D8EBC4E3D3 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		23E52903B99A781403A7CD32 /* Partner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Partner.swift; sourceTree = "<group>"; };
+		25360391A9F1A00BDE3F67EE /* ScheduleEventSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventSections.swift; sourceTree = "<group>"; };
 		289429F90BF35752C92D95A7 /* HelpRequestCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpRequestCard.swift; sourceTree = "<group>"; };
 		2A0FAEAE3DEFD169BDA719CA /* MuckEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckEvent.swift; sourceTree = "<group>"; };
 		2A2E0E1A363992E35A3FD6FB /* AwarenessMapMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessMapMarker.swift; sourceTree = "<group>"; };
@@ -109,6 +113,7 @@
 		4CD3E4402705B8A86C1532A9 /* AwarenessViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwarenessViewModel.swift; sourceTree = "<group>"; };
 		524765881669E99862203E85 /* Grub.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Grub.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C9BA6E45986AFCA7FCDD6E2 /* HomeMiniMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeMiniMapView.swift; sourceTree = "<group>"; };
+		5F4595150261C2DC7C00B674 /* EventSavedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSavedView.swift; sourceTree = "<group>"; };
 		632C2F91DD7B35B2A04BEB89 /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
 		6341D1AA1E0A0EA57A6BCF25 /* SquadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadView.swift; sourceTree = "<group>"; };
 		677E75E37C1C41678CE8A50A /* TypeBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeBadgeView.swift; sourceTree = "<group>"; };
@@ -124,6 +129,7 @@
 		7B986405B5BABD48CAD63D7E /* EventLiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventLiveView.swift; sourceTree = "<group>"; };
 		7DC66CBC2FD20B89C0F193A1 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
 		8204790B4A659E31ABDC9920 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
+		84986A613B9FEB77627BBF9D /* MuckLinkingComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckLinkingComponents.swift; sourceTree = "<group>"; };
 		87D6B190F2F6105F50AB0C87 /* MuckMiniMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuckMiniMapView.swift; sourceTree = "<group>"; };
 		8AAC5F994776F115B6E7AE07 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		90A910FF716602F8D53AFF16 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
@@ -281,8 +287,11 @@
 			children = (
 				DDB7C2114E3847FEBAE6B5B3 /* AddToEventSheet.swift */,
 				7B986405B5BABD48CAD63D7E /* EventLiveView.swift */,
+				5F4595150261C2DC7C00B674 /* EventSavedView.swift */,
 				9C9A262C367E9690FB5D8BF2 /* EventsView.swift */,
 				E096F4AD480067C0E607F83D /* EventWrapUpView.swift */,
+				84986A613B9FEB77627BBF9D /* MuckLinkingComponents.swift */,
+				25360391A9F1A00BDE3F67EE /* ScheduleEventSections.swift */,
 				9BB21888E0DD634338526D36 /* ScheduleEventView.swift */,
 			);
 			path = Events;
@@ -517,6 +526,7 @@
 				2575BB2B761ABE31631419CC /* DesignTokens.swift in Sources */,
 				A9BC1D841B397886994A4657 /* EmptyStateIllustration.swift in Sources */,
 				BD187811AF5BF7E23CD8DCF4 /* EventLiveView.swift in Sources */,
+				50F52FDFD612A99B3A8B137C /* EventSavedView.swift in Sources */,
 				7ED01CCF8A64FC4BA3089882 /* EventViewModel.swift in Sources */,
 				48A938EF6C6DC7DBA6A8CE25 /* EventWrapUpView.swift in Sources */,
 				003AD2891A98AD71BAC07AA8 /* EventsView.swift in Sources */,
@@ -538,6 +548,7 @@
 				F7014BC8E402EBEF438A43C9 /* Muck.swift in Sources */,
 				34BFD69DD9FB92C5559C68BF /* MuckCardView.swift in Sources */,
 				F58484A156015E6669190F7A /* MuckEvent.swift in Sources */,
+				3E7C351A1ED6FD4D0E137AD3 /* MuckLinkingComponents.swift in Sources */,
 				EAAFF076663A850C5D6808BC /* MuckMiniMapView.swift in Sources */,
 				19F0D826F704A80CD3799CC7 /* MuckRank.swift in Sources */,
 				222074DF393D3FDE09468072 /* MuckUpApp.swift in Sources */,
@@ -556,6 +567,7 @@
 				A22933096E4ADD0CA76F339A /* RaiseMuckView.swift in Sources */,
 				D2F781146285C1BE80681699 /* RankUpBanner.swift in Sources */,
 				03B70C81FB38E8636867B61B /* RootView.swift in Sources */,
+				13F069EFB91553FC878C5E74 /* ScheduleEventSections.swift in Sources */,
 				518CBED455A9BF2EC75C3E73 /* ScheduleEventView.swift in Sources */,
 				8DB67FB1CDB01BB17C72CE7E /* SettingsView.swift in Sources */,
 				4D93ABE7B2F224F9DD1B9D2B /* SplashView.swift in Sources */,
