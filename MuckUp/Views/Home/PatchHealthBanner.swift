@@ -49,6 +49,13 @@ struct PatchHealthBanner: View {
     var challenge: WeeklyChallenge? = nil
     var challengeProgress: Int = 0
 
+    // Never show the egg here — at 36pt in a small, always-visible card
+    // it reads as an odd oval rather than a lifecycle stage. A brand-new
+    // user just sees the grub sprite until their first rank-up.
+    private var displayStage: GrubLifecycleStage {
+        stage == .egg ? .grub : stage
+    }
+
     private var mood: GrubMood {
         if openHazards > 0 && health == .barren { return .concerned }
         if health == .thriving { return .celebrating }
@@ -68,7 +75,7 @@ struct PatchHealthBanner: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             HStack(spacing: Spacing.xs) {
-                GrubCharacterView(stage: stage, mood: mood, size: 36)
+                GrubCharacterView(stage: displayStage, mood: mood, size: 36, bounceEnabled: false)
 
                 Text(health.label)
                     .font(.muckHeadline)

@@ -40,6 +40,11 @@ struct GrubCharacterView: View {
     var stage: GrubLifecycleStage = .grub
     let mood: GrubMood
     var size: CGFloat = 72
+    // The idle vertical breathing loop reads fine at hero sizes (Profile,
+    // rank-up banner) but is too much motion for a small, frequently-
+    // visible spot like the patch-health card — callers there can turn
+    // it off while keeping blink/sway.
+    var bounceEnabled: Bool = true
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var breathe = false
@@ -63,7 +68,7 @@ struct GrubCharacterView: View {
                 .opacity(outgoingStage == nil ? 1 : crossfade)
         }
         .frame(width: size, height: size)
-        .offset(y: (breathe && !reduceMotion ? -2 : 0) + mood.bounce)
+        .offset(y: (breathe && !reduceMotion && bounceEnabled ? -2 : 0) + (bounceEnabled ? mood.bounce : 0))
         .animation(reduceMotion ? nil : .easeInOut(duration: 1.6).repeatForever(autoreverses: true), value: breathe)
         .animation(.spring(response: 0.4, dampingFraction: 0.6), value: mood.bounce)
         .onAppear {
