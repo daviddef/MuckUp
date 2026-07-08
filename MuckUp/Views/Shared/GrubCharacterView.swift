@@ -45,11 +45,18 @@ struct GrubCharacterView: View {
     // visible spot like the patch-health card — callers there can turn
     // it off while keeping blink/sway.
     var bounceEnabled: Bool = true
+    // A slow side-to-side patrol instead of the vertical bounce — reads
+    // as "pacing the patch" rather than "bobbing in place".
+    var walkEnabled: Bool = false
+    var walkRange: CGFloat = 14
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var breathe = false
     @State private var isBlinking = false
     @State private var blinkTask: Task<Void, Never>?
+    @State private var walkedRight = false
+    @State private var facingRight = true
+    @State private var walkTask: Task<Void, Never>?
 
     // A Canvas can't interpolate between two completely different body
     // plans on its own — .animation() only tweens real View properties.
@@ -68,14 +75,23 @@ struct GrubCharacterView: View {
                 .opacity(outgoingStage == nil ? 1 : crossfade)
         }
         .frame(width: size, height: size)
-        .offset(y: (breathe && !reduceMotion && bounceEnabled ? -2 : 0) + (bounceEnabled ? mood.bounce : 0))
+        .scaleEffect(x: (walkEnabled && !facingRight) ? -1 : 1, y: 1)
+        .offset(
+            x: walkEnabled && !reduceMotion ? (walkedRight ? walkRange / 2 : -walkRange / 2) : 0,
+            y: (breathe && !reduceMotion && bounceEnabled ? -2 : 0) + (bounceEnabled ? mood.bounce : 0)
+        )
         .animation(reduceMotion ? nil : .easeInOut(duration: 1.6).repeatForever(autoreverses: true), value: breathe)
         .animation(.spring(response: 0.4, dampingFraction: 0.6), value: mood.bounce)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 1.8), value: walkedRight)
         .onAppear {
             breathe = true
             startBlinkLoop()
+            if walkEnabled { startWalkLoop() }
         }
-        .onDisappear { blinkTask?.cancel() }
+        .onDisappear {
+            blinkTask?.cancel()
+            walkTask?.cancel()
+        }
         .onChange(of: stage) { oldStage, _ in
             guard !reduceMotion else { return }
             outgoingStage = oldStage
@@ -90,6 +106,23 @@ struct GrubCharacterView: View {
         TimelineView(.animation(paused: reduceMotion)) { timeline in
             Canvas { context, canvasSize in
                 draw(stage: stage, in: &context, size: canvasSize, time: timeline.date.timeIntervalSinceReferenceDate)
+            }
+        }
+    }
+
+    // Alternates a short walk left/right on a fixed cadence — the
+    // .animation(value: walkedRight) modifier eases the actual offset,
+    // this loop just flips the target and keeps facingRight in sync so
+    // the sprite turns around at each end of its patrol.
+    private func startWalkLoop() {
+        guard !reduceMotion else { return }
+        walkTask?.cancel()
+        walkTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 1_800_000_000)
+                guard !Task.isCancelled else { return }
+                walkedRight.toggle()
+                facingRight = walkedRight
             }
         }
     }

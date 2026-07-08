@@ -75,7 +75,7 @@ struct PatchHealthBanner: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             HStack(spacing: Spacing.xs) {
-                GrubCharacterView(stage: displayStage, mood: mood, size: 36, bounceEnabled: false)
+                GrubCharacterView(stage: displayStage, mood: mood, size: 36, bounceEnabled: false, walkEnabled: true, walkRange: 10)
 
                 Text(health.label)
                     .font(.muckHeadline)
