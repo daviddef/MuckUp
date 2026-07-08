@@ -9,6 +9,7 @@ struct PhotoPickerButton: View {
     @State private var pickerItem: PhotosPickerItem?
     @State private var showOptions = false
     @State private var showCamera = false
+    @State private var showLibraryPicker = false
 
     var body: some View {
         Group {
@@ -54,12 +55,16 @@ struct PhotoPickerButton: View {
             }
         }
         .confirmationDialog("Add Photo", isPresented: $showOptions) {
-            PhotosPicker(selection: $pickerItem, matching: .images) {
-                Label("Choose from Library", systemImage: "photo")
-            }
+            // A PhotosPicker nested directly inside a confirmationDialog
+            // button doesn't reliably present its own sheet — the dialog
+            // dismisses and swallows the tap before the picker can act.
+            // Setting a flag here and presenting .photosPicker separately
+            // (below) is the pattern that actually works.
+            Button("Choose from Library") { showLibraryPicker = true }
             Button("Take Photo") { showCamera = true }
             Button("Cancel", role: .cancel) {}
         }
+        .photosPicker(isPresented: $showLibraryPicker, selection: $pickerItem, matching: .images)
         .onChange(of: pickerItem) { _, item in
             Task {
                 if let data = try? await item?.loadTransferable(type: Data.self) {

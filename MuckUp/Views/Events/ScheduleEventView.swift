@@ -20,7 +20,7 @@ struct ScheduleEventView: View {
     @State private var muckSearch = ""
     @State private var expandedRadius = false
     @State private var quickLookMuck: Muck?
-    @State private var showMuckLinking = false
+    @State private var showMuckLinking = true
 
     // Meetup location picker state
     @State private var pickedMeetupCoordinate: CLLocationCoordinate2D? = nil
@@ -455,7 +455,7 @@ struct ScheduleEventView: View {
                 }
             }
             .navigationDestination(isPresented: $isSaved) {
-                EventSavedView()
+                EventSavedView(onBackToHome: { dismiss() })
             }
             .sheet(item: $quickLookMuck) { muck in
                 MuckQuickLookSheet(
@@ -895,7 +895,7 @@ private struct MuckQuickLookSheet: View {
 // MARK: - Event Saved
 
 struct EventSavedView: View {
-    @Environment(\.dismiss) private var dismiss
+    var onBackToHome: () -> Void
     @State private var celebrate = false
 
     var body: some View {
@@ -918,7 +918,7 @@ struct EventSavedView: View {
                 .padding(.horizontal, Spacing.xl)
             Spacer()
             PrimaryButton(title: "Back to Home") {
-                dismiss()
+                onBackToHome()
             }
             .padding(.horizontal, Spacing.md)
             .padding(.bottom, Spacing.xl)

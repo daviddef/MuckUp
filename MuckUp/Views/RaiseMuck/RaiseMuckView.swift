@@ -217,7 +217,12 @@ struct RaiseMuckView: View {
                 }
             }
             .navigationDestination(isPresented: $isSaved) {
-                MuckSavedView()
+                // MuckSavedView's own @Environment(\.dismiss) only pops
+                // this push (back to the form) since it's scoped to the
+                // navigationDestination — passing this view's dismiss
+                // explicitly is what actually closes the Raise a Muck
+                // sheet and returns to Home.
+                MuckSavedView(onBackToHome: { dismiss() })
             }
             .onAppear {
                 if let loc = locationService.location {
@@ -504,7 +509,7 @@ private struct TypeSelectorCard: View {
 // MARK: - Muck Saved
 
 struct MuckSavedView: View {
-    @Environment(\.dismiss) private var dismiss
+    var onBackToHome: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject var muckVM: MuckViewModel
     @State private var showScheduleEvent = false
@@ -529,7 +534,7 @@ struct MuckSavedView: View {
                     showScheduleEvent = true
                 }
                 SecondaryButton(title: "Back to Home") {
-                    dismiss()
+                    onBackToHome()
                 }
             }
             .padding(.horizontal, Spacing.md)
