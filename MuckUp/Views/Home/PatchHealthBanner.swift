@@ -75,7 +75,12 @@ struct PatchHealthBanner: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             HStack(spacing: Spacing.xs) {
-                GrubCharacterView(stage: displayStage, mood: mood, size: 36, bounceEnabled: false, walkEnabled: true, walkRange: 10)
+                // No walk/bounce here — at 36pt the side-to-side pacing
+                // plus its horizontal flip on turn-around read as
+                // "spinning" once the sprite (busier than the old flat
+                // vector) was in place. The sprite's own built-in idle
+                // animation is motion enough on its own.
+                GrubCharacterView(stage: displayStage, mood: mood, size: 36, bounceEnabled: false, walkEnabled: false)
 
                 Text(health.label)
                     .font(.muckHeadline)
