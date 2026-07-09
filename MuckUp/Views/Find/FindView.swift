@@ -81,15 +81,40 @@ struct FindView: View {
             }
             .background(Color.muckBg)
             .navigationTitle("Find")
-            .task {
-                if partnerVM.items.isEmpty {
-                    if let loc = locationService.location {
-                        await partnerVM.fetchAll(near: loc)
-                    } else {
-                        partnerVM.loadMockData()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        Task { await refreshNearby() }
+                    } label: {
+                        if partnerVM.isLoading {
+                            ProgressView().tint(Color.muckNearBlack)
+                        } else {
+                            Image(systemName: "location.fill")
+                                .foregroundStyle(Color.muckGreen)
+                        }
                     }
+                    .disabled(partnerVM.isLoading)
+                    .accessibilityLabel("Show near me")
                 }
             }
+            .task {
+                if partnerVM.items.isEmpty {
+                    await refreshNearby()
+                }
+            }
+        }
+    }
+
+    // Re-centers the whole Find tab on wherever the user currently is —
+    // re-fetches every source around the live location rather than
+    // whatever was cached from app launch (or the mock-data fallback if
+    // location wasn't available yet at that point).
+    private func refreshNearby() async {
+        if let loc = locationService.location {
+            await partnerVM.fetchAll(near: loc)
+        } else {
+            locationService.requestLocation()
+            partnerVM.loadMockData()
         }
     }
 
@@ -133,6 +158,9 @@ struct FindMapView: View {
             }
         }
         .mapStyle(.standard(elevation: .flat))
+        .mapControls {
+            MapUserLocationButton()
+        }
         .onAppear {
             if let loc = locationService.location {
                 cameraPosition = .camera(MapCamera(centerCoordinate: loc.coordinate, distance: 6000))
