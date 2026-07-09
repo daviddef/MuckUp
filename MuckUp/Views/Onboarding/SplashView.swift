@@ -9,6 +9,7 @@ struct SplashView: View {
     @State private var iconScale: CGFloat = 0.85
     @State private var contentOpacity: Double = 0
     @State private var isFadingOut = false
+    @State private var showSprite = false
 
     var body: some View {
         ZStack {
@@ -16,14 +17,22 @@ struct SplashView: View {
 
             // Sizing/spacing matched to LaunchScreen.storyboard so the handoff
             // from the system launch screen to this view is seamless — no
-            // visible jump in icon size or text position.
+            // visible jump in icon size or text position. Once that handoff
+            // beat has landed, the static icon crossfades into the real,
+            // animated Grub — the icon "coming to life" as the app opens.
             VStack(spacing: 0) {
-                Image("LaunchIcon")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 150, height: 150)
-                    .scaleEffect(iconScale)
-                    .padding(.bottom, 16)
+                ZStack {
+                    Image("LaunchIcon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150, height: 150)
+                        .opacity(showSprite ? 0 : 1)
+
+                    AnimatedGrubSpriteView(stage: .grub, size: 150)
+                        .opacity(showSprite ? 1 : 0)
+                }
+                .scaleEffect(iconScale)
+                .padding(.bottom, 16)
 
                 Text("GRUB")
                     .font(.system(size: 48, weight: .black))
@@ -44,6 +53,11 @@ struct SplashView: View {
             }
             withAnimation(.easeOut(duration: 0.4)) {
                 contentOpacity = 1
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    showSprite = true
+                }
             }
             // Hold, then fade the whole splash out
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {

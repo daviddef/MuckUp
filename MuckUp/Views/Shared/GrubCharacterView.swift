@@ -102,10 +102,18 @@ struct GrubCharacterView: View {
         .accessibilityHidden(true)
     }
 
+    // Hand-illustrated frame sets replace the flat vector drawing one
+    // stage at a time as they arrive — a stage with no sprite folder
+    // yet keeps using the Canvas body plan below.
+    @ViewBuilder
     private func canvas(for stage: GrubLifecycleStage) -> some View {
-        TimelineView(.animation(paused: reduceMotion)) { timeline in
-            Canvas { context, canvasSize in
-                draw(stage: stage, in: &context, size: canvasSize, time: timeline.date.timeIntervalSinceReferenceDate)
+        if AnimatedGrubSpriteView.hasSprite(for: stage) {
+            AnimatedGrubSpriteView(stage: stage, size: size)
+        } else {
+            TimelineView(.animation(paused: reduceMotion)) { timeline in
+                Canvas { context, canvasSize in
+                    draw(stage: stage, in: &context, size: canvasSize, time: timeline.date.timeIntervalSinceReferenceDate)
+                }
             }
         }
     }

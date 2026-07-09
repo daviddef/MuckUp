@@ -25,6 +25,7 @@ targets:
       - path: MuckUp
     resources:
       - path: MuckUp/Resources
+      - path: MuckUp/Sprites.bundle
     info:
       path: MuckUp/Info.plist
       properties:
