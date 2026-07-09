@@ -19,6 +19,7 @@ struct FindView: View {
     @EnvironmentObject var locationService: LocationService
     @State private var searchText = ""
     @State private var displayMode: FindDisplayMode = .list
+    @State private var showRadiusSheet = false
 
     private var filteredItems: [PartnerItem] {
         let base = partnerVM.filteredItems
@@ -83,9 +84,7 @@ struct FindView: View {
             .navigationTitle("Find")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        Task { await refreshNearby() }
-                    } label: {
+                    Group {
                         if partnerVM.isLoading {
                             ProgressView().tint(Color.muckNearBlack)
                         } else {
@@ -93,14 +92,34 @@ struct FindView: View {
                                 .foregroundStyle(Color.muckGreen)
                         }
                     }
-                    .disabled(partnerVM.isLoading)
+                    .frame(width: 30, height: 30)
+                    .contentShape(Rectangle())
+                    // Both gestures on the same view — SwiftUI waits out
+                    // the double-tap window before firing the single-tap,
+                    // so a quick double-tap opens the radius slider
+                    // instead of also triggering a refresh first.
+                    .onTapGesture(count: 2) {
+                        showRadiusSheet = true
+                    }
+                    .onTapGesture(count: 1) {
+                        Task { await refreshNearby() }
+                    }
                     .accessibilityLabel("Show near me")
+                    .accessibilityHint("Double-tap to set search distance")
                 }
             }
             .task {
                 if partnerVM.items.isEmpty {
                     await refreshNearby()
                 }
+            }
+            .sheet(isPresented: $showRadiusSheet) {
+                RadiusSliderSheet(
+                    radiusMetres: $partnerVM.searchRadiusMetres,
+                    onApply: { Task { await refreshNearby() } }
+                )
+                .presentationDetents([.height(240)])
+                .presentationDragIndicator(.visible)
             }
         }
     }
@@ -367,5 +386,66 @@ struct MoreOrganisationsView: View {
         .padding(Spacing.md)
         .background(Color.muckSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+    }
+}
+
+// MARK: - Radius Slider Sheet
+
+/// Reached by double-tapping Find's "near me" location button — lets
+/// the user widen or narrow how far the four live event sources
+/// (Brisbane/Green/Parks/Gold events) search around them, instead of
+/// the previously-fixed 30km.
+private struct RadiusSliderSheet: View {
+    @Binding var radiusMetres: Double
+    let onApply: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    private let range: ClosedRange<Double> = 5_000...100_000
+
+    private var radiusLabel: String {
+        let km = radiusMetres / 1000
+        return km < 1 ? "\(Int(radiusMetres))m" : "\(Int(km))km"
+    }
+
+    var body: some View {
+        VStack(spacing: Spacing.lg) {
+            VStack(spacing: Spacing.xxs) {
+                Text("Search distance")
+                    .font(.muckHeadline)
+                    .foregroundStyle(Color.muckNearBlack)
+                Text("How far from you to look for events")
+                    .font(.muckCaption)
+                    .foregroundStyle(Color.muckNearBlack.opacity(0.5))
+            }
+            .padding(.top, Spacing.md)
+
+            VStack(spacing: Spacing.xs) {
+                Text(radiusLabel)
+                    .font(.muckDisplay)
+                    .foregroundStyle(Color.muckGreen)
+                    .contentTransition(.numericText())
+                    .animation(.easeOut(duration: 0.15), value: radiusMetres)
+
+                Slider(value: $radiusMetres, in: range, step: 5_000)
+                    .tint(Color.muckGreen)
+                    .padding(.horizontal, Spacing.lg)
+
+                HStack {
+                    Text("5km")
+                    Spacer()
+                    Text("100km")
+                }
+                .font(.muckMicro)
+                .foregroundStyle(Color.muckNearBlack.opacity(0.4))
+                .padding(.horizontal, Spacing.lg)
+            }
+
+            PrimaryButton(title: "Apply", icon: "checkmark") {
+                onApply()
+                dismiss()
+            }
+            .padding(.horizontal, Spacing.lg)
+            .padding(.bottom, Spacing.md)
+        }
     }
 }

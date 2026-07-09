@@ -11,6 +11,12 @@ final class PartnerViewModel: ObservableObject {
     // the Home screen's mini map and "Events near you" section — on by
     // default, toggled off via the icon filter in Home's filter bar.
     @Published var showOnHome: Bool = true
+    // "Near me" radius for Find's four live event sources (Brisbane,
+    // Green, Parks, Gold events) — user-adjustable via the radius
+    // slider on Find's location button. Composting hubs/transfer
+    // stations aren't radius-scoped server-side, so this doesn't touch
+    // them; they're few enough to just always fetch in full.
+    @Published var searchRadiusMetres: Double = BrisbaneEventsService.defaultSearchRadiusMetres
 
     var filteredItems: [PartnerItem] {
         var result = items.filter { enabledSources.contains($0.source) }
@@ -57,10 +63,10 @@ final class PartnerViewModel: ObservableObject {
         // Everything else here is a live feed, fetched concurrently and
         // merged in alongside the mock items.
         loadMockData()
-        async let councilEvents = BrisbaneEventsService.shared.fetchNearby(location)
-        async let greenEvents = GreenEventsService.shared.fetchNearby(location)
-        async let parksEvents = ParksEventsService.shared.fetchNearby(location)
-        async let goldEvents = GoldEventsService.shared.fetchNearby(location)
+        async let councilEvents = BrisbaneEventsService.shared.fetchNearby(location, radiusMetres: searchRadiusMetres)
+        async let greenEvents = GreenEventsService.shared.fetchNearby(location, radiusMetres: searchRadiusMetres)
+        async let parksEvents = ParksEventsService.shared.fetchNearby(location, radiusMetres: searchRadiusMetres)
+        async let goldEvents = GoldEventsService.shared.fetchNearby(location, radiusMetres: searchRadiusMetres)
         async let compostingHubs = WasteResourceLocationsService.shared.fetchCompostingHubs()
         async let transferStations = WasteResourceLocationsService.shared.fetchWasteTransferStations()
 
