@@ -22,6 +22,8 @@
 	<string>1</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.lifestyle</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Grub needs your camera to photograph mucks you report.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

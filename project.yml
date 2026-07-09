@@ -43,6 +43,7 @@ targets:
         UIDeviceFamily:
           - 1
         ITSAppUsesNonExemptEncryption: false
+        LSApplicationCategoryType: public.app-category.lifestyle
     settings:
       base:
         INFOPLIST_FILE: MuckUp/Info.plist

@@ -30,7 +30,7 @@ final class GoldEventsService {
         guard let url = components.url else { return [] }
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.grubData.data(from: url)
             let decoded = try JSONDecoder().decode(ODSGenericEventsResponse.self, from: data)
             return decoded.results.compactMap { $0.toPartnerItem(source: .goldEvents, idPrefix: "gold") }
         } catch {

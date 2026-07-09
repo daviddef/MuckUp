@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct OnboardingPage {
-    let icon: String
+    let stage: GrubLifecycleStage
+    let mood: GrubMood
     let title: String
     let subtitle: String
 }
@@ -11,19 +12,25 @@ struct OnboardingView: View {
 
     @State private var pageIndex = 0
 
+    // Walks Grub through its own lifecycle across the three pages — the
+    // same metamorphosis story that plays out over real app usage,
+    // previewed up front instead of three unrelated SF Symbols.
     private let pages: [OnboardingPage] = [
         OnboardingPage(
-            icon: "eye.fill",
+            stage: .grub,
+            mood: .idle,
             title: "Spot it",
             subtitle: "Notice a mess in your neighbourhood? Litter, illegal dumping, hazards — anything that needs cleaning up."
         ),
         OnboardingPage(
-            icon: "camera.fill",
+            stage: .bigGrub,
+            mood: .celebrating,
             title: "Log it",
             subtitle: "Drop a pin, snap a photo, add a description. That evidence is what gets things fixed."
         ),
         OnboardingPage(
-            icon: "figure.2.and.child.holdinghands",
+            stage: .fullFlight,
+            mood: .celebrating,
             title: "Clean it up",
             subtitle: "Rally your community, schedule a cleanup event, and watch your impact add up — one bag at a time."
         )
@@ -76,9 +83,7 @@ private struct OnboardingPageView: View {
                 Circle()
                     .fill(Color.muckGreen.opacity(0.1))
                     .frame(width: 140, height: 140)
-                Image(systemName: page.icon)
-                    .font(.system(size: 52))
-                    .foregroundStyle(Color.muckGreen)
+                GrubCharacterView(stage: page.stage, mood: page.mood, size: 92)
             }
 
             VStack(spacing: Spacing.sm) {

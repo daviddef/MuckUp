@@ -34,7 +34,7 @@ final class WaterwaySafetyService {
         guard let url = components.url else { return [] }
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.grubData.data(from: url)
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let results = json["results"] as? [[String: Any]] else { return [] }
             return results.compactMap { parseRecord($0) }

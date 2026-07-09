@@ -20,7 +20,7 @@ final class PlannedBurnsService {
         guard let url = components.url else { return [] }
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.grubData.data(from: url)
             let decoded = try JSONDecoder().decode(BurnsResponse.self, from: data)
             return decoded.results.compactMap { record in
                 guard let name = record.parkname else { return nil }

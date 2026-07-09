@@ -28,7 +28,7 @@ final class AnimalComplaintsService {
         guard let url = components.url else { return nil }
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.grubData.data(from: url)
             let decoded = try JSONDecoder().decode(ODSComplaintsResponse.self, from: data)
             guard !decoded.results.isEmpty else { return nil }
 
@@ -69,7 +69,7 @@ final class AnimalComplaintsService {
         ]
         guard let url = components.url else { return nil }
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.grubData.data(from: url)
             let decoded = try JSONDecoder().decode(ODSComplaintsResponse.self, from: data)
             return decoded.results.first?.quarter
         } catch {

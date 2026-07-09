@@ -17,7 +17,7 @@ final class WasteResourceLocationsService {
     func fetchCompostingHubs() async -> [PartnerItem] {
         guard let url = URL(string: compostingURL + "?limit=50") else { return [] }
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.grubData.data(from: url)
             let decoded = try JSONDecoder().decode(CompostingResponse.self, from: data)
             return decoded.results.compactMap { record in
                 guard let name = record.name else { return nil }
@@ -42,7 +42,7 @@ final class WasteResourceLocationsService {
     func fetchWasteTransferStations() async -> [PartnerItem] {
         guard let url = URL(string: transferStationURL + "?limit=20") else { return [] }
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.grubData.data(from: url)
             let decoded = try JSONDecoder().decode(TransferStationResponse.self, from: data)
             return decoded.results.compactMap { record in
                 guard let name = record.name else { return nil }
