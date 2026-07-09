@@ -17,7 +17,32 @@ final class PartnerViewModel: ObservableObject {
         if let filter = sourceFilter {
             result = result.filter { $0.source == filter }
         }
-        return result
+        // Items arrive from 6+ independently-fetched sources appended one
+        // after another (council events, then green events, then parks,
+        // then gold, then composting hubs, ...) with no shared ordering —
+        // left as-is this reads as a random shuffle. Sort chronologically
+        // instead, soonest-upcoming first (same "what's next" rule as
+        // Home's activity feed): upcoming dated items ascending, then
+        // undated items (permanent locations like composting hubs), then
+        // anything with a date already in the past.
+        let now = Date.now
+        return result.sorted { a, b in
+            let aBucket = bucket(for: a.date, now: now)
+            let bBucket = bucket(for: b.date, now: now)
+            if aBucket != bBucket { return aBucket < bBucket }
+            switch (a.date, b.date) {
+            case let (da?, db?): return aBucket == 0 ? da < db : da > db
+            default: return false
+            }
+        }
+    }
+
+    /// 0 = upcoming (sorts soonest-first), 1 = undated, 2 = past (sorts
+    /// most-recent-first) — keeps "what's next" at the top without
+    /// burying permanent locations behind a stale one-off event.
+    private func bucket(for date: Date?, now: Date) -> Int {
+        guard let date else { return 1 }
+        return date >= now ? 0 : 2
     }
 
     func loadMockData() {
