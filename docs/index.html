@@ -3,28 +3,211 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Grub</title>
+<title>Grub — spot it, log it, clean it up</title>
+<meta name="description" content="Grub turns noticing litter and hazards in your neighbourhood into something you actually want to do. Raise a muck, join a clean-up, watch your patch come alive.">
 <style>
-  :root { color-scheme: light dark; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 680px; margin: 0 auto; padding: 4rem 1.5rem; line-height: 1.6; color: #1b1f1a; background: #fafaf7; text-align: center; }
-  h1 { font-size: 2rem; margin-bottom: 0.25rem; }
-  p { color: #6b7268; }
-  nav { margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; }
-  a { color: #1e7a3d; text-decoration: none; font-weight: 600; }
-  a:hover { text-decoration: underline; }
-  @media (prefers-color-scheme: dark) {
-    body { background: #141713; color: #e7e9e3; }
-    p { color: #9aa298; }
-    a { color: #6fd48f; }
+  :root {
+    color-scheme: light dark;
+    --ink: #17251a;
+    --ink-soft: #4b5a4e;
+    --paper: #f6f7f1;
+    --card: #ffffff;
+    --line: #dfe3d6;
+    --green: #1e7a3d;
+    --green-deep: #14512a;
+    --moss: #e8f0e4;
   }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #eef1e9;
+      --ink-soft: #a9b3a3;
+      --paper: #10150f;
+      --card: #171d15;
+      --line: #2a3226;
+      --green: #6fd48f;
+      --green-deep: #a8ecc0;
+      --moss: #17251a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+  header.hero {
+    padding: 4.5rem 0 3rem;
+    text-align: center;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--green-deep);
+    background: var(--moss);
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    font-size: clamp(2.2rem, 5vw, 3.1rem);
+    margin: 0 0 0.75rem;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .tagline {
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    max-width: 30em;
+    margin: 0 auto 2rem;
+    text-wrap: balance;
+  }
+  .cta-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .cta {
+    display: inline-block;
+    padding: 0.8rem 1.6rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  .cta.primary { background: var(--green); color: #06170c; }
+  .cta.secondary { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+
+  section.features {
+    padding: 2rem 0 3.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .feature {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.3rem 1.4rem;
+  }
+  .feature h3 { font-size: 1rem; margin: 0 0 0.4rem; }
+  .feature p { font-size: 0.9rem; color: var(--ink-soft); margin: 0; }
+
+  section.howitworks {
+    padding: 1rem 0 4rem;
+  }
+  section.howitworks h2 {
+    font-size: 1.4rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+  }
+  .step { text-align: center; }
+  .step .num {
+    width: 2.2rem;
+    height: 2.2rem;
+    line-height: 2.2rem;
+    border-radius: 50%;
+    background: var(--moss);
+    color: var(--green-deep);
+    font-weight: 700;
+    margin: 0 auto 0.75rem;
+  }
+  .step h4 { margin: 0 0 0.3rem; font-size: 0.95rem; }
+  .step p { margin: 0; font-size: 0.85rem; color: var(--ink-soft); }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 2rem 0 3rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  footer nav { margin-top: 0.75rem; display: flex; gap: 1.25rem; justify-content: center; }
+  footer a { color: var(--green-deep); text-decoration: none; font-weight: 600; }
+  footer a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
-<h1>Grub</h1>
-<p>Spot it, log it, clean it up.</p>
-<nav>
-  <a href="support.html">Support</a>
-  <a href="privacy.html">Privacy Policy</a>
-</nav>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="badge">Coming to the App Store</span>
+    <h1>Spot it. Log it. Clean it up.</h1>
+    <p class="tagline">Grub turns noticing litter and hazards in your neighbourhood into something you actually want to do — with a little green companion cheering your patch on.</p>
+    <div class="cta-row">
+      <a class="cta primary" href="support.html">Get support</a>
+      <a class="cta secondary" href="privacy.html">Privacy policy</a>
+    </div>
+  </header>
+
+  <section class="features">
+    <div class="feature">
+      <h3>Raise a muck</h3>
+      <p>Photograph litter or a hazard and drop a pin in seconds — anyone nearby can see it and help.</p>
+    </div>
+    <div class="feature">
+      <h3>Find nearby</h3>
+      <p>Browse a live map of open mucks, clean-up events, and hazards near you, with an adjustable search radius.</p>
+    </div>
+    <div class="feature">
+      <h3>Squads and streaks</h3>
+      <p>Form a group with friends or classmates, climb a shared leaderboard, and build a cleaning streak.</p>
+    </div>
+    <div class="feature">
+      <h3>A patch that comes alive</h3>
+      <p>Your local area has a real state — barren, growing, or thriving — driven by how much gets cleared nearby.</p>
+    </div>
+  </section>
+
+  <section class="howitworks">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h4>Spot something</h4>
+        <p>Litter, a hazard, anything worth flagging.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h4>Raise a muck</h4>
+        <p>Snap a photo and pin the location.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h4>Rally your crew</h4>
+        <p>Schedule an event or let neighbours find it.</p>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <h4>Watch it grow</h4>
+        <p>Your patch — and your Grub — thrive together.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>Grub is free, ad-free, and built for real communities.</p>
+    <nav>
+      <a href="support.html">Support</a>
+      <a href="privacy.html">Privacy policy</a>
+    </nav>
+  </div>
+</footer>
+
 </body>
 </html>
