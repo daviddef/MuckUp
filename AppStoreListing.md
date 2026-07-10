@@ -123,10 +123,97 @@ My read based on actual app content:
 ## App Review Information
 
 **Contact**: your name, phone, email
-**Demo account**: not required — reviewers can tap "Continue as Guest" to bypass Sign in with Apple entirely. Note this in the review notes to save back-and-forth:
+
+**Demo account**: not required — reviewers can tap "Continue as Guest" to bypass Sign in with Apple entirely.
+
+### Reviewer response to Guideline 2.1 rejection (7 July 2026)
+
+Apple asked for a screen recording plus 7 pieces of info in the Notes field before continuing review. Paste this into **App Review Information → Notes**, then attach the screen recording separately as instructed in App Store Connect.
+
 ```
-No demo account needed — tap "Continue as Guest" on the welcome screen to access the full app without signing in.
+Thanks for the detailed request — answers below.
+
+ACCESS
+No demo account is needed. On first launch, tap "Continue as Guest" on the
+welcome screen to use the full app immediately without Sign in with Apple.
+Location, camera, and photo library permission prompts appear naturally
+during normal use (raising a muck, viewing the map) — no special setup
+required to trigger them.
+
+APP PURPOSE AND AUDIENCE
+Grub helps community members report and coordinate cleanup of litter and
+hazards in their local area. Users photograph and pin a "muck" (a litter/
+hazard report), others nearby can see it on a map, help close it out, or
+join a scheduled cleanup event. It's aimed at community groups, schools,
+and neighbourhood volunteers who want a simple, game-like way to track
+and coordinate real-world cleanup work.
+
+CORE FEATURE FLOWS IN THE APP
+- Raise a Muck: photograph litter/a hazard, add a description, and drop a
+  pin at the location.
+- Find nearby: browse a live map of open mucks, hazards, and community
+  cleanup events near the user, with adjustable search radius.
+- Schedule Events: organize a cleanup, link relevant mucks, invite a Squad.
+- Squads: a group of users (e.g. friends, classmates) with a shared
+  leaderboard.
+- Account: Sign in with Apple (optional) syncs data via iCloud/CloudKit
+  across a user's own devices; Delete Account in Settings permanently
+  removes the user's mucks/events and profile.
+
+ACCOUNT REGISTRATION, LOGIN, AND DELETION
+- Registration/login: Sign in with Apple only (optional — Guest mode
+  available). No separate username/password system exists.
+- Deletion: Settings → Delete Account. This is a destructive action behind
+  a confirmation alert; it deletes the signed-in user's owned Muck and
+  MuckEvent records from the SwiftData/CloudKit store, then signs the user
+  out. Guest sessions have no account to delete, so the option isn't shown
+  for guests.
+
+PAID CONTENT / SUBSCRIPTIONS
+None. Grub is entirely free with no in-app purchases, subscriptions, or
+paid content of any kind.
+
+USER-GENERATED CONTENT, REPORTING, AND BLOCKING
+Mucks, event descriptions, and photos are user-submitted. Any muck, event,
+or profile can be flagged via a flag icon; flagged content is hidden
+pending review. There is no direct user-to-user messaging.
+
+SENSITIVE DATA / DEVICE CAPABILITY PROMPTS
+- Location (While Using the App): requested when viewing the Find map or
+  raising a muck, to show/place reports accurately. Purpose string:
+  "Grub uses your location to show nearby mucks and events."
+- Camera: requested when raising a muck to photograph litter/hazards.
+  Purpose string: "Grub needs your camera to photograph mucks you report."
+- Photo Library: requested when attaching an existing photo to a muck.
+  Purpose string: "Grub needs photo library access to attach images to
+  mucks."
+- No contacts access, no App Tracking Transparency prompt — Grub does not
+  track users across other apps/websites.
+
+DEVICES AND OS TESTED
+[FILL IN: e.g. "iPhone 15 Pro, iOS 18.x" and any other physical devices/
+simulators you actually tested on before this submission]
+
+EXTERNAL SERVICES / THIRD-PARTY DATA
+- Apple Sign in with Apple (authentication)
+- Apple CloudKit (private database sync for signed-in users' own data)
+- Public environmental/event open-data feeds (Brisbane City Council,
+  state parks, and similar open data council/government sources) queried
+  read-only to show nearby public cleanup events — no user data is sent
+  to these services beyond the device's current location for the query.
+No AI services, no payment processors, no analytics/ad SDKs.
+
+REGIONAL DIFFERENCES
+None — the app functions identically in all regions. The public event
+data sources are strongest in Australia (where the app was built and
+tested) but the core muck-reporting and Squad features work anywhere.
+
+REGULATED INDUSTRY / PROTECTED MATERIAL
+Not applicable — Grub is a general-audience community/lifestyle app with
+no regulated-industry content and no licensed third-party material.
 ```
+
+**Before re-submitting**: record a screen capture on a physical iPhone (Settings → Control Center → add Screen Recording, or QuickTime with the phone plugged into a Mac via Finder's "New Movie Recording" and selecting the phone as the source). Show, in order: app launch → Continue as Guest → grant location/camera prompts as they appear → Raise a Muck end-to-end (photo + pin) → Find tab map → flagging a muck → Settings → Delete Account confirmation flow. Attach the file where App Store Connect's rejection message indicates.
 
 ## Version Release
 
