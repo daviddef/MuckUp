@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 /// Account info, Junior Mode, and sign out — moved out of Profile's
 /// toolbar Menu into a proper sheet. That menu was the right call with
@@ -6,8 +7,11 @@ import SwiftUI
 /// stacking toolbar icons/menu rows and give settings their own screen.
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var authService: AuthService
     @EnvironmentObject var muckVM: MuckViewModel
+
+    @State private var showDeleteConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -41,6 +45,18 @@ struct SettingsView: View {
                         Text("Sign Out")
                     }
                 }
+
+                if !authService.isGuest {
+                    Section {
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            Text("Delete Account")
+                        }
+                    } footer: {
+                        Text("Permanently deletes your mucks, events, and profile. This can't be undone.")
+                    }
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -49,6 +65,30 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .alert("Delete Account?", isPresented: $showDeleteConfirmation) {
+                Button("Delete", role: .destructive) { deleteAccount() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This permanently deletes every muck and event you've created, along with your profile. This can't be undone.")
+            }
         }
+    }
+
+    // Deletes everything the current user owns before signing out — Apple
+    // guideline 5.1.1(v) requires in-app account deletion for any app that
+    // supports account creation, not just a sign-out.
+    private func deleteAccount() {
+        guard let userId = authService.currentUser?.id else { return }
+
+        if let ownedMucks = try? modelContext.fetch(FetchDescriptor<Muck>(predicate: #Predicate { $0.ownerId == userId })) {
+            ownedMucks.forEach { modelContext.delete($0) }
+        }
+        if let ownedEvents = try? modelContext.fetch(FetchDescriptor<MuckEvent>(predicate: #Predicate { $0.ownerId == userId })) {
+            ownedEvents.forEach { modelContext.delete($0) }
+        }
+        try? modelContext.save()
+
+        authService.signOut()
+        dismiss()
     }
 }
