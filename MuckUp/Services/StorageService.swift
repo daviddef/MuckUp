@@ -177,6 +177,29 @@ final class StorageService {
         appendUnique(muckId, key: "flagged_\(userId)")
     }
 
+    // MARK: - Blocked users
+
+    /// Owners this user has blocked. Content authored by a blocked owner is
+    /// hidden from this device's feeds — App Store Guideline 1.2 expects a
+    /// way to block abusive users alongside content reporting.
+    func blockedOwnerIds(for userId: String) -> [String] {
+        defaults.array(forKey: "blockedOwners_\(userId)") as? [String] ?? []
+    }
+
+    func isOwnerBlocked(_ ownerId: String, userId: String) -> Bool {
+        blockedOwnerIds(for: userId).contains(ownerId)
+    }
+
+    func blockOwner(_ ownerId: String, userId: String) {
+        appendUnique(ownerId, key: "blockedOwners_\(userId)")
+    }
+
+    func unblockOwner(_ ownerId: String, userId: String) {
+        var blocked = blockedOwnerIds(for: userId)
+        blocked.removeAll { $0 == ownerId }
+        defaults.set(blocked, forKey: "blockedOwners_\(userId)")
+    }
+
     // MARK: - Junior Mode
 
     /// Light-touch safety setting: fuzzes the displayed map position and

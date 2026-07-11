@@ -11,6 +11,7 @@ struct MuckUpApp: App {
     @StateObject private var locationService = LocationService()
     @StateObject private var awarenessVM = AwarenessViewModel()
     @StateObject private var squadVM = SquadViewModel()
+    @StateObject private var tabRouter = TabRouter()
 
     var body: some Scene {
         WindowGroup {
@@ -23,6 +24,7 @@ struct MuckUpApp: App {
                 .environmentObject(locationService)
                 .environmentObject(awarenessVM)
                 .environmentObject(squadVM)
+                .environmentObject(tabRouter)
                 .onAppear {
                     locationService.requestLocation()
                     NotificationService.shared.requestPermission()

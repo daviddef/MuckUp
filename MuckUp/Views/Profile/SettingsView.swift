@@ -12,6 +12,9 @@ struct SettingsView: View {
     @EnvironmentObject var muckVM: MuckViewModel
 
     @State private var showDeleteConfirmation = false
+    // Local mirror of the blocked list so unblocking updates the rows
+    // immediately without needing MuckViewModel to be @Published per-id.
+    @State private var blockedOwnerIds: [String] = []
 
     var body: some View {
         NavigationStack {
@@ -46,6 +49,39 @@ struct SettingsView: View {
                     }
                 }
 
+                if !blockedOwnerIds.isEmpty {
+                    Section {
+                        ForEach(blockedOwnerIds, id: \.self) { ownerId in
+                            HStack {
+                                Label("Blocked user", systemImage: "person.slash")
+                                    .font(.muckBody)
+                                Spacer()
+                                Button("Unblock") {
+                                    muckVM.unblockOwner(ownerId)
+                                    blockedOwnerIds = muckVM.blockedOwnerIds
+                                }
+                                .font(.muckCaption)
+                                .foregroundStyle(Color.muckGreen)
+                            }
+                        }
+                    } header: {
+                        Text("Blocked Users")
+                    } footer: {
+                        Text("You won't see mucks from blocked users. Unblock to see them again.")
+                    }
+                }
+
+                Section {
+                    Link(destination: URL(string: "https://daviddef.github.io/MuckUp/terms.html")!) {
+                        Label("Terms of Use", systemImage: "doc.text")
+                    }
+                    Link(destination: URL(string: "https://daviddef.github.io/MuckUp/privacy.html")!) {
+                        Label("Privacy Policy", systemImage: "lock.shield")
+                    }
+                } header: {
+                    Text("About")
+                }
+
                 if !authService.isGuest {
                     Section {
                         Button(role: .destructive) {
@@ -60,6 +96,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear { blockedOwnerIds = muckVM.blockedOwnerIds }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }

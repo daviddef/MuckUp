@@ -13,6 +13,7 @@ struct ViewMuckView: View {
     @State private var afterPhotoData: Data?
     @State private var showReportConfirm = false
     @State private var didReport = false
+    @State private var showBlockConfirm = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -196,6 +197,14 @@ struct ViewMuckView: View {
                         Label("Report this Muck", systemImage: "flag")
                     }
                     .disabled(!muckVM.canFlag(muck) || didReport)
+
+                    if muckVM.canBlockOwner(of: muck) {
+                        Button(role: .destructive) {
+                            showBlockConfirm = true
+                        } label: {
+                            Label("Block this User", systemImage: "person.slash")
+                        }
+                    }
                 } label: {
                     Image(systemName: "ellipsis.circle")
                         .foregroundStyle(Color.muckNearBlack.opacity(0.6))
@@ -219,6 +228,17 @@ struct ViewMuckView: View {
             Button("Report", role: .destructive) {
                 muckVM.flag(muck)
                 didReport = true
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .confirmationDialog(
+            "Block this user? You won't see any of their mucks again.",
+            isPresented: $showBlockConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Block", role: .destructive) {
+                muckVM.blockOwner(of: muck)
                 dismiss()
             }
             Button("Cancel", role: .cancel) {}

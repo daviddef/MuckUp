@@ -49,7 +49,10 @@ final class MuckViewModel: ObservableObject {
     // MARK: - Filtering & Sorting
 
     func filtered(_ mucks: [Muck]) -> [Muck] {
-        var result = mucks.filter { !$0.isClosed && !$0.isHiddenByFlags }
+        let blocked = Set(storage.blockedOwnerIds(for: userId))
+        var result = mucks.filter {
+            !$0.isClosed && !$0.isHiddenByFlags && !blocked.contains($0.ownerId)
+        }
 
         if let filter = typeFilter {
             result = result.filter { $0.type == filter }
@@ -99,6 +102,35 @@ final class MuckViewModel: ObservableObject {
         storage.recordFlagLocally(muckId: muck.id, userId: userId)
         muck.flagCount += 1
         Task { await CloudKitMuckSyncService.shared.flag(muckId: muck.id) }
+    }
+
+    // MARK: - Blocking
+
+    /// Whether a muck was raised by someone the current user can block —
+    /// their own mucks and ownerless (legacy/guest) mucks aren't blockable.
+    func canBlockOwner(of muck: Muck) -> Bool {
+        !muck.ownerId.isEmpty && muck.ownerId != userId
+    }
+
+    func isOwnerBlocked(of muck: Muck) -> Bool {
+        storage.isOwnerBlocked(muck.ownerId, userId: userId)
+    }
+
+    /// Hides all current and future content from this muck's author on this
+    /// device. Publishing objectWillChange so feeds re-filter immediately.
+    func blockOwner(of muck: Muck) {
+        guard canBlockOwner(of: muck) else { return }
+        storage.blockOwner(muck.ownerId, userId: userId)
+        objectWillChange.send()
+    }
+
+    func unblockOwner(_ ownerId: String) {
+        storage.unblockOwner(ownerId, userId: userId)
+        objectWillChange.send()
+    }
+
+    var blockedOwnerIds: [String] {
+        storage.blockedOwnerIds(for: userId)
     }
 
     // MARK: - Favourites

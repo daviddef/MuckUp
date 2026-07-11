@@ -2,12 +2,11 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var muckVM: MuckViewModel
-    @StateObject private var tabRouter = TabRouter()
+    @EnvironmentObject var tabRouter: TabRouter
 
     var body: some View {
         ZStack(alignment: .top) {
             tabView
-                .environmentObject(tabRouter)
 
             if let rank = muckVM.justRankedUp {
                 RankUpBanner(rank: rank) {
@@ -64,4 +63,5 @@ struct ContentView: View {
         .environmentObject(HelpViewModel())
         .environmentObject(LocationService())
         .environmentObject(AwarenessViewModel())
+        .environmentObject(TabRouter())
 }

@@ -174,9 +174,18 @@ None. Grub is entirely free with no in-app purchases, subscriptions, or
 paid content of any kind.
 
 USER-GENERATED CONTENT, REPORTING, AND BLOCKING
-Mucks, event descriptions, and photos are user-submitted. Any muck, event,
-or profile can be flagged via a flag icon; flagged content is hidden
-pending review. There is no direct user-to-user messaging.
+Mucks, event descriptions, and photos are user-submitted. Moderation
+controls (Guideline 1.2):
+- Report: the "..." menu on any muck has "Report this Muck" — reported
+  content is hidden pending review, and content passing a flag threshold
+  is auto-hidden from all feeds.
+- Block: the same menu has "Block this User" — blocking hides all of that
+  author's content. Blocked users are listed and can be unblocked in
+  Settings.
+- Terms of Use with a zero-tolerance clause for objectionable content and
+  abusive users is linked in Settings → About and at
+  https://daviddef.github.io/MuckUp/terms.html
+There is no direct user-to-user messaging.
 
 SENSITIVE DATA / DEVICE CAPABILITY PROMPTS
 - Location (While Using the App): requested when viewing the Find map or
