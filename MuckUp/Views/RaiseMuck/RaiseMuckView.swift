@@ -14,6 +14,7 @@ struct RaiseMuckView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var locationService: LocationService
+    @EnvironmentObject var tabRouter: TabRouter
 
     var prefill: RaiseMuckPrefill = RaiseMuckPrefill()
 
@@ -221,8 +222,20 @@ struct RaiseMuckView: View {
                 // this push (back to the form) since it's scoped to the
                 // navigationDestination — passing this view's dismiss
                 // explicitly is what actually closes the Raise a Muck
-                // sheet and returns to Home.
-                MuckSavedView(onBackToHome: { dismiss() })
+                // sheet. Raise a Muck can be opened from tabs other than
+                // Home (e.g. Help), so also switch tabRouter to Home —
+                // otherwise "Back to Home" just closes the sheet and
+                // strands the user on whatever tab they started from.
+                MuckSavedView(onBackToHome: {
+                    // Clear any active type filter and sort-to-newest so
+                    // the muck the user just raised is guaranteed to be
+                    // visible in the Home feed instead of possibly being
+                    // hidden by a filter left on from before.
+                    muckVM.typeFilter = nil
+                    muckVM.sortOrder = .date
+                    tabRouter.goHome()
+                    dismiss()
+                })
             }
             .onAppear {
                 if let loc = locationService.location {

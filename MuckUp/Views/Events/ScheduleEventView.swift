@@ -10,6 +10,7 @@ struct ScheduleEventView: View {
     @EnvironmentObject var muckVM: MuckViewModel
     @EnvironmentObject var locationService: LocationService
     @EnvironmentObject var awarenessVM: AwarenessViewModel
+    @EnvironmentObject var tabRouter: TabRouter
     @Query private var allMucks: [Muck]
 
     @State private var title = ""
@@ -392,7 +393,14 @@ struct ScheduleEventView: View {
                 }
             }
             .navigationDestination(isPresented: $isSaved) {
-                EventSavedView(onBackToHome: { dismiss() })
+                // ScheduleEventView can be opened from Home, Find, or
+                // Events — switch tabRouter to Home too, or "Back to
+                // Home" just closes the sheet and strands the user on
+                // whatever tab they started from.
+                EventSavedView(onBackToHome: {
+                    tabRouter.goHome()
+                    dismiss()
+                })
             }
             .sheet(item: $quickLookMuck) { muck in
                 MuckQuickLookSheet(
