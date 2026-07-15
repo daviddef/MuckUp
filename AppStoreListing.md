@@ -126,6 +126,21 @@ My read based on actual app content:
 
 **Demo account**: not required — reviewers can tap "Continue as Guest" to bypass Sign in with Apple entirely.
 
+### Reply to "demo account required" automated flag (12 July 2026)
+
+The automated check flags Sign in with Apple as a login and asks for a demo account. Grub's login is OPTIONAL. Reply to the App Store Connect message AND paste this at the TOP of App Review Information → Notes (the automated re-check re-scans the Notes field):
+
+```
+Grub does not require a login to access its features. The only sign-in
+option is Sign in with Apple, which is entirely optional — tapping
+"Continue as Guest" on the welcome screen gives full access to all app
+functionality (viewing the map, raising a muck, finding nearby events,
+reporting and blocking content) with no account or credentials required.
+
+Because there is no username/password login, a demo account is not
+applicable. Reviewers can access everything by tapping "Continue as Guest."
+```
+
 ### Reviewer response to Guideline 2.1 rejection (7 July 2026)
 
 Apple asked for a screen recording plus 7 pieces of info in the Notes field before continuing review. Paste this into **App Review Information → Notes**, then attach the screen recording separately as instructed in App Store Connect.
